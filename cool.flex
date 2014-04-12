@@ -8,6 +8,9 @@
  *  to the code in the file.  Don't remove anything that was here initially
  */
  
+ /*************************************
+  * DECLARATIONS
+  */
  
 %{
 #include <cool-parse.h>
@@ -47,6 +50,9 @@ extern YYSTYPE cool_yylval;
  
 %}
 
+/*************************************
+  * DEFINITIONS
+  */
 
 /*
  * Define names for regular expressions here.
@@ -56,6 +62,10 @@ DARROW          =>
 ONE 1
 
 %%
+
+/*************************************
+  * RULES
+  */
 
  /*
   *  Nested comments
@@ -83,3 +93,7 @@ ONE 1
 
 
 %%
+
+/*************************************
+  * DECLARATIONS
+  */
