@@ -7,6 +7,8 @@
  *  output, so headers and global definitions are placed here to be visible
  *  to the code in the file.  Don't remove anything that was here initially
  */
+ 
+ 
 %{
 #include <cool-parse.h>
 #include <stringtab.h>
@@ -14,7 +16,7 @@
 
 /* The compiler assumes these identifiers. */
 #define yylval cool_yylval /* this holds the current lexeme */
-#define yylex  cool_yylex
+#define yylex  cool_yylex  /* 
 
 /* Max size of string constants */
 #define MAX_STR_CONST 1025
@@ -39,11 +41,10 @@ extern int verbose_flag;
 
 extern YYSTYPE cool_yylval;
 
-
 /*
  *  Add Your own definitions here
  */
-
+ 
 %}
 
 
@@ -52,6 +53,7 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW          =>
+ONE 1
 
 %%
 
@@ -64,6 +66,7 @@ DARROW          =>
   *  The multiple-character operators.
   */
 {DARROW}		{ return (DARROW); }
+{ONE}           
 
  /*
   * Keywords are case-insensitive except for the values true and false,
