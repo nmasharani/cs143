@@ -1,0 +1,13 @@
+/* Definitions */
+
+DIGIT            [0-9]
+LETTER           [a-zA-Z]
+UPPERCASE_LETTER [A-Z]
+LOWERCASE_LETTER [a-z]
+NOT_IN_STR       ['EOF'\0']
+
+
+/* Rules */
+
+INT_CONST {DIGIT}+
+TYPEID    
