@@ -65,8 +65,13 @@ NEWLINE             \n
 DIGIT              [0-9]
 CAPITAL_LETTER     [A-Z]
 LOWERCASE_LETTER   [a-z]
+
+OPEN_STRING        \"
+CLOSE_STRING       \"
+
+
 NULL_CHAR           /0
-COOL_STRING        \"(\\.|[^"])*\"
+COOL_STRING        \"(\\.|[^"])*\n|\"
 
 
 
@@ -77,11 +82,14 @@ COOL_STRING        \"(\\.|[^"])*\"
  */
 
 %x IN_NESTED_COMMENT
+%x IN_STRING
 
 %%
 
     /* tracks the number of outstanding open comments */
-    int openCommentCount = 0; 
+    int openCommentCount = 0;
+    bool stringExceededMaxLength = false;
+    int currStringLength = 0; 
 
     /* Rule 1: Remove any whitespace that is not within a comment */
 {WHITESPACE} {;}
@@ -133,11 +141,45 @@ COOL_STRING        \"(\\.|[^"])*\"
     BEGIN(INITIAL);
     return ERROR;
 }
-    /* Rule 9: Strings */
-{COOL_STRING} {
-    cool_yylval.symbol = stringtable.add_string(yytext);
+  
+    /* Rule 9: Begin a string */
+{OPEN_STRING} {
+    string_buf_ptr = string_buf
+    stringExceededMaxLength = false;
+    currStringLength = 0;
+    BEGIN(IN_STRING);
+}
+
+    /* Rule 10: Close a string. Check for validity in rule. */
+<IN_STRING>{CLOSE_STRING} {
+    BEGIN(INITIAL);
+    if (stringExceededMaxLength) {
+        cool_yylval.error_msg = "String constant too long";
+        return ERROR;
+    }
+    *string_buf_ptr = '\0';
+    string_buf_ptr = string_buf;
+    int index_of_firstNull = 0;
+    while (*string_buf_ptr != '\0') {
+        string_buf_ptr++;
+        first_null++;
+    }
+    if (index_of_firstNull < currStringLength) {
+        cool_yylval.error_msg = "String contains null character";
+        return ERROR;
+    }
+    cool_yylval.symbol = stringtable.add_string(strdup(string_buf));
     return STR_CONST;
 }
+
+<IN_STRING><<EOF>> {
+    BEGIN(INITIAL);
+    cool_yylval.error_msg = "EOF in string constant";
+    return ERROR;
+}
+  
+  
+
 
 
 
