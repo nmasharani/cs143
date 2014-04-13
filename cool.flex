@@ -41,9 +41,10 @@ extern YYSTYPE cool_yylval;
 
 /*
  * *********************************************************
- *  Add Your own definitions here
+ * Add Your own definitions here
  * *********************************************************
  */
+
 
 %}
 
@@ -53,16 +54,59 @@ extern YYSTYPE cool_yylval;
  * *********************************************************
  */
 
-DARROW          =>
-INLINE_COMMENT --[^(\n<<EOF>>)]*
+DARROW               =>
+INLINE_COMMENT       --[^(\n<<EOF>>)]*
+OPEN_NESTED_COMMENT  "(""*"
+CLOSE_NESTED_COMMENT "*"")"
+
+
+
+/*
+ * *********************************************************
+ * Define names for start conditions here. 
+ * *********************************************************
+ */
+ 
+%x NESTED_COMMENT
 
 %%
 
-{INLINE_COMMENT}
+    /* tracks the number of outstanding open comments */
+    int openCommentCount = 0; 
+    
+    /* Rule 1: remove inline comments */
+{INLINE_COMMENT}   {;}
 
- /*
-  *  Nested comments
-  */
+    /* Rule 2: Process open nested comment tag */
+<*>{OPEN_NESTED_COMMENT} {
+
+        BEGIN(NESTED_COMMENT);
+        openCommentCount++;
+}
+                    
+    /* Rule 3: Process closed nested comment tag */
+<NESTED_COMMENT>{CLOSE_NESTED_COMMENT} {
+
+        openCommentCount--;
+        if (openCommentCount == 0) BEGIN(INITIAL);
+}
+
+    /* Rule 4: Remove characters from within nested comment */
+    /* <NESTED_COMMENT> */
+
+    /* Rule 5: EOF within a nested comment is an error */
+<NESTED_COMMENT><<EOF>> {
+        
+        cool_yylval.error_msg = "EOF in comment";
+        BEGIN(INITIAL);
+        return ERROR;
+}
+
+    /* Rule 5: A close nested comment before an open nested comment tag is an error */
+{CLOSE_NESTED_COMMENT}      {
+                cool_yylval.error_msg = "Unmatched *)";
+                return ERROR;
+}
 
 
  /*
