@@ -54,20 +54,22 @@ extern YYSTYPE cool_yylval;
  * *********************************************************
  */
 
-DARROW               =>
-ASSIGN               \<\-
-LESSTHAN_EQUALTO     \<\=
-INLINE_COMMENT       "-""-"[^\n]*
-OPEN_NESTED_COMMENT  \(\*
-CLOSE_NESTED_COMMENT \*\)
-WHITESPACE          [ \t\r\f\v]*
-NEWLINE             \n
-DIGIT              [0-9]
-CAPITAL_LETTER     [A-Z]
-LOWERCASE_LETTER   [a-z]
+DARROW                  =>
+ASSIGN                  \<\-
+LESSTHAN_EQUALTO        \<\=
+INLINE_COMMENT          "-""-"[^\n]*
+OPEN_NESTED_COMMENT     \(\*
+CLOSE_NESTED_COMMENT    \*\)
+WHITESPACE              [ \t\r\f\v]*
+NEWLINE                 \n
+DIGIT                   [0-9]
+CAPITAL_LETTER          [A-Z]
+LOWERCASE_LETTER        [a-z]
 
-OPEN_STRING        \"
-CLOSE_STRING       \"
+OPEN_STRING             \"
+CLOSE_STRING            \"
+STRING_ESCAPE_SEQUENCES \\(.|\n)
+REGULAR_STR_CHARACTER   ([^\\\n\"])
 
 
 NULL_CHAR           /0
@@ -95,7 +97,7 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
 {WHITESPACE} {;}
 
     /* Rule 2: anytime we see a newline character, update linenumber. */
-<*>{NEWLINE} {
+<INITIAL,IN_NESTED_COMMENT>{NEWLINE} {
     curr_lineno++;
 }
     
@@ -144,7 +146,7 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
   
     /* Rule 9: Begin a string */
 {OPEN_STRING} {
-    string_buf_ptr = string_buf
+    string_buf_ptr = string_buf;
     stringExceededMaxLength = false;
     currStringLength = 0;
     BEGIN(IN_STRING);
@@ -162,7 +164,7 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
     int index_of_firstNull = 0;
     while (*string_buf_ptr != '\0') {
         string_buf_ptr++;
-        first_null++;
+        index_of_firstNull++;
     }
     if (index_of_firstNull < currStringLength) {
         cool_yylval.error_msg = "String contains null character";
@@ -172,16 +174,44 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
     return STR_CONST;
 }
 
+    /* Rule 11: EOF within an open string constant is an error. */
 <IN_STRING><<EOF>> {
     BEGIN(INITIAL);
     cool_yylval.error_msg = "EOF in string constant";
     return ERROR;
 }
-  
-  
 
-
-
+    /* Rule 12: An unescaped newline within an open string constant is an error. */
+<IN_STRING>{NEWLINE} {
+    BEGIN(INITIAL);
+    cool_yylval.error_msg = "Unterminated string constant";
+    curr_lineno++;
+    return ERROR;
+}
+    /* Rule 13: Handle escape sequences in string constants. */
+    /* Check for newline sequence to update curr_lineno. */
+<IN_STRING>{STRING_ESCAPE_SEQUENCES} {
+    currStringLength++;
+    if (currStringLength >= MAX_STR_CONST) {
+        stringExceededMaxLength = true;
+        string_buf_ptr = string_buf;
+    } 
+    *string_buf_ptr++ = yytext[1];
+    if (strcmp(yytext, "\\\n") == 0) {
+        curr_lineno++;
+    }
+}
+    
+    /* Rule 14: Copies verbatim regular string characters one at a time to buffer. */
+    /* Checks to ensure no overflow by incremementing currStringLength. */
+<IN_STRING>{REGULAR_STR_CHARACTER} {
+    currStringLength++;
+    if (currStringLength >= MAX_STR_CONST) {
+        stringExceededMaxLength = true;
+        string_buf_ptr = string_buf;
+    }
+    *string_buf_ptr++ = yytext[0];
+}
 
     /* Rule 9: Process integers that are not within comments or strings */
 {DIGIT}+ {
@@ -264,15 +294,6 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
     cool_yylval.error_msg = yytext;
     return ERROR;
 }
-
-
-
- /*
-  *  String constants (C syntax)
-  *  Escape sequence \c is accepted for all characters c. Except for 
-  *  \n \t \b \f, the result is c.
-  *
-  */
 
 
 %%
