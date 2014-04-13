@@ -58,6 +58,9 @@ DARROW               =>
 INLINE_COMMENT       --[^(\n<<EOF>>)]*
 OPEN_NESTED_COMMENT  "(""*"
 CLOSE_NESTED_COMMENT "*"")"
+WHITESPACE          [ \t]*
+NEWLINE             \n
+
 
 
 
@@ -73,9 +76,26 @@ CLOSE_NESTED_COMMENT "*"")"
 
     /* tracks the number of outstanding open comments */
     int openCommentCount = 0; 
+
+
     
-    /* Rule 1: remove inline comments */
+    /* Rule 1: Remove inline comments */
 {INLINE_COMMENT}   {;}
+
+
+
+    /* Rule 2: Remove whitespace */
+<*>{WHITESPACE}    {;}
+
+
+
+    /* Rule 3: Remove newline character and update numLines */
+<*>{NEWLINE} {
+        
+        curr_lineno++;
+}
+
+
 
     /* Rule 2: Process open nested comment tag */
 <*>{OPEN_NESTED_COMMENT} {
@@ -83,7 +103,9 @@ CLOSE_NESTED_COMMENT "*"")"
         BEGIN(NESTED_COMMENT);
         openCommentCount++;
 }
+ 
                     
+                                                          
     /* Rule 3: Process closed nested comment tag */
 <NESTED_COMMENT>{CLOSE_NESTED_COMMENT} {
 
@@ -91,8 +113,12 @@ CLOSE_NESTED_COMMENT "*"")"
         if (openCommentCount == 0) BEGIN(INITIAL);
 }
 
-    /* Rule 4: Remove characters from within nested comment */
-    /* <NESTED_COMMENT> */
+
+
+    /* Rule 4: Remove characters that are not newline from within nested comment */
+<NESTED_COMMENT>[^({NEWLINE}<<EOF>>)] {;}
+
+
 
     /* Rule 5: EOF within a nested comment is an error */
 <NESTED_COMMENT><<EOF>> {
@@ -101,6 +127,8 @@ CLOSE_NESTED_COMMENT "*"")"
         BEGIN(INITIAL);
         return ERROR;
 }
+
+
 
     /* Rule 5: A close nested comment before an open nested comment tag is an error */
 {CLOSE_NESTED_COMMENT}      {

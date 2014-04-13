@@ -1,2 +1,1 @@
-#name "./Testfiles/closeNestedBeforeOpen.cl"
-#1 ERROR "Unmatched *)"
+#name "./Testfiles/nestedComments_noErrors.cl"
