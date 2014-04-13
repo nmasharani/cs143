@@ -55,11 +55,14 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW               =>
-INLINE_COMMENT       --[^\n^<<EOF>>]*
-OPEN_NESTED_COMMENT  "(""*"
-CLOSE_NESTED_COMMENT "*"")"
-WHITESPACE          [ \t]*
+INLINE_COMMENT       "-""-"[^\n]*
+OPEN_NESTED_COMMENT  \(\*
+CLOSE_NESTED_COMMENT \*\)
+WHITESPACE          [ \t\r\f\v]*
 NEWLINE             \n
+DIGIT              [0-9]
+CAPITAL_LETTER     [A-Z]
+LOWERCASE_LETTER   [a-z]
 
 
 
@@ -102,7 +105,12 @@ NEWLINE             \n
 }
 
     /* Rule 5: Remove all characters within the comment except newline, EOF, (* and *) */
-<IN_NESTED_COMMENT>[^{NEWLINE}^<<EOF>>^{OPEN_NESTED_COMMENT}^{CLOSE_NESTED_COMMENT}] {;}
+<IN_NESTED_COMMENT>[^\n"(""*"")"]* {;}
+
+    /* Rule 5A: If we see an isolated ( or *  or ) in a comment, remove it */
+<IN_NESTED_COMMENT>"(" {;}
+<IN_NESTED_COMMENT>")" {;}
+<IN_NESTED_COMMENT>"*" {;}
 
     /* Rule 6: Process closed tag after an open tag has occurred. */
 <IN_NESTED_COMMENT>{CLOSE_NESTED_COMMENT} {
@@ -121,6 +129,24 @@ NEWLINE             \n
     cool_yylval.error_msg = "EOF in comment";
     BEGIN(INITIAL);
     return ERROR;
+}
+
+    /* Rule 9: Process integers that are not within comments or strings */
+{DIGIT}+ {
+    cool_yylval.symbol = inttable.add_string(yytext);
+    return INT_CONST;
+}
+
+    /* Rule 10: Process Type Identifiers */
+{CAPITAL_LETTER}[A-Za-z0-9_]* {
+    cool_yylval.symbol = idtable.add_string(yytext);
+    return TYPEID;
+}
+
+    /* Rule 11: Process Object Identifiers */
+{LOWERCASE_LETTER}[A-Za-z0-9_]* {
+    cool_yylval.symbol = idtable.add_string(yytext);
+    return OBJECTID;
 }
 
 
