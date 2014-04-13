@@ -40,18 +40,25 @@ extern int verbose_flag;
 extern YYSTYPE cool_yylval;
 
 /*
+ * *********************************************************
  *  Add Your own definitions here
+ * *********************************************************
  */
 
 %}
 
 /*
+ * *********************************************************
  * Define names for regular expressions here.
+ * *********************************************************
  */
 
 DARROW          =>
+INLINE_COMMENT --[^(\n<<EOF>>)]*
 
 %%
+
+{INLINE_COMMENT}
 
  /*
   *  Nested comments
