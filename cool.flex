@@ -55,6 +55,7 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW               =>
+ASSIGN               <-
 INLINE_COMMENT       "-""-"[^\n]*
 OPEN_NESTED_COMMENT  \(\*
 CLOSE_NESTED_COMMENT \*\)
@@ -149,36 +150,28 @@ LOWERCASE_LETTER   [a-z]
     return OBJECTID;
 }
 
+    /* Rule 12: The single character operators operators */
+"+" {return '+';}
+"/" {return '/';}
+"-" {return '-';}
+"*" {return '*';}
+"=" {return '=';}
+"<" {return '<';}
+"." {return '.';}
+"~" {return '~';}
+"," {return ',';}
+";" {return ';';}
+":" {return ':';}
+"(" {return '(';}
+")" {return ')';}
+"@" {return '@';}
+"{" {return '{';}
+"}" {return '}';}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- /*
-  *  The multiple-character operators.
-  */
+    /* Rule 13: The multiple-character operators. */
 {DARROW}		{ return (DARROW); }
+{ASSIGN}        { return (ASSIGN); }
 
  /*
   * Keywords are case-insensitive except for the values true and false,
