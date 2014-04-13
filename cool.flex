@@ -55,7 +55,8 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW               =>
-ASSIGN               <-
+ASSIGN               \<\-
+LESSTHAN_EQUALTO     \<\=
 INLINE_COMMENT       "-""-"[^\n]*
 OPEN_NESTED_COMMENT  \(\*
 CLOSE_NESTED_COMMENT \*\)
@@ -138,19 +139,49 @@ LOWERCASE_LETTER   [a-z]
     return INT_CONST;
 }
 
-    /* Rule 10: Process Type Identifiers */
+    /* Rule 10: Keyword Matching. Keywords are case insensitive, */
+    /* except for the values true and false, which must begin with a lower */
+    /* case letter. */
+([cC][lL][aA][sS][sS]) { return CLASS; }
+([eE][lL][sS][eE])     { return ELSE;  }
+([fF][iI])             { return FI;    }
+([iI][fF])             { return IF;    }
+([iI][nN])             { return IN;    }
+([iI][nN][hH][eE][rR][iI][tT][sS]) { return INHERITS; }
+([iI][sS][vV][oO][iI][dD]) { return ISVOID; }
+([lL][eE][tT])         { return LET; }
+([lL][oO][oO][pP])     { return LOOP; }
+([pP][oO][oO][lL])     { return POOL; }
+([tT][hH][eE][nN])     { return THEN; }
+([wW][hH][iI][lL][eE]) { return WHILE; }
+([cC][aA][sS][eE])     { return CASE; }
+([eE][sS][aA][cC])     { return ESAC; }
+([nN][eE][wW])         { return NEW; }
+([oO][fF])             { return OF; }
+([nN][oO][tT])         { return NOT; }
+(t[rR][uU][eE]) {
+    cool_yylval.boolean = 0;
+    return BOOL_CONST;
+}
+(f[aA][lL][sS][eE]) {
+    cool_yylval.boolean = 1;
+    return BOOL_CONST;
+}
+
+
+    /* Rule 11: Process Type Identifiers */
 {CAPITAL_LETTER}[A-Za-z0-9_]* {
     cool_yylval.symbol = idtable.add_string(yytext);
     return TYPEID;
 }
 
-    /* Rule 11: Process Object Identifiers */
+    /* Rule 12: Process Object Identifiers */
 {LOWERCASE_LETTER}[A-Za-z0-9_]* {
     cool_yylval.symbol = idtable.add_string(yytext);
     return OBJECTID;
 }
 
-    /* Rule 12: The single character operators operators */
+    /* Rule 13: The single character operators operators */
 "+" {return '+';}
 "/" {return '/';}
 "-" {return '-';}
@@ -169,11 +200,14 @@ LOWERCASE_LETTER   [a-z]
 "}" {return '}';}
 
 
-    /* Rule 13: The multiple-character operators. */
-{DARROW}		{ return (DARROW); }
-{ASSIGN}        { return (ASSIGN); }
+    /* Rule 14: The multiple-character operators. */
+{DARROW}		   { return (DARROW);           }
+{ASSIGN}           { return (ASSIGN);           }
+{LESSTHAN_EQUALTO} { return (LE); }
 
-    /* Rule 14: Error handling. Character cannot begin anything above */
+
+
+    /* Rule 15: Error handling. Character cannot begin anything above */
     /* This should be at bottom of list, only invoked at last resort */
     /* Note, the '.' represents any character but newline, which is what we want */
 . {
@@ -181,10 +215,6 @@ LOWERCASE_LETTER   [a-z]
     return ERROR;
 }
 
- /*
-  * Keywords are case-insensitive except for the values true and false,
-  * which must begin with a lower-case letter.
-  */
 
 
  /*
