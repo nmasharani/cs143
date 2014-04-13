@@ -1,6 +1,16 @@
-#name "./Testfiles/keywords.cl"
-#1 CLASS
-#3 CLASS
-#5 CLASS
-#6 OBJECTID classes
-#7 CLASS
+#name "./Testfiles/strings.cl"
+#2 ERROR "Unterminated string constant"
+#2 OBJECTID but
+#2 OBJECTID it
+#2 OBJECTID is
+#2 NOT
+#2 OBJECTID a
+#2 OBJECTID string
+#2 OBJECTID because
+#2 OF
+#2 OBJECTID the
+#2 OBJECTID unescaped
+#2 OBJECTID newline
+#2 OBJECTID valid
+#2 OBJECTID string
+#2 ERROR "EOF in string constant"

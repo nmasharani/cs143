@@ -65,7 +65,8 @@ NEWLINE             \n
 DIGIT              [0-9]
 CAPITAL_LETTER     [A-Z]
 LOWERCASE_LETTER   [a-z]
-
+NULL_CHAR           /0
+COOL_STRING        \"(\\.|[^"])*\"
 
 
 
@@ -132,6 +133,13 @@ LOWERCASE_LETTER   [a-z]
     BEGIN(INITIAL);
     return ERROR;
 }
+    /* Rule 9: Strings */
+{COOL_STRING} {
+    cool_yylval.symbol = stringtable.add_string(yytext);
+    return STR_CONST;
+}
+
+
 
     /* Rule 9: Process integers that are not within comments or strings */
 {DIGIT}+ {
