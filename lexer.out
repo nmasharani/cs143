@@ -1,0 +1,6 @@
+#name "./Testfiles/escape.cl"
+#1 STR_CONST "this is a w normal string. No escaping."
+#3 ERROR "Unterminated string constant"
+#3 STR_CONST "test string on a new line."
+#5 STR_CONST " test properly formatter \nescaped new line."
+#7 STR_CONST "Test \\n in a string."
