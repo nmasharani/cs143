@@ -55,7 +55,7 @@ extern YYSTYPE cool_yylval;
  */
 
 DARROW               =>
-INLINE_COMMENT       --[^(\n<<EOF>>)]*
+INLINE_COMMENT       --[^\n^<<EOF>>]*
 OPEN_NESTED_COMMENT  "(""*"
 CLOSE_NESTED_COMMENT "*"")"
 WHITESPACE          [ \t]*
@@ -69,72 +69,84 @@ NEWLINE             \n
  * Define names for start conditions here. 
  * *********************************************************
  */
- 
-%x NESTED_COMMENT
+
+%x IN_NESTED_COMMENT
 
 %%
 
     /* tracks the number of outstanding open comments */
     int openCommentCount = 0; 
 
+    /* Rule 1: Remove any whitespace that is not within a comment */
+{WHITESPACE} {;}
 
+    /* Rule 2: anytime we see a newline character, update linenumber. */
+<*>{NEWLINE} {
+    curr_lineno++;
+}
     
-    /* Rule 1: Remove inline comments */
+    /* Rule 3: Remove inline comments */
+    /* When in an inline comment, we want to remove everything except new line and EOF */
 {INLINE_COMMENT}   {;}
 
 
+   /* Rule 4: Process open nested comment tag */
+{OPEN_NESTED_COMMENT} {
+    BEGIN(IN_NESTED_COMMENT);
+    openCommentCount++;
+}
+    
+    /* Rule 4A: handles the case of a nested open tag */
+<IN_NESTED_COMMENT>{OPEN_NESTED_COMMENT} {
+    openCommentCount++;
+}
 
-    /* Rule 2: Remove whitespace */
-<*>{WHITESPACE}    {;}
+    /* Rule 5: Remove all characters within the comment except newline, EOF, (* and *) */
+<IN_NESTED_COMMENT>[^{NEWLINE}^<<EOF>>^{OPEN_NESTED_COMMENT}^{CLOSE_NESTED_COMMENT}] {;}
 
+    /* Rule 6: Process closed tag after an open tag has occurred. */
+<IN_NESTED_COMMENT>{CLOSE_NESTED_COMMENT} {
+    openCommentCount--;
+    if (openCommentCount == 0) BEGIN(INITIAL);
+}
 
+    /* Rule 7: A close nested comment tag without an open previous to it is an error */
+{CLOSE_NESTED_COMMENT} {
+    cool_yylval.error_msg = "Unmatched *)";
+    return ERROR;
+}
 
-    /* Rule 3: Remove newline character and update numLines */
-<*>{NEWLINE} {
-        
-        curr_lineno++;
+    /* Rule 8: EOF within a nested comment is an error */
+<IN_NESTED_COMMENT><<EOF>> {
+    cool_yylval.error_msg = "EOF in comment";
+    BEGIN(INITIAL);
+    return ERROR;
 }
 
 
 
-    /* Rule 2: Process open nested comment tag */
-<*>{OPEN_NESTED_COMMENT} {
-
-        BEGIN(NESTED_COMMENT);
-        openCommentCount++;
-}
- 
-                    
-                                                          
-    /* Rule 3: Process closed nested comment tag */
-<NESTED_COMMENT>{CLOSE_NESTED_COMMENT} {
-
-        openCommentCount--;
-        if (openCommentCount == 0) BEGIN(INITIAL);
-}
 
 
 
-    /* Rule 4: Remove characters that are not newline from within nested comment */
-<NESTED_COMMENT>[^({NEWLINE}<<EOF>>)] {;}
 
 
 
-    /* Rule 5: EOF within a nested comment is an error */
-<NESTED_COMMENT><<EOF>> {
-        
-        cool_yylval.error_msg = "EOF in comment";
-        BEGIN(INITIAL);
-        return ERROR;
-}
 
 
 
-    /* Rule 5: A close nested comment before an open nested comment tag is an error */
-{CLOSE_NESTED_COMMENT}      {
-                cool_yylval.error_msg = "Unmatched *)";
-                return ERROR;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  /*
