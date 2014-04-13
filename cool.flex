@@ -173,6 +173,14 @@ LOWERCASE_LETTER   [a-z]
 {DARROW}		{ return (DARROW); }
 {ASSIGN}        { return (ASSIGN); }
 
+    /* Rule 14: Error handling. Character cannot begin anything above */
+    /* This should be at bottom of list, only invoked at last resort */
+    /* Note, the '.' represents any character but newline, which is what we want */
+. {
+    cool_yylval.error_msg = yytext;
+    return ERROR;
+}
+
  /*
   * Keywords are case-insensitive except for the values true and false,
   * which must begin with a lower-case letter.
