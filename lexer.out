@@ -1,2 +1,5 @@
-#name "Testfiles/superLongString.cl"
-#1 ERROR "String constant too long"
+#name "Testfiles/escapeExceptions.cl"
+#1 STR_CONST "\t"
+#2 STR_CONST "\n"
+#3 STR_CONST "\b"
+#4 STR_CONST "\f"

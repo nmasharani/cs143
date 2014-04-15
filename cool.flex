@@ -143,6 +143,9 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
     BEGIN(INITIAL);
     return ERROR;
 }
+  	/* Strings */
+  	/* Modified from C string matching found at: */
+  	/* http://flex.sourceforge.net/manual/Start-Conditions.html#Start-Conditions */
   
     /* Rule 9: Begin a string */
 {OPEN_STRING} {
@@ -190,6 +193,23 @@ COOL_STRING        \"(\\.|[^"])*\n|\"
 }
     /* Rule 13: Handle escape sequences in string constants. */
     /* Check for newline sequence to update curr_lineno. */
+
+<IN_STRING>\\n {
+	*string_buf_ptr++ = '\n';
+}
+
+<IN_STRING>\\b {
+	*string_buf_ptr++ = '\b';
+}
+
+<IN_STRING>\\t {
+	*string_buf_ptr++ = '\t';
+}
+
+<IN_STRING>\\f {
+	*string_buf_ptr++ = '\f';
+}
+
 <IN_STRING>{STRING_ESCAPE_SEQUENCES} {
     currStringLength++;
     if (currStringLength >= MAX_STR_CONST) {
