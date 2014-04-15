@@ -1,17 +1,2 @@
-#name "Testfiles/typeID.cl"
-#1 TYPEID A
-#3 TYPEID ABC
-#5 TYPEID A123
-#6 TYPEID Aa_12_1232_five
-#7 TYPEID A_
-#11 TYPEID Nine9
-#14 TYPEID NINE
-#16 TYPEID EXCLAMATION
-#16 ERROR "!"
-#16 TYPEID POINT
-#18 TYPEID PERIOD
-#18 '.'
-#18 TYPEID COMMA
-#18 ','
-#18 TYPEID Apostrophe
-#18 ERROR "'"
+#name "Testfiles/superLongString.cl"
+#1 ERROR "String constant too long"
