@@ -1,6 +1,17 @@
-#name "./Testfiles/escape.cl"
-#1 STR_CONST "this is a w normal string. No escaping."
-#3 ERROR "Unterminated string constant"
-#3 STR_CONST "test string on a new line."
-#5 STR_CONST " test properly formatter \nescaped new line."
-#7 STR_CONST "Test \\n in a string."
+#name "Testfiles/typeID.cl"
+#1 TYPEID A
+#3 TYPEID ABC
+#5 TYPEID A123
+#6 TYPEID Aa_12_1232_five
+#7 TYPEID A_
+#11 TYPEID Nine9
+#14 TYPEID NINE
+#16 TYPEID EXCLAMATION
+#16 ERROR "!"
+#16 TYPEID POINT
+#18 TYPEID PERIOD
+#18 '.'
+#18 TYPEID COMMA
+#18 ','
+#18 TYPEID Apostrophe
+#18 ERROR "'"
