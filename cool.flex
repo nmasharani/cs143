@@ -69,6 +69,7 @@ LOWERCASE_LETTER        [a-z]
 OPEN_STRING             \"
 CLOSE_STRING            \"
 STRING_ESCAPE_SEQUENCES \\(.|\n)
+STRING_ESCAPE_SEQUENCES_2 \\n|\\b|\\t|\\f
 REGULAR_STR_CHARACTER   ([^\\\n\"])
 
 
@@ -196,25 +197,29 @@ NULL_CHAR           /0
     curr_lineno++;
     return ERROR;
 }
+
+<IN_STRING>{STRING_ESCAPE_SEQUENCES_2} {
+     currStringLength++;
+    if (currStringLength >= MAX_STR_CONST) {
+        stringExceededMaxLength = true;
+        string_buf_ptr = string_buf;
+    } 
+    if (strcmp(yytext, "\\n") == 0) {
+        *string_buf_ptr++ = '\n';
+    }
+    if (strcmp(yytext, "\\b") == 0) {
+        *string_buf_ptr++ = '\b';
+    }
+    if (strcmp(yytext, "\\t") == 0) {
+        *string_buf_ptr++ = '\t';
+    }
+    if (strcmp(yytext, "\\f") == 0) {
+        *string_buf_ptr++ = '\f';
+    }
+}
+
     /* Rule 13: Handle escape sequences in string constants. */
     /* Check for newline sequence to update curr_lineno. */
-
-<IN_STRING>\\n {
-	*string_buf_ptr++ = '\n';
-}
-
-<IN_STRING>\\b {
-	*string_buf_ptr++ = '\b';
-}
-
-<IN_STRING>\\t {
-	*string_buf_ptr++ = '\t';
-}
-
-<IN_STRING>\\f {
-	*string_buf_ptr++ = '\f';
-}
-
 <IN_STRING>{STRING_ESCAPE_SEQUENCES} {
     currStringLength++;
     if (currStringLength >= MAX_STR_CONST) {
