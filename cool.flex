@@ -73,8 +73,6 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
 
 
 NULL_CHAR           /0
-COOL_STRING        \"(\\.|[^"])*\n|\"
-
 
 
 /*

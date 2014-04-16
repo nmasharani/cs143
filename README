@@ -119,3 +119,41 @@ Instructions
 Write-up for PA1
 ----------------
 
+DESIGN DECISIONS
+
+One of the biggest and most challenging decisions we made was the 
+choice to use exclusive start conditions for strings and nested comments
+instead of developing regexes for them. For nested comments, the idea of 
+using start conditions was fairly natural, given that we had to balance open
+and closed parenthesis and that regexes are not capable of doing so. However, 
+for strings, we played around a lot with the usage of regexes before choosing to
+use start conditions instead. We decided to use start conditions because the 
+rules for strings are incredibly complicated, and we thought it would be easier
+for us to design and easier for others to understand if we used start 
+conditions. Furthermore, we also realized that, if we used start conditions, 
+we could replace escaped characters as we went, which reduced the amount of 
+complicated post-processing we had to do to our string. This decision was also
+partially inspired by some code we found in the Flex manual that matched 
+C-strings using start conditions
+(http://flex.sourceforge.net/manual/Start-Conditions.html#Start-Conditions). 
+
+For the rest of the tokens, we chose to use traditional regular 
+expressions, as we felt that we did not need the complexity of start conditions
+as we had no balancing to do or changes to make to the lexemes.
+
+CORRECTNESS 
+
+Our code contains all the rules for matching tokens as described in section 10
+of the Cool manual. Furthermore, our code has produced the same output as the
+reference compiler on all of the tests we have run (see the below section 
+for details on testing).
+
+TESTING
+
+Our test cases include both actual Cool code and fragments of code that are both
+valid and invalid. A significant portion of our testing code is dedicated to
+testing strings and nested comments, which are the two most compilcated parts 
+of our lexer. We tested valid inputs as well as invalid inputs, and compared our
+outputs to those of the reference compiler. To test the remainder of our rules, 
+we used actual Cool code that contained examples of where all of our rules 
+should apply. Our tests can be found in test2.cl and in the Testfiles directory.
