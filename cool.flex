@@ -90,6 +90,7 @@ NULL_CHAR           /0
     int openCommentCount = 0;
     bool stringExceededMaxLength = false;
     int currStringLength = 0; 
+    bool stringContainsEscapedNull = false;
 
     /* Rule 1: Remove any whitespace that is not within a comment */
 {WHITESPACE} {;}
@@ -149,6 +150,7 @@ NULL_CHAR           /0
 {OPEN_STRING} {
     string_buf_ptr = string_buf;
     stringExceededMaxLength = false;
+    stringContainsEscapedNull = false;
     currStringLength = 0;
     BEGIN(IN_STRING);
 }
@@ -162,6 +164,11 @@ NULL_CHAR           /0
     }
     *string_buf_ptr = '\0';
     string_buf_ptr = string_buf;
+
+    if (stringContainsEscapedNull) {
+        cool_yylval.error_msg = "String contains escaped null character";
+        return ERROR;
+    }
     int index_of_firstNull = 0;
     while (*string_buf_ptr != '\0') {
         string_buf_ptr++;
@@ -217,6 +224,10 @@ NULL_CHAR           /0
     *string_buf_ptr++ = yytext[1];
     if (strcmp(yytext, "\\\n") == 0) {
         curr_lineno++;
+    }
+
+    if (strcmp(yytext, "\\\0") == 0) {
+        stringContainsEscapedNull = true;
     }
 }
     
