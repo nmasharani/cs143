@@ -91,6 +91,7 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
     bool stringExceededMaxLength = false;
     int currStringLength = 0; 
     bool stringContainsEscapedNull = false;
+    bool longStringContainsNull = false;
 
     /* Rule 1: Remove any whitespace that is not within a comment */
 {WHITESPACE} {;}
@@ -151,6 +152,7 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
     string_buf_ptr = string_buf;
     stringExceededMaxLength = false;
     stringContainsEscapedNull = false;
+    longStringContainsNull = false;
     currStringLength = 0;
     BEGIN(IN_STRING);
 }
@@ -159,7 +161,11 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
 <IN_STRING>{CLOSE_STRING} {
     BEGIN(INITIAL);
     if (stringExceededMaxLength) {
-        cool_yylval.error_msg = "String constant too long";
+        if (longStringContainsNull) {
+            cool_yylval.error_msg = "String contains null character";
+        } else {
+            cool_yylval.error_msg = "String constant too long";
+        }
         return ERROR;
     }
     *string_buf_ptr = '\0';
@@ -185,14 +191,22 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
     /* Rule 11: EOF within an open string constant is an error. */
 <IN_STRING><<EOF>> {
     BEGIN(INITIAL);
-    cool_yylval.error_msg = "EOF in string constant";
+    if (stringExceededMaxLength) {
+        cool_yylval.error_msg = "String constant too long";
+    } else {
+        cool_yylval.error_msg = "EOF in string constant";
+    }
     return ERROR;
 }
 
     /* Rule 12: An unescaped newline within an open string constant is an error. */
 <IN_STRING>{NEWLINE} {
     BEGIN(INITIAL);
-    cool_yylval.error_msg = "Unterminated string constant";
+    if (stringExceededMaxLength) {
+        cool_yylval.error_msg = "String constant too long";
+    } else {
+        cool_yylval.error_msg = "Unterminated string constant";
+    }
     curr_lineno++;
     return ERROR;
 }
@@ -225,6 +239,11 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
         stringExceededMaxLength = true;
         string_buf_ptr = string_buf;
     } 
+    if (yytext[1] == '\0') {
+        if (!stringExceededMaxLength) {
+            longStringContainsNull = true;
+        }
+    }
     *string_buf_ptr++ = yytext[1];
     if (strcmp(yytext, "\\\n") == 0) {
         curr_lineno++;
@@ -242,6 +261,11 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
     if (currStringLength >= MAX_STR_CONST) {
         stringExceededMaxLength = true;
         string_buf_ptr = string_buf;
+    }
+    if (yytext[0] == '\0') {
+        if (!stringExceededMaxLength) {
+            longStringContainsNull = true;
+        }
     }
     *string_buf_ptr++ = yytext[0];
 }

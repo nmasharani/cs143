@@ -1,6 +1,5 @@
 (* little test file to test some hard edge cases *)
 
--- (* hello world
 
 "this is a valid \
 string"
@@ -10,7 +9,6 @@ string"
 
 (* test (* hello world *) test *)
 
-(* test (* hello world *)
 
 "blah \" blah \" blah"
 
