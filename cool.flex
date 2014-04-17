@@ -73,7 +73,6 @@ STRING_ESCAPE_SEQUENCES_2 \\n|\\b|\\t|\\f
 REGULAR_STR_CHARACTER   ([^\\\n\"])
 
 
-NULL_CHAR           /0
 
 
 /*

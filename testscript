@@ -1,4 +1,4 @@
 mycoolc -k $1
 \cp lexer.out mine.out
 /usr/class/cs143/bin/coolc -k $1
-cmp --silent mine.out lexer.out || echo "files are different"
+diff mine.out lexer.out
