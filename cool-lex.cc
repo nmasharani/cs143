@@ -1258,7 +1258,7 @@ YY_RULE_SETUP
         cool_yylval.error_msg = "String contains null character";
         return ERROR;
     }
-    cool_yylval.symbol = stringtable.add_string(strdup(string_buf));
+    cool_yylval.symbol = stringtable.add_string((string_buf));
     return STR_CONST;
 }
 	YY_BREAK
@@ -1461,7 +1461,7 @@ case 36:
 YY_RULE_SETUP
 #line 299 "cool.flex"
 {
-    cool_yylval.boolean = 0;
+    cool_yylval.boolean = 1;
     return BOOL_CONST;
 }
 	YY_BREAK
@@ -1469,7 +1469,7 @@ case 37:
 YY_RULE_SETUP
 #line 303 "cool.flex"
 {
-    cool_yylval.boolean = 1;
+    cool_yylval.boolean = 0;
     return BOOL_CONST;
 }
 	YY_BREAK
