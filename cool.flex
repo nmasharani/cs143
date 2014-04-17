@@ -54,23 +54,23 @@ extern YYSTYPE cool_yylval;
  * *********************************************************
  */
 
-DARROW                  =>
-ASSIGN                  \<\-
-LESSTHAN_EQUALTO        \<\=
-INLINE_COMMENT          "-""-"[^\n]*
-OPEN_NESTED_COMMENT     \(\*
-CLOSE_NESTED_COMMENT    \*\)
-WHITESPACE              [ \t\r\f\v]*
-NEWLINE                 \n
-DIGIT                   [0-9]
-CAPITAL_LETTER          [A-Z]
-LOWERCASE_LETTER        [a-z]
+DARROW                      =>
+ASSIGN                      \<\-
+LESSTHAN_EQUALTO            \<\=
+INLINE_COMMENT              "-""-"[^\n]*
+OPEN_NESTED_COMMENT         \(\*
+CLOSE_NESTED_COMMENT        \*\)
+WHITESPACE                  [ \t\r\f\v]*
+NEWLINE                     \n
+DIGIT                       [0-9]
+CAPITAL_LETTER              [A-Z]
+LOWERCASE_LETTER            [a-z]
 
-OPEN_STRING             \"
-CLOSE_STRING            \"
-STRING_ESCAPE_SEQUENCES \\(.|\n)
-STRING_ESCAPE_SEQUENCES_2 \\n|\\b|\\t|\\f
-REGULAR_STR_CHARACTER   ([^\\\n\"])
+OPEN_STRING                 \"
+CLOSE_STRING                \"
+STRING_ESCAPE_SEQUENCES     \\(.|\n)
+STRING_ESCAPE_SEQUENCES_2   \\n|\\b|\\t|\\f
+REGULAR_STR_CHARACTER       ([^\\\n\"])
 
 
 
