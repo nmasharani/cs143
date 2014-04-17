@@ -1,8 +1,29 @@
-#name "Testfiles/unmatchedCommentTag.cl"
-#1 ERROR "Unmatched *)"
-#7 ERROR "Unmatched *)"
-#7 ERROR "Unmatched *)"
-#9 ERROR "Unmatched *)"
-#9 ERROR "Unmatched *)"
-#9 ERROR "Unmatched *)"
-#11 ERROR "EOF in comment"
+#name "Testfiles/verifyLexemes.cl"
+#1 TYPEID Integer
+#1 OBJECTID val
+#1 LE
+#1 INT_CONST 12342
+#1 ';'
+#3 TYPEID Object
+#3 OBJECTID obj
+#3 LE
+#3 NEW
+#3 TYPEID Object
+#3 '('
+#3 ')'
+#3 ';'
+#5 TYPEID Boolean
+#5 OBJECTID bool
+#5 LE
+#5 BOOL_CONST false
+#5 ';'
+#7 OBJECTID bools
+#7 LE
+#7 BOOL_CONST true
+#7 ';'
+#9 TYPEID ClassID
+#9 ';'
+#11 OBJECTID objectId
+#11 ';'
+#13 STR_CONST "A STRING!1!1!1"
+#13 ';'

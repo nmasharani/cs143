@@ -297,11 +297,11 @@ REGULAR_STR_CHARACTER       ([^\\\n\"])
 ([oO][fF])             { return OF; }
 ([nN][oO][tT])         { return NOT; }
 (t[rR][uU][eE]) {
-    cool_yylval.boolean = 0;
+    cool_yylval.boolean = 1;
     return BOOL_CONST;
 }
 (f[aA][lL][sS][eE]) {
-    cool_yylval.boolean = 1;
+    cool_yylval.boolean = 0;
     return BOOL_CONST;
 }
 
