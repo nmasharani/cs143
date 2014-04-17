@@ -1,2 +1,30 @@
+<<<<<<< HEAD
 #name "Testfiles/stringNullThenEof.cl"
 #1 ERROR "String contains null character."
+=======
+#name "Testfiles/whitespace.cl"
+#1 ERROR "\\"
+#1 TYPEID Null
+#2 ERROR "\\"
+#2 OBJECTID n
+#3 ERROR "\\"
+#3 OBJECTID f
+#4 ERROR "\\"
+#4 OBJECTID r
+#5 ERROR "\\"
+#5 OBJECTID t
+#6 ERROR "\\"
+#6 OBJECTID v
+#7 ERROR "\\"
+#7 OBJECTID n
+#7 ERROR "\\"
+#7 OBJECTID t
+#7 ERROR "\\"
+#7 OBJECTID f
+#7 ERROR "\\"
+#7 OBJECTID r
+#7 ERROR "\\"
+#7 OBJECTID v
+#7 ERROR "\\"
+#7 OBJECTID bool
+>>>>>>> fca7a6e53ab067eb909a559aaa6b50bbc15f2cb0
