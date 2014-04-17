@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#name "Testfiles/stringNullThenEof.cl"
-#1 ERROR "String contains null character."
-=======
 #name "Testfiles/whitespace.cl"
 #1 ERROR "\\"
 #1 TYPEID Null
@@ -27,4 +23,3 @@
 #7 OBJECTID v
 #7 ERROR "\\"
 #7 OBJECTID bool
->>>>>>> fca7a6e53ab067eb909a559aaa6b50bbc15f2cb0

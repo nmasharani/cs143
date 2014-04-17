@@ -33,5 +33,5 @@
 
 "ballon (* -- blah blah*)"
 
-"""hi"""
+"\n""hi"""
 
