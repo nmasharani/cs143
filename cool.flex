@@ -184,7 +184,7 @@ REGULAR_STR_CHARACTER       ([^\\\n\"])
         cool_yylval.error_msg = "String contains null character";
         return ERROR;
     }
-    cool_yylval.symbol = stringtable.add_string(strdup(string_buf));
+    cool_yylval.symbol = stringtable.add_string((string_buf));
     return STR_CONST;
 }
 

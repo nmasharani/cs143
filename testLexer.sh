@@ -9,7 +9,9 @@ rm mine
 y
 for file in Testfiles/*
         do
+                echo $file
                 ./lexer $file > mine
                 /usr/class/cs143/bin/coolc -k $file
                 diff ./mine ./lexer.out
+                echo ""
         done
