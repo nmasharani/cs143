@@ -118,7 +118,7 @@ REGULAR_STR_CHARACTER   ([^\\\n\"])
 }
 
     /* Rule 5: Remove all characters within the comment except newline, EOF, (* and *) */
-<IN_NESTED_COMMENT>[^\n"(""*"")"]* {;}
+<IN_NESTED_COMMENT>[^\n\(\*\)]* {;}
 
     /* Rule 5A: If we see an isolated ( or *  or ) in a comment, remove it */
 <IN_NESTED_COMMENT>"(" {;}
