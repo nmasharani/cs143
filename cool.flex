@@ -274,13 +274,13 @@ REGULAR_STR_CHARACTER       ([^\\\n\"])
     *string_buf_ptr++ = yytext[0];
 }
 
-    /* Rule 9: Process integers that are not within comments or strings */
+    /* Rule 15: Process integers that are not within comments or strings */
 {DIGIT}+ {
     cool_yylval.symbol = inttable.add_string(yytext);
     return INT_CONST;
 }
 
-    /* Rule 10: Keyword Matching. Keywords are case insensitive, */
+    /* Rule 16: Keyword Matching. Keywords are case insensitive, */
     /* except for the values true and false, which must begin with a lower */
     /* case letter. */
 ([cC][lL][aA][sS][sS]) { return CLASS; }
@@ -310,19 +310,19 @@ REGULAR_STR_CHARACTER       ([^\\\n\"])
 }
 
 
-    /* Rule 11: Process Type Identifiers */
+    /* Rule 17: Process Type Identifiers */
 {CAPITAL_LETTER}[A-Za-z0-9_]* {
     cool_yylval.symbol = idtable.add_string(yytext);
     return TYPEID;
 }
 
-    /* Rule 12: Process Object Identifiers */
+    /* Rule 18: Process Object Identifiers */
 {LOWERCASE_LETTER}[A-Za-z0-9_]* {
     cool_yylval.symbol = idtable.add_string(yytext);
     return OBJECTID;
 }
 
-    /* Rule 13: The single character operators operators */
+    /* Rule 19: The single character operators operators */
 "+" {return '+';}
 "/" {return '/';}
 "-" {return '-';}
@@ -341,14 +341,14 @@ REGULAR_STR_CHARACTER       ([^\\\n\"])
 "}" {return '}';}
 
 
-    /* Rule 14: The multiple-character operators. */
+    /* Rule 20: The multiple-character operators. */
 {DARROW}           { return (DARROW);           }
 {ASSIGN}           { return (ASSIGN);           }
 {LESSTHAN_EQUALTO} { return (LE); }
 
 
 
-    /* Rule 15: Error handling. Character cannot begin anything above */
+    /* Rule 21: Error handling. Character cannot begin anything above */
     /* This should be at bottom of list, only invoked at last resort */
     /* Note, the '.' represents any character but newline, which is what we want */
 . {

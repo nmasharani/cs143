@@ -118,6 +118,8 @@ Instructions
 
 Write-up for PA1
 ----------------
+user: lpappas9
+user: nisham
 
 DESIGN DECISIONS
 
@@ -141,12 +143,31 @@ For the rest of the tokens, we chose to use traditional regular
 expressions, as we felt that we did not need the complexity of start conditions
 as we had no balancing to do or changes to make to the lexemes.
 
+Note, the error reporting in strings is a challenging issue. We designed strings with 
+only a single start tag, to indicate that we are in a string, therefore all 
+error handling must happen in the logic for the rules. The advantage of this 
+approach is that there are naturally less rules, which makes the comprehension
+of the regexes easier. The disadvantage is that it makes the logic of the rule
+more involved. 
+
 CORRECTNESS 
 
 Our code contains all the rules for matching tokens as described in section 10
 of the Cool manual. Furthermore, our code has produced the same output as the
 reference compiler on all of the tests we have run (see the below section 
 for details on testing).
+
+We address every case that is listed in the assignment and in the manual. We also
+checked every piazza post in order to test for the cases introduced there. 
+
+Our lexer output matches that of lexer.out for every one of our test cases
+except for the line number of a null error in string. In this case, we indicate line
+number of end of string. The assignment does not specify which is correct. Piazza
+indicates that either reporting is fine. Also confirmed with Professor Aiken and TA's 
+that our line number reporting in this case is fine. The other case where we don't 
+match is the content of some of the error statements. In the assignment, the reported
+error statements do not have period. In the reference output, they do have periods. We
+followed the assignment and do not have periods, so the diff catches this as well. 
 
 TESTING
 
@@ -157,3 +178,12 @@ of our lexer. We tested valid inputs as well as invalid inputs, and compared our
 outputs to those of the reference compiler. To test the remainder of our rules, 
 we used actual Cool code that contained examples of where all of our rules 
 should apply. Our tests can be found in test2.cl and in the Testfiles directory.
+
+Note, our test files are named to indicate the purpose of each test. We wrote shell 
+scripts to iterate over every one of the files in the test files directory and 
+compare our lexer output to that of the sample. This allowed for easier and 
+faster testing. 
+
+Our tests cases address every one of the edge conditions addressed in the assignment and
+the manual, and we also address every condition raised on piazza as of 14:16:15 April
+17th. 
