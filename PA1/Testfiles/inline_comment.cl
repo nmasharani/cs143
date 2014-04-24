@@ -1,0 +1,4 @@
+-- test inline comments
+-- these lines should be removed and the output empty.
+--EOF
+--A NEW LINEONUM
