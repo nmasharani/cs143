@@ -1,7 +1,0 @@
-for file in Testfiles/*
-	do
-		mycoolc -k $file
-		\cp lexer.out mine.out
-		/usr/class/cs143/bin/coolc -k $file
-		diff mine.out lexer.out
-	done
