@@ -133,9 +133,11 @@
     %type <program> program
     %type <classes> class_list
     %type <class_> class
+    %type <features> feature_list
+    %type <feature> feature
     
     /* You will want to change the following line. */
-    %type <features> dummy_feature_list
+    /*%type <features> dummy_feature_list*/
     
     /* Precedence declarations go here. */
     
@@ -157,10 +159,10 @@
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
-    class	: CLASS TYPEID '{' dummy_feature_list '}' ';'
+    class	: CLASS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,idtable.add_string("Object"),$4,
     stringtable.add_string(curr_filename)); }
-    | CLASS TYPEID INHERITS TYPEID '{' dummy_feature_list '}' ';'
+    | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
     ;
 
@@ -169,27 +171,36 @@
     /* have 1+ features */
     /* TODO: rules */
     feature_list:
-    /* empty */
-    | feature_list feature
+    /* empty */ 
+    { $$ = nil_Features(); }
+    | feature 
+    { $$ = single_Features($1); }
+    | feature_list feature 
+    { $$ = append_Features($1, single_Features($2)); }
     ;
 
+    /* feature */
+    /* Currently, does not modify idtables, etc. TODO: maybe should? */
     feature:
-    OBJECTID '(' formal_list.opt ')' ':' TYPEID '{' expr '}'
-    | OBJECTID ':' TYPEID assignment.opt
-    ;
+    /* method: no formal list */
+    OBJECTID '(' ')' ':' TYPEID '{' expr '}'
+    { $$ = method($1, nil_Features(), $6, $8); }
+    
+    /* method: formal list */
+    | OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
+    { $$ = method($1, $3, $6, $8); }
+    
+    /* attribute: no assignment */
+    | OBJECTID ':' TYPEID 
+    { $$ = attr($1, $3, nil_Expression()); }
 
-    assignment.opt:
-    /* empty */
-    | '<''-' expr
+    /* attribute: assignment */
+    | OBJECTID ':' TYPEID '<' '-' expr
+    { $$ = attr($1, $3, $6); }
     ;
 
     /* formal_list */
     /* TODO: also rules here */
-    formal_list.opt:
-    /* empty */
-    | formal_list
-    ;
-
     formal_list:
     formal
     | formal_list ',' formal
@@ -203,7 +214,7 @@
 
     expr:
     /* 1 */
-    OBJECTID '<''-' expr
+    OBJECTID '<' '-' expr
     /* 2 */
     | expr dispatch.opt '.' OBJECTID '(' expr_list.opt ')'
     /* 3 */
@@ -254,8 +265,8 @@
 
 
     let_list:
-    OBJECTID ':' TYPEID assigment.opt
-    | let_list ',' OBJECTID ':' TYPEID assigment.opt
+    OBJECTID ':' TYPEID assignment.opt
+    | let_list ',' OBJECTID ':' TYPEID assignment.opt
     ;
 
     case_list:
@@ -289,8 +300,8 @@
 
     
     /* Feature list may be empty, but no empty features in list. */
-    dummy_feature_list:		/* empty */
-    {  $$ = nil_Features(); }
+    /*dummy_feature_list:		empty */
+    /*{  $$ = nil_Features(); }*/
     
     
     /* end of grammar */
