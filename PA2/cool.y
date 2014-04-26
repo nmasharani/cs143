@@ -148,34 +148,71 @@
     %type <cases> case_list
 
     
-    /* You will want to change the following line. */
-    /*%type <features> dummy_feature_list*/
-    
     /* Precedence declarations go here. */
     
+
+
+
     %%
-    /* 
-    Save the root of the abstract syntax tree in a global variable.
-    */
-    program	: class_list	{ @$ = @1; ast_root = program($1); }
-    ;
+
+
+    /* Save the root of the abstract syntax tree in a global variable. */
+    program	: class_list	
+    { 
+        @$ = @1; 
+        ast_root = program($1); 
+    };
     
-    class_list
-    : class			/* single class */
-    { $$ = single_Classes($1);
-    parse_results = $$; }
-    | class_list class	/* several classes */
-    { $$ = append_Classes($1,single_Classes($2)); 
-    parse_results = $$; }
-    ;
+
+
+    /* single class */
+    class_list : class		
+    { 
+        @$ = @1;
+        SET_NODELOC(@1)
+        $$ = single_Classes($1);
+        parse_results = $$; 
+    };
+
+
+    /* several classes */
+    class_list : class_list class	
+    { 
+        @$ = @1;
+        SET_NODELOC(@1)
+        $$ = append_Classes($1,single_Classes($2)); 
+        parse_results = $$; 
+    };
     
+
+
     /* If no parent is specified, the class inherits from the Object class. */
-    class	: CLASS TYPEID '{' feature_list '}' ';'
-    { $$ = class_($2,idtable.add_string("Object"),$4,
-    stringtable.add_string(curr_filename)); }
-    | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
-    { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
-    ;
+    /* Note, we add the object to the stringtable here */
+    class : CLASS TYPEID '{' feature_list '}' ';'  
+    { 
+        @$ = @1;
+        SET_NODELOC(@1)
+        $$ = class_($2,idtable.add_string("Object"),$4,stringtable.add_string(curr_filename)); 
+    };
+
+
+
+    /* Standard class definition with an inherits */
+    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
+    { 
+        @$ = @1;
+        SET_NODELOC(@1)
+        $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
+    };
+
+
+
+
+
+
+
+
+
 
     /* feature_list */
     /* perhaps non-dummy feature list? feature list can either be empty or */
