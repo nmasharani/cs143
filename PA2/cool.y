@@ -163,6 +163,130 @@
     | CLASS TYPEID INHERITS TYPEID '{' dummy_feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
     ;
+
+    /* feature_list */
+    /* perhaps non-dummy feature list? feature list can either be empty or */
+    /* have 1+ features */
+    /* TODO: rules */
+    feature_list:
+    /* empty */
+    | feature_list feature
+    ;
+
+    feature:
+    OBJECTID '(' formal_list.opt ')' ':' TYPEID '{' expr '}'
+    | OBJECTID ':' TYPEID assignment.opt
+    ;
+
+    assignment.opt:
+    /* empty */
+    | '<''-' expr
+    ;
+
+    /* formal_list */
+    /* TODO: also rules here */
+    formal_list.opt:
+    /* empty */
+    | formal_list
+    ;
+
+    formal_list:
+    formal
+    | formal_list ',' formal
+    ;
+
+    /* formal */
+    /* TODO: rules */
+    formal:
+    OBJECTID ':' TYPEID
+    ;
+
+    expr:
+    /* 1 */
+    OBJECTID '<''-' expr
+    /* 2 */
+    | expr dispatch.opt '.' OBJECTID '(' expr_list.opt ')'
+    /* 3 */
+    | OBJECTID '(' expr_list.opt ')'
+    /* 4 */
+    IF expr THEN expr ELSE expr FI
+    /* 5 */
+    WHILE expr LOOP expr POOL
+    /* 6 */
+    '{' exprs '}'
+    /* 7 */
+    LET let_list IN expr
+    /* 8 */
+    CASE expr OF case_list ESAC
+    /* 9 */
+    NEW TYPEID
+    /* 10 */
+    ISVOID expr
+    /* 11 */
+    expr '+' expr
+    /* 12 */
+    expr '-' expr
+    /* 13 */
+    expr '*' expr
+    /* 14 */
+    expr '/' expr
+    /* 15 */
+    '~' expr
+    /* 16 */
+    expr '<' expr
+    /* 17 */
+    expr '<' '=' expr
+    /* 18 */
+    expr '=' expr
+    /* 19 */
+    NOT expr
+    /* 20 */
+    '(' expr ')'
+    /* 21 */
+    OBJECTID
+    /* 22 */
+    INT_CONST
+    /* 23 */
+    STR_CONST
+    /* 24 */
+    BOOL_CONST
+    ;
+
+
+    let_list:
+    OBJECTID ':' TYPEID assigment.opt
+    | let_list ',' OBJECTID ':' TYPEID assigment.opt
+    ;
+
+    case_list:
+    case_list_elem
+    | case_list case_list_elem
+    ;
+
+    case_list_elem:
+    OBJECTID ':' TYPEID '=' '>' expr ';'
+    ;
+
+    exprs:
+    expr ';'
+    | exprs expr ';'
+    ;
+
+    expr_list.opt:
+    /* empty */
+    | expr_list
+    ;
+
+    expr_list:
+    expr
+    | expr_list ',' expr
+    ;
+
+    dispatch.opt:
+    /* empty */
+    | '@' TYPEID
+    ;
+
     
     /* Feature list may be empty, but no empty features in list. */
     dummy_feature_list:		/* empty */
