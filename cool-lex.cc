@@ -1364,7 +1364,7 @@ YY_RULE_SETUP
     *string_buf_ptr++ = yytext[0];
 }
 	YY_BREAK
-/* Rule 9: Process integers that are not within comments or strings */
+/* Rule 15: Process integers that are not within comments or strings */
 case 18:
 YY_RULE_SETUP
 #line 278 "cool.flex"
@@ -1373,7 +1373,7 @@ YY_RULE_SETUP
     return INT_CONST;
 }
 	YY_BREAK
-/* Rule 10: Keyword Matching. Keywords are case insensitive, */
+/* Rule 16: Keyword Matching. Keywords are case insensitive, */
 /* except for the values true and false, which must begin with a lower */
 /* case letter. */
 case 19:
@@ -1477,7 +1477,7 @@ YY_RULE_SETUP
     return BOOL_CONST;
 }
 	YY_BREAK
-/* Rule 11: Process Type Identifiers */
+/* Rule 17: Process Type Identifiers */
 case 38:
 YY_RULE_SETUP
 #line 314 "cool.flex"
@@ -1486,7 +1486,7 @@ YY_RULE_SETUP
     return TYPEID;
 }
 	YY_BREAK
-/* Rule 12: Process Object Identifiers */
+/* Rule 18: Process Object Identifiers */
 case 39:
 YY_RULE_SETUP
 #line 320 "cool.flex"
@@ -1495,7 +1495,7 @@ YY_RULE_SETUP
     return OBJECTID;
 }
 	YY_BREAK
-/* Rule 13: The single character operators operators */
+/* Rule 19: The single character operators operators */
 case 40:
 YY_RULE_SETUP
 #line 326 "cool.flex"
@@ -1576,7 +1576,7 @@ YY_RULE_SETUP
 #line 341 "cool.flex"
 {return '}';}
 	YY_BREAK
-/* Rule 14: The multiple-character operators. */
+/* Rule 20: The multiple-character operators. */
 case 56:
 YY_RULE_SETUP
 #line 345 "cool.flex"
@@ -1592,7 +1592,7 @@ YY_RULE_SETUP
 #line 347 "cool.flex"
 { return (LE); }
 	YY_BREAK
-/* Rule 15: Error handling. Character cannot begin anything above */
+/* Rule 21: Error handling. Character cannot begin anything above */
 /* This should be at bottom of list, only invoked at last resort */
 /* Note, the '.' represents any character but newline, which is what we want */
 case 59:
