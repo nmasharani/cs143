@@ -144,7 +144,6 @@
     %type <feature> let_attr
     %type <case_> case
     %type <cases> case_list
-
     
     /* You will want to change the following line. */
     /*%type <features> dummy_feature_list*/
@@ -204,8 +203,8 @@
     { $$ = attr($1, $3, no_expr()); }
 
     /* attribute: assignment */
-    | OBJECTID ':' TYPEID '<' '-' expr
-    { $$ = attr($1, $3, $6); }
+    | OBJECTID ':' TYPEID ASSIGN expr
+    { $$ = attr($1, $3, $5); }
     ;
 
     /* formal_list */
@@ -227,8 +226,8 @@
     expr:
 
     /* 1: assignment */
-    OBJECTID '<' '-' expr
-    { $$ = assign($1, $4); }
+    OBJECTID ASSIGN expr
+    { $$ = assign($1, $3); }
 
     /* 2: dispatch */
     
@@ -272,7 +271,19 @@
 
     /* 7 */
     | LET let_list IN expr
-    {}
+    {
+        Expression body = $4;
+        Features let_list = $2;
+        int let_list_len = let_list->len();
+        for (int i = let_list_len - 1; i >= 0; i--) {
+            Feature elem = let_list->nth(i);
+            Expression nested = let(elem->get_name(), elem->get_type_decl(), \
+                                    elem->get_init(), body);
+            body = nested;
+        }
+        $$ = body;
+
+    }
 
     /* 8 */
     | CASE expr OF case_list ESAC
@@ -311,8 +322,8 @@
     { $$ = lt($1, $3); }
 
     /* 17 */
-    | expr '<' '=' expr
-    { $$ = leq($1, $4); }
+    | expr LE expr
+    { $$ = leq($1, $3); }
 
     /* 18 */
     | expr '=' expr
@@ -346,8 +357,8 @@
     let_attr:
     OBJECTID ':' TYPEID
     { $$ = attr($1, $3, no_expr()); }
-    | OBJECTID ':' TYPEID '<' '-' expr
-    { $$ = attr($1, $3, $6); }
+    | OBJECTID ':' TYPEID ASSIGN expr
+    { $$ = attr($1, $3, $5); }
     ;
 
     let_list:
@@ -365,8 +376,8 @@
     ;
 
     case:
-    OBJECTID ':' TYPEID '=' '>' expr ';'
-    { $$ = branch($1, $3, $6); }
+    OBJECTID ':' TYPEID DARROW expr ';'
+    { $$ = branch($1, $3, $5); }
     ;
 
     expr_list_semicolon:
