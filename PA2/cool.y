@@ -140,6 +140,10 @@
     %type <expression> expr
     %type <expressions> expr_list_comma
     %type <expressions> expr_list_semicolon
+    %type <features> let_list
+    %type <feature> let_attr
+    %type <case_> case
+    %type <cases> case_list
 
     
     /* You will want to change the following line. */
@@ -189,7 +193,7 @@
     feature:
     /* method: no formal list */
     OBJECTID '(' ')' ':' TYPEID '{' expr '}'
-    { $$ = method($1, nil_Features(), $5, $7); }
+    { $$ = method($1, nil_Formals(), $5, $7); }
     
     /* method: formal list */
     | OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
@@ -208,7 +212,7 @@
     /* TODO: also rules here */
     formal_list:
     formal
-    { $$ = single_Formals(); }
+    { $$ = single_Formals($1); }
     | formal_list ',' formal
     { $$ = append_Formals($1, single_Formals($3)); }
     ;
@@ -268,6 +272,7 @@
 
     /* 7 */
     | LET let_list IN expr
+    {}
 
     /* 8 */
     | CASE expr OF case_list ESAC
@@ -338,9 +343,18 @@
     { $$ = bool_const($1); }
     ;
 
+    let_attr:
+    OBJECTID ':' TYPEID
+    { $$ = attr($1, $3, no_expr()); }
+    | OBJECTID ':' TYPEID '<' '-' expr
+    { $$ = attr($1, $3, $6); }
+    ;
+
     let_list:
-    OBJECTID ':' TYPEID assignment.opt
-    | let_list ',' OBJECTID ':' TYPEID assignment.opt
+    let_attr
+    { $$ = single_Features($1); }
+    | let_list ',' let_attr
+    { $$ = append_Features($1, single_Features($3)); }
     ;
 
     case_list:
@@ -358,15 +372,15 @@
     expr_list_semicolon:
     expr ';'
     { $$ = single_Expressions($1); }
-    | exprs expr ';'
-    { $$ = append_expressions($1, single_Expressions($2)); }
+    | expr_list_semicolon expr ';'
+    { $$ = append_Expressions($1, single_Expressions($2)); }
     ;
 
     expr_list_comma:
     expr
     { $$ = single_Expressions($1); }
-    | expr_list ',' expr
-    { $$ = append_expressions($1, single_Expressions($3)); }
+    | expr_list_comma ',' expr
+    { $$ = append_Expressions($1, single_Expressions($3)); }
     ;
 
     /* end of grammar */
