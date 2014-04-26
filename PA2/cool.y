@@ -54,7 +54,7 @@
       // like you acess the value of the i'th exporession with $i.
       //
       // Here, we choose the line number of the last INT_CONST (@3) as the
-      // line number of the resulting expression (@$). You are free to pick
+      // line number intof the resulting expression (@$). You are free to pick
       // any reasonable line as the line number of non-terminals. If you 
       // omit the statement @$=..., bison has default rules for deciding which 
       // line number to use. Check the manual for details if you are interested.
@@ -86,6 +86,8 @@
     %}
     
     /* A union of all the types that can be the result of parsing actions. */
+    /* The union declaration specifies the entire collection of possible */
+    /* data types for semantic values. */
     %union {
       Boolean boolean;
       Symbol symbol;
