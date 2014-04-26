@@ -1,5 +1,5 @@
 /*
-*  cool.y
+* cool.y
 *              Parser definition for the COOL language.
 *
 */
@@ -386,7 +386,10 @@
     ;
 
     /* end of grammar */
+
     %%
+    
+
     
     /* This function is called automatically when Bison detects a parse error. */
     void yyerror(char *s)
