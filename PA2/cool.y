@@ -135,12 +135,23 @@
     %type <program> program
     %type <classes> class_list
     %type <class_> class
+    %type <features> feature_list
+    %type <feature> feature
+    %type <formals> formal_list
+    %type <formal> formal
+    %type <expression> expr
+    %type <expressions> expr_list_comma
+    %type <expressions> expr_list_semicolon
+    %type <features> let_list
+    %type <feature> let_attr
+    %type <case_> case
+    %type <cases> case_list
+
     
     /* You will want to change the following line. */
-    %type <features> dummy_feature_list
+    /*%type <features> dummy_feature_list*/
     
     /* Precedence declarations go here. */
-    
     
     %%
     /* 
@@ -159,18 +170,221 @@
     ;
     
     /* If no parent is specified, the class inherits from the Object class. */
-    class	: CLASS TYPEID '{' dummy_feature_list '}' ';'
+    class	: CLASS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,idtable.add_string("Object"),$4,
     stringtable.add_string(curr_filename)); }
-    | CLASS TYPEID INHERITS TYPEID '{' dummy_feature_list '}' ';'
+    | CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); }
     ;
+
+    /* feature_list */
+    /* perhaps non-dummy feature list? feature list can either be empty or */
+    /* have 1+ features */
+    /* TODO: rules */
+    feature_list:
+    /* empty */ 
+    { $$ = nil_Features(); }
+    | feature 
+    { $$ = single_Features($1); }
+    | feature_list feature 
+    { $$ = append_Features($1, single_Features($2)); }
+    ;
+
+    /* feature */
+    /* Currently, does not modify idtables, etc. TODO: maybe should? */
+    feature:
+    /* method: no formal list */
+    OBJECTID '(' ')' ':' TYPEID '{' expr '}'
+    { $$ = method($1, nil_Formals(), $5, $7); }
     
-    /* Feature list may be empty, but no empty features in list. */
-    dummy_feature_list:		/* empty */
-    {  $$ = nil_Features(); }
+    /* method: formal list */
+    | OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
+    { $$ = method($1, $3, $6, $8); }
     
+    /* attribute: no assignment */
+    | OBJECTID ':' TYPEID 
+    { $$ = attr($1, $3, no_expr()); }
+
+    /* attribute: assignment */
+    | OBJECTID ':' TYPEID '<' '-' expr
+    { $$ = attr($1, $3, $6); }
+    ;
+
+    /* formal_list */
+    /* TODO: also rules here */
+    formal_list:
+    formal
+    { $$ = single_Formals($1); }
+    | formal_list ',' formal
+    { $$ = append_Formals($1, single_Formals($3)); }
+    ;
+
+    /* formal */
+    /* TODO: rules */
+    formal:
+    OBJECTID ':' TYPEID
+    { $$ = formal($1, $3); }
+    ;
+
+    expr:
+
+    /* 1: assignment */
+    OBJECTID '<' '-' expr
+    { $$ = assign($1, $4); }
+
+    /* 2: dispatch */
     
+    /*  static dispatch - with type and with expression list */
+    | expr '@' TYPEID '.' OBJECTID '(' expr_list_comma ')'
+    { $$ = static_dispatch($1, $3, $5, $7); }
+    
+    /*  static dispatch - with type but no expression list */
+    | expr '@' TYPEID '.' OBJECTID '(' ')'
+    { $$ = static_dispatch($1, $3, $5, nil_Expressions()); }
+    
+    /*  dynamic dispatch - with expression list */
+    | expr '.' OBJECTID '(' expr_list_comma ')'
+    { $$ = dispatch($1, $3, $5); }
+
+    /*  dynamic dispatch - no expression list */
+    | expr '.' OBJECTID '(' ')'
+    { $$ = dispatch($1, $3, nil_Expressions()); }
+
+    /* 3: more dispatch: no expression */
+
+    /*  expression list */
+    | OBJECTID '(' expr_list_comma ')'
+    { $$ = dispatch(no_expr(), $1, $3); }
+
+    /* no expression list */
+    | OBJECTID '(' ')'
+    { $$ = dispatch(no_expr(), $1, nil_Expressions()); }
+
+    /* 4: Conditionals */
+    | IF expr THEN expr ELSE expr FI
+    { $$ = cond($2, $4, $6); }
+
+    /* 5: While loop */
+    | WHILE expr LOOP expr POOL
+    { $$ = loop($2, $4); }
+
+    /* 6 : block */
+    | '{' expr_list_semicolon '}'
+    { $$ = block($2); }
+
+    /* 7 */
+    | LET let_list IN expr
+    {}
+
+    /* 8 */
+    | CASE expr OF case_list ESAC
+    { $$ = typcase($2, $4); }
+
+    /* 9 */
+    | NEW TYPEID
+    { $$ = new_($2); }
+    
+    /* 10 */
+    | ISVOID expr
+    { $$ = isvoid($2); }
+    
+    /* 11 */
+    | expr '+' expr
+    { $$ = plus($1, $3); }
+    
+    /* 12 */
+    | expr '-' expr
+    { $$ = sub($1, $3); }
+
+    /* 13 */
+    | expr '*' expr
+    { $$ = mul($1, $3); }
+
+    /* 14 */
+    | expr '/' expr
+    { $$ = divide($1, $3); }
+
+    /* 15 */
+    | '~' expr
+    { $$ = neg($2); }
+
+    /* 16 */
+    | expr '<' expr
+    { $$ = lt($1, $3); }
+
+    /* 17 */
+    | expr '<' '=' expr
+    { $$ = leq($1, $4); }
+
+    /* 18 */
+    | expr '=' expr
+    { $$ = eq($1, $3); }
+
+    /* 19 */
+    | NOT expr
+    { $$ = comp($2); }
+
+    /* 20 */
+    | '(' expr ')'
+    { $$ = $2; }
+
+    /* 21 */
+    | OBJECTID
+    { $$ = object($1); }
+
+    /* 22 */
+    | INT_CONST
+    { $$ = int_const($1); }
+
+    /* 23 */
+    | STR_CONST
+    { $$ = string_const($1); }
+
+    /* 24 */
+    | BOOL_CONST
+    { $$ = bool_const($1); }
+    ;
+
+    let_attr:
+    OBJECTID ':' TYPEID
+    { $$ = attr($1, $3, no_expr()); }
+    | OBJECTID ':' TYPEID '<' '-' expr
+    { $$ = attr($1, $3, $6); }
+    ;
+
+    let_list:
+    let_attr
+    { $$ = single_Features($1); }
+    | let_list ',' let_attr
+    { $$ = append_Features($1, single_Features($3)); }
+    ;
+
+    case_list:
+    case
+    { $$ = single_Cases($1); }
+    | case_list case
+    { $$ = append_Cases($1, single_Cases($2)); }
+    ;
+
+    case:
+    OBJECTID ':' TYPEID '=' '>' expr ';'
+    { $$ = branch($1, $3, $6); }
+    ;
+
+    expr_list_semicolon:
+    expr ';'
+    { $$ = single_Expressions($1); }
+    | expr_list_semicolon expr ';'
+    { $$ = append_Expressions($1, single_Expressions($2)); }
+    ;
+
+    expr_list_comma:
+    expr
+    { $$ = single_Expressions($1); }
+    | expr_list_comma ',' expr
+    { $$ = append_Expressions($1, single_Expressions($3)); }
+    ;
+
     /* end of grammar */
     %%
     
