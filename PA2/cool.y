@@ -148,9 +148,19 @@
     %type <cases> case_list
 
     
-    /* Precedence declarations go here. */
-    
+    /* Precedence declarations go here.                              */
+    /* Per the Bison documentation, we list them in reverse order as */
+    /* the lower on the list, the higher the precendence.            */
 
+    %right ASSIGN
+    %left NOT
+    %nonassoc LE '<' '='
+    %left '+' '-'
+    %left '*' '/'
+    %left ISVOID
+    %left '~'
+    %left '@'
+    %left '.'
 
 
     %%
@@ -166,7 +176,6 @@
         ast_root = program($1); 
     };
     
-
     /* single class */
     class_list : class		
     { 
@@ -175,7 +184,6 @@
         $$ = single_Classes($1);
         parse_results = $$; 
     };
-
 
     /* several classes */
     class_list : class_list class	
@@ -198,7 +206,6 @@
         SET_NODELOC(@1);
         $$ = class_($2,idtable.add_string("Object"),$4,stringtable.add_string(curr_filename)); 
     };
-
 
     /* Standard class definition with an inherits */
     class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
@@ -679,7 +686,6 @@
 
     %%
     
-
     
     /* This function is called automatically when Bison detects a parse error. */
     void yyerror(char *s)
