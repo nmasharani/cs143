@@ -400,19 +400,23 @@
         $$ = static_dispatch($1, $3, $5, nil_Expressions()); 
     };
     
-    /*  dynamic dispatch - with expression list */
+    /* Dynamic dispatch - with expression list */
+    /* Note, add SELF_TYPE to idtable, as it is infered by syntax here */
     expr : expr '.' OBJECTID '(' expr_list_comma ')'
     { 
         @$ = @3;
         SET_NODELOC(@3);
+        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, $5); 
     };
 
-    /*  dynamic dispatch - no expression list */
+    /* Dynamic dispatch - no expression list */
+    /* Note, add SELF_TYPE to idtable, as it is infered by syntax here */
     expr : expr '.' OBJECTID '(' ')'
     { 
         @$ = @3;
         SET_NODELOC(@3);
+        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, nil_Expressions()); 
     };
 
@@ -422,18 +426,22 @@
     /* 3: more dispatch: no expression */
 
     /*  expression list */
+    /* Note, add self to the idtable, as it is implied by syntax (Section 7.4) */
     expr : OBJECTID '(' expr_list_comma ')'
     { 
         @$ = @1;
         SET_NODELOC(@1);
+        idtable.add_string("self");
         $$ = dispatch(no_expr(), $1, $3); 
     };
 
     /* no expression list */
+    /* Note, add self to the idtable, as it is implied by syntax (Section 7.4) */
     expr : OBJECTID '(' ')'
     { 
         @$ = @1;
         SET_NODELOC(@1);
+        idtable.add_string("self");
         $$ = dispatch(no_expr(), $1, nil_Expressions()); 
     };
 
