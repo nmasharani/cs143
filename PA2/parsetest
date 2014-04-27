@@ -1,6 +1,15 @@
-rm mine
-y
+\rm mine
 for file in Testfiles_good/*
+        do
+                echo $file
+                ./myparser $file > mine
+                /usr/class/cs143/bin/coolc -k $file
+                diff ./mine ./parser.out
+                echo ""
+        done
+\rm mine
+
+for file in Testfiles_bad/*
         do
                 echo $file
                 ./myparser $file > mine

@@ -301,8 +301,10 @@
     feature: OBJECTID ':' TYPEID 
     { 
         @$ = @1;
+        SET_NODELOC(0);
+        Expression x = no_expr();
         SET_NODELOC(@1);
-        $$ = attr($1, $3, no_expr()); 
+        $$ = attr($1, $3, x); 
     };
 
     /* attribute: assignment */
