@@ -153,6 +153,7 @@
     /* Per the Bison documentation, we list them in reverse order as */
     /* the lower on the list, the higher the precendence.            */
 
+    %left LET_PREC
     %right ASSIGN
     %left NOT
     %nonassoc LE '<' '='
@@ -417,7 +418,7 @@
     /************************   EXPR 7    ******************************/
     /*******************************************************************/
     /* 7: let statements */
-    
+
     expr : LET let_list 
     {
         @$ = @2;
@@ -425,7 +426,7 @@
         $$ = $2;
     };
 
-    let_list : OBJECTID ':' TYPEID IN expr
+    let_list : OBJECTID ':' TYPEID IN expr %prec LET_PREC
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -433,7 +434,7 @@
     };
 
     
-    let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr
+    let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr %prec LET_PREC
     { 
         @$ = @1;
         SET_NODELOC(@1);
