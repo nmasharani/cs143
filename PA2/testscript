@@ -1,0 +1,7 @@
+for file in Testfiles/*
+	do
+		mycoolc -k $file
+		\cp parser.out mine.out
+		/usr/class/cs143/bin/coolc -k $file
+		diff mine.out parser.out
+	done

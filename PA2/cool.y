@@ -217,16 +217,27 @@
         $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
     };
 
+    /* If no parent is specified, the class inherits from the Object class. */
+    /* With empty feature list. */
+    class : CLASS TYPEID '{' '}' ';'  
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = class_($2,idtable.add_string("Object"),nil_Features(),stringtable.add_string(curr_filename)); 
+    };
+
+    /* Standard class definition with an inherits and empty feature list */
+    class : CLASS TYPEID INHERITS TYPEID '{' '}' ';'
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = class_($2,$4,nil_Features(),stringtable.add_string(curr_filename)); 
+    };
+
     /*******************************************************************/
     /************************   FEATURE LIST   *************************/
     /*******************************************************************/
-
-    /* feature list can either be empty or have 1+ features */
-    feature_list: /* empty */ 
-    { 
-        $$ = nil_Features(); 
-    };
-
+    
     feature_list: feature ';'
     {   
         @$ = @1;
@@ -271,7 +282,7 @@
     };
 
     /* attribute: assignment */
-    feature: OBJECTID ':' TYPEID ASSIGN expr
+    feature: OBJECTID ':' TYPEID ASSIGN expr  
     { 
         @$ = @1;
         SET_NODELOC(@1);
