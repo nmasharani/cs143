@@ -2105,8 +2105,8 @@ yyreduce:
     { 
         (yyloc) = (yylsp[(1) - (4)]);
         SET_NODELOC((yylsp[(1) - (4)]));
-        idtable.add_string("self");
-        (yyval.expression) = dispatch(no_expr(), (yyvsp[(1) - (4)].symbol), (yyvsp[(3) - (4)].expressions)); 
+        IdEntry * caller = idtable.add_string("self");
+        (yyval.expression) = dispatch(object(caller), (yyvsp[(1) - (4)].symbol), (yyvsp[(3) - (4)].expressions)); 
     }
     break;
 
@@ -2117,8 +2117,8 @@ yyreduce:
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
-        idtable.add_string("self");
-        (yyval.expression) = dispatch(no_expr(), (yyvsp[(1) - (3)].symbol), nil_Expressions()); 
+        IdEntry * caller = idtable.add_string("self");
+        (yyval.expression) = dispatch(object(caller), (yyvsp[(1) - (3)].symbol), nil_Expressions()); 
     }
     break;
 

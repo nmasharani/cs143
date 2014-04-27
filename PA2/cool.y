@@ -433,8 +433,8 @@
     { 
         @$ = @1;
         SET_NODELOC(@1);
-        idtable.add_string("self");
-        $$ = dispatch(no_expr(), $1, $3); 
+        IdEntry * caller = idtable.add_string("self");
+        $$ = dispatch(object(caller), $1, $3); 
     };
 
     /* no expression list */
@@ -443,8 +443,8 @@
     { 
         @$ = @1;
         SET_NODELOC(@1);
-        idtable.add_string("self");
-        $$ = dispatch(no_expr(), $1, nil_Expressions()); 
+        IdEntry * caller = idtable.add_string("self");
+        $$ = dispatch(object(caller), $1, nil_Expressions()); 
     };
 
     /*******************************************************************/

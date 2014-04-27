@@ -1,332 +1,175 @@
-#4
+#1
 _program
-  #4
+  #1
   _class
-    Test3
+    Test1
     Object
-    "Testfiles_good/expr_test.cl"
+    "Testfiles_good/dispatch_test.cl"
     (
-    #5
+    #2
     _attr
       x
       Int
-      #0
-      _no_expr
+      #2
+      _int
+        0
       : _no_type
-    #6
+    #3
     _attr
       y
       Int
-      #6
+      #3
       _int
         0
       : _no_type
-    #8
+    #5
     _method
-      expr1
-      Bool
+      get_x
+      Int
+      #6
+      _object
+        x
+      : _no_type
+    #9
+    _method
+      get_y
+      Int
       #10
-      _block
-        #10
-        _assign
-          x
-          #10
-          _int
-            2
-          : _no_type
-        : _no_type
-        #11
-        _bool
-          1
-        : _no_type
-      : _no_type
-    #15
-    _method
-      expr4
-      Bool
-      #17
-      _block
-        #17
-        _cond
-          #17
-          _lt
-            #17
-            _object
-              x
-            : _no_type
-            #17
-            _int
-              1
-            : _no_type
-          : _no_type
-          #17
-          _bool
-            1
-          : _no_type
-          #17
-          _bool
-            0
-          : _no_type
-        : _no_type
-      : _no_type
-    #21
-    _method
-      expr5
-      Bool
-      #23
-      _block
-        #23
-        _assign
-          x
-          #23
-          _int
-            0
-          : _no_type
-        : _no_type
-        #24
-        _loop
-          #24
-          _lt
-            #24
-            _object
-              x
-            : _no_type
-            #24
-            _int
-              5
-            : _no_type
-          : _no_type
-          #24
-          _eq
-            #24
-            _object
-              x
-            : _no_type
-            #24
-            _plus
-              #24
-              _object
-                x
-              : _no_type
-              #24
-              _int
-                1
-              : _no_type
-            : _no_type
-          : _no_type
-        : _no_type
-        #25
-        _bool
-          1
-        : _no_type
-      : _no_type
-    #29
-    _method
-      expr9
-      Bool
-      #31
-      _block
-        #31
-        _new
-          Int
-        : _no_type
-        #32
-        _bool
-          1
-        : _no_type
-      : _no_type
-    #36
-    _method
-      expr10
-      Bool
-      #37
-      _isvoid
-        #37
-        _object
-          x
-        : _no_type
-      : _no_type
-    #40
-    _method
-      expr11
-      Int
-      #41
-      _plus
-        #41
-        _int
-          4
-        : _no_type
-        #41
-        _int
-          3
-        : _no_type
-      : _no_type
-    #44
-    _method
-      expr12
-      Int
-      #45
-      _sub
-        #45
-        _int
-          4
-        : _no_type
-        #45
-        _int
-          3
-        : _no_type
-      : _no_type
-    #48
-    _method
-      expr13
-      Int
-      #49
-      _mul
-        #49
-        _int
-          4
-        : _no_type
-        #49
-        _int
-          3
-        : _no_type
-      : _no_type
-    #52
-    _method
-      expr14
-      Int
-      #53
-      _divide
-        #53
-        _int
-          12
-        : _no_type
-        #53
-        _int
-          3
-        : _no_type
-      : _no_type
-    #56
-    _method
-      expr15
-      Int
-      #57
-      _neg
-        #57
-        _int
-          1
-        : _no_type
-      : _no_type
-    #60
-    _method
-      expr16
-      Bool
-      #61
-      _lt
-        #61
-        _int
-          3
-        : _no_type
-        #61
-        _int
-          4
-        : _no_type
-      : _no_type
-    #64
-    _method
-      expr17
-      Bool
-      #65
-      _leq
-        #65
-        _int
-          3
-        : _no_type
-        #65
-        _int
-          4
-        : _no_type
-      : _no_type
-    #68
-    _method
-      expr18
-      Bool
-      #69
-      _eq
-        #69
-        _int
-          3
-        : _no_type
-        #69
-        _int
-          4
-        : _no_type
-      : _no_type
-    #72
-    _method
-      expr19
-      Bool
-      #73
-      _comp
-        #73
-        _bool
-          1
-        : _no_type
-      : _no_type
-    #76
-    _method
-      expr20
-      Bool
-      #77
-      _eq
-        #77
-        _object
-          y
-        : _no_type
-        #77
-        _int
-          1
-        : _no_type
-      : _no_type
-    #80
-    _method
-      expr21
-      Int
-      #81
       _object
         y
       : _no_type
-    #84
+    )
+  #14
+  _class
+    Test2
+    Test1
+    "Testfiles_good/dispatch_test.cl"
+    (
+    #16
     _method
-      expr22
+      get_x_plus_y
       Int
-      #85
-      _int
-        1
-      : _no_type
-    #88
-    _method
-      expr23
-      String
-      #89
-      _string
-        "hello, world!"
-      : _no_type
-    #92
-    _method
-      expr24
-      Bool
-      #93
-      _bool
-        1
-      : _no_type
-    #96
-    _method
-      expr25
-      Bool
-      #97
-      _bool
-        0
+      #17
+      _plus
+        #17
+        _static_dispatch
+          #17
+          _object
+            self
+          : _no_type
+          Test1
+          get_x
+          (
+          )
+        : _no_type
+        #17
+        _static_dispatch
+          #17
+          _object
+            self
+          : _no_type
+          Test1
+          get_y
+          (
+          )
+        : _no_type
       : _no_type
     )
-    
+  #22
+  _class
+    Test3
+    Object
+    "Testfiles_good/dispatch_test.cl"
+    (
+    #23
+    _attr
+      a
+      Test1
+      #23
+      _new
+        Test1
+      : _no_type
+    #24
+    _attr
+      b
+      Test2
+      #24
+      _new
+        Test2
+      : _no_type
+    #26
+    _method
+      do_something
+      Bool
+      #27
+      _eq
+        #27
+        _dispatch
+          #27
+          _object
+            a
+          : _no_type
+          get_x
+          (
+          )
+        : _no_type
+        #27
+        _static_dispatch
+          #27
+          _object
+            b
+          : _no_type
+          Test1
+          get_x
+          (
+          )
+        : _no_type
+      : _no_type
+    #30
+    _method
+      do_something_else
+      #30
+      _formal
+        q
+        String
+      Bool
+      #31
+      _cond
+        #31
+        _dispatch
+          #31
+          _object
+            self
+          : _no_type
+          do_something
+          (
+          )
+        : _no_type
+        #31
+        _bool
+          1
+        : _no_type
+        #31
+        _bool
+          0
+        : _no_type
+      : _no_type
+    #34
+    _method
+      do_something_even_more
+      Bool
+      #35
+      _dispatch
+        #35
+        _object
+          self
+        : _no_type
+        do_something_else
+        (
+        #35
+        _string
+          "hello, world!"
+        : _no_type
+        )
+      : _no_type
+    )
