@@ -227,14 +227,14 @@
         $$ = nil_Features(); 
     };
 
-    feature_list: feature 
+    feature_list: feature ';'
     {   
         @$ = @1;
         SET_NODELOC(@1);
         $$ = single_Features($1); 
     };
 
-    feature_list: feature_list feature 
+    feature_list: feature_list feature ';'
     { 
         @$ = @1;
         SET_NODELOC(@2);
