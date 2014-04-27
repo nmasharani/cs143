@@ -140,8 +140,7 @@
     %type <expression> expr
     %type <expressions> expr_list_comma
     %type <expressions> expr_list_semicolon
-    %type <features> let_list
-    %type <feature> let_attr
+    %type <expression> let_list
     %type <case_> case
     %type <cases> case_list
     
@@ -270,20 +269,8 @@
     { $$ = block($2); }
 
     /* 7 */
-    | LET let_list IN expr
-    {
-        Expression body = $4;
-        Features let_list = $2;
-        int let_list_len = let_list->len();
-        for (int i = let_list_len - 1; i >= 0; i--) {
-            Feature elem = let_list->nth(i);
-            Expression nested = let(elem->get_name(), elem->get_type_decl(), \
-                                    elem->get_init(), body);
-            body = nested;
-        }
-        $$ = body;
-
-    }
+    | LET let_list
+    { $$ = $2; }
 
     /* 8 */
     | CASE expr OF case_list ESAC
@@ -354,18 +341,18 @@
     { $$ = bool_const($1); }
     ;
 
-    let_attr:
-    OBJECTID ':' TYPEID
-    { $$ = attr($1, $3, no_expr()); }
-    | OBJECTID ':' TYPEID ASSIGN expr
-    { $$ = attr($1, $3, $5); }
-    ;
-
     let_list:
-    let_attr
-    { $$ = single_Features($1); }
-    | let_list ',' let_attr
-    { $$ = append_Features($1, single_Features($3)); }
+    OBJECTID ':' TYPEID IN expr
+    { $$ = let($1, $3, no_expr(), $5); }
+    
+    | OBJECTID ':' TYPEID ASSIGN expr IN expr
+    { $$ = let($1, $3, $5, $7); }
+    
+    | OBJECTID ':' TYPEID ',' let_list
+    { $$ = let($1, $3, no_expr(), $5); }
+
+    | OBJECTID ':' TYPEID ASSIGN expr ',' let_list
+    { $$ = let($1, $3, $5, $7); }
     ;
 
     case_list:

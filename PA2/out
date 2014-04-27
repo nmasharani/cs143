@@ -1,0 +1,202 @@
+Starting parse
+Entering state 0
+
+class
+Reading a token: Next token is token CLASS (: )
+Shifting token CLASS (: )
+Entering state 1
+
+
+A
+Reading a token: Next token is token TYPEID (: )
+Shifting token TYPEID (: )
+Entering state 5
+
+
+{
+Reading a token: Next token is token '{' (: )
+Shifting token '{' (: )
+Entering state 9
+
+ana
+Reading a token: Next token is token OBJECTID (: )
+Shifting token OBJECTID (: )
+Entering state 11
+
+(
+Reading a token: Next token is token '(' (: )
+Shifting token '(' (: )
+Entering state 15
+
+)
+Reading a token: Next token is token ')' (: )
+Shifting token ')' (: )
+Entering state 21
+
+:
+Reading a token: Next token is token ':' (: )
+Shifting token ':' (: )
+Entering state 28
+
+Int
+Reading a token: Next token is token TYPEID (: )
+Shifting token TYPEID (: )
+Entering state 34
+
+{
+Reading a token: Next token is token '{' (: )
+Shifting token '{' (: )
+Entering state 52
+
+(
+Reading a token: Next token is token '(' (: )
+Shifting token '(' (: )
+Entering state 49
+
+let
+Reading a token: Next token is token LET (: )
+Shifting token LET (: )
+Entering state 38
+
+x
+Reading a token: Next token is token OBJECTID (: )
+Shifting token OBJECTID (: )
+Entering state 55
+
+:
+Reading a token: Next token is token ':' (: )
+Shifting token ':' (: )
+Entering state 80
+
+Int
+Reading a token: Next token is token TYPEID (: )
+Shifting token TYPEID (: )
+Entering state 103
+
+<-
+Reading a token: Next token is token ASSIGN (: )
+Shifting token ASSIGN (: )
+Entering state 116
+
+1 -> expression
+Reading a token: Next token is token INT_CONST (: )
+Shifting token INT_CONST (: )
+Entering state 44
+Reducing stack by rule 41 (line 332):
+   $1 = token INT_CONST (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52 49 38 55 80 103 116
+Entering state 128
+
+in
+Reading a token: Next token is token IN (: )
+Shifting token IN (: )
+Entering state 134
+
+2 -> expression
+Reading a token: Next token is token INT_CONST (: )
+Shifting token INT_CONST (: )
+Entering state 44
+Reducing stack by rule 41 (line 332):
+   $1 = token INT_CONST (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52 49 38 55 80 103 116 128 134
+Entering state 139
+
+) -> let_list
+Reading a token: Next token is token ')' (: )
+Reducing stack by rule 45 (line 348):
+   $1 = token OBJECTID (: )
+   $2 = token ':' (: )
+   $3 = token TYPEID (: )
+   $4 = token ASSIGN (: )
+   $5 = nterm expr (: )
+   $6 = token IN (: )
+   $7 = nterm expr (: )
+-> $$ = nterm let_list (: )
+Stack now 0 1 5 9 11 15 21 28 34 52 49 38
+Entering state 56
+
+-> let statement
+Reducing stack by rule 26 (line 272):
+   $1 = token LET (: )
+   $2 = nterm let_list (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52 49
+Entering state 66
+
+)
+Next token is token ')' (: )
+Shifting token ')' (: )
+Entering state 90
+Reducing stack by rule 39 (line 324):
+   $1 = token '(' (: )
+   $2 = nterm expr (: )
+   $3 = token ')' (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52
+Entering state 77
+
++
+Reading a token: Next token is token '+' (: )
+Shifting token '+' (: )
+Entering state 71
+
+3
+Reading a token: Next token is token INT_CONST (: )
+Shifting token INT_CONST (: )
+Entering state 44
+
+3 -> expression
+Reducing stack by rule 41 (line 332):
+   $1 = token INT_CONST (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52 77 71
+Entering state 94
+
+} -> expression
+Reading a token: Next token is token '}' (: )
+Reducing stack by rule 30 (line 288):
+   $1 = nterm expr (: )
+   $2 = token '+' (: )
+   $3 = nterm expr (: )
+-> $$ = nterm expr (: )
+Stack now 0 1 5 9 11 15 21 28 34 52
+Entering state 77
+
+}
+Next token is token '}' (: )
+Shifting token '}' (: )
+Entering state 100
+Reducing stack by rule 9 (line 193):
+   $1 = token OBJECTID (: )
+   $2 = token '(' (: )
+   $3 = token ')' (: )
+   $4 = token ':' (: )
+   $5 = token TYPEID (: )
+   $6 = token '{' (: )
+   $7 = nterm expr (: )
+   $8 = token '}' (: )
+-> $$ = nterm feature (: )
+Stack now 0 1 5 9
+Entering state 13
+Reducing stack by rule 7 (line 183):
+   $1 = nterm feature (: )
+-> $$ = nterm feature_list (: )
+Stack now 0 1 5 9
+Entering state 12
+
+;
+Reading a token: Next token is token ';' (: )
+"good.cl", line 4: syntax error at or near ';'
+Error: popping nterm feature_list (: )
+Stack now 0 1 5 9
+Error: popping token '{' (: )
+Stack now 0 1 5
+Error: popping token TYPEID (: )
+Stack now 0 1
+Error: popping token CLASS (: )
+Stack now 0
+Cleanup: discarding lookahead token ';' (: )
+Stack now 0
+Compilation halted due to lex and parse errors
