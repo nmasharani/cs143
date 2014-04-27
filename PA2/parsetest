@@ -1,6 +1,6 @@
 rm mine
 y
-for file in Testfiles/*
+for file in Testfiles_good/*
         do
                 echo $file
                 ./myparser $file > mine
