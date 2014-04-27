@@ -171,7 +171,7 @@
     class_list : class		
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = single_Classes($1);
         parse_results = $$; 
     };
@@ -181,7 +181,7 @@
     class_list : class_list class	
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = append_Classes($1,single_Classes($2)); 
         parse_results = $$; 
     };
@@ -195,7 +195,7 @@
     class : CLASS TYPEID '{' feature_list '}' ';'  
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = class_($2,idtable.add_string("Object"),$4,stringtable.add_string(curr_filename)); 
     };
 
@@ -204,7 +204,7 @@
     class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
     };
 
@@ -221,14 +221,14 @@
     feature_list: feature 
     {   
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = single_Features($1); 
     };
 
     feature_list: feature_list feature 
     { 
         @$ = @1;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = append_Features($1, single_Features($2)); 
     };
 
@@ -241,7 +241,7 @@
     feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}'
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = method($1, nil_Formals(), $5, $7); 
     };
     
@@ -249,7 +249,7 @@
     feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = method($1, $3, $6, $8); 
     };
     
@@ -257,7 +257,7 @@
     feature: OBJECTID ':' TYPEID 
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = attr($1, $3, no_expr()); 
     };
 
@@ -265,7 +265,7 @@
     feature: OBJECTID ':' TYPEID ASSIGN expr
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = attr($1, $3, $6); 
     };
 
@@ -277,14 +277,14 @@
     formal_list: formal
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = single_Formals($1); 
     };
 
     formal_list: formal_list ',' formal
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = append_Formals($1, single_Formals($3)); 
     };
 
@@ -295,7 +295,7 @@
     formal: OBJECTID ':' TYPEID
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = formal($1, $3);
     };
 
@@ -307,7 +307,7 @@
     expr: OBJECTID ASSIGN expr
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = assign($1, $4); 
     };
 
@@ -320,7 +320,7 @@
     expr : expr '@' TYPEID '.' OBJECTID '(' expr_list_comma ')'
     { 
         @$ = @5;
-        SET_NODELOC(@5)
+        SET_NODELOC(@5);
         $$ = static_dispatch($1, $3, $5, $7); 
     };
     
@@ -328,7 +328,7 @@
     expr : expr '@' TYPEID '.' OBJECTID '(' ')'
     { 
         @$ = @5;
-        SET_NODELOC(@5)
+        SET_NODELOC(@5);
         $$ = static_dispatch($1, $3, $5, nil_Expressions()); 
     };
     
@@ -336,7 +336,7 @@
     expr : expr '.' OBJECTID '(' expr_list_comma ')'
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = dispatch($1, $3, $5); 
     };
 
@@ -344,7 +344,7 @@
     expr : expr '.' OBJECTID '(' ')'
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = dispatch($1, $3, nil_Expressions()); 
     };
 
@@ -357,7 +357,7 @@
     expr : OBJECTID '(' expr_list_comma ')'
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = dispatch(no_expr(), $1, $3); 
     };
 
@@ -365,7 +365,7 @@
     expr : OBJECTID '(' ')'
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = dispatch(no_expr(), $1, nil_Expressions()); 
     };
 
@@ -377,7 +377,7 @@
     expr : IF expr THEN expr ELSE expr FI
     { 
         @$ = @7;
-        SET_NODELOC(@7)
+        SET_NODELOC(@7);
         $$ = cond($2, $4, $6); 
     };
 
@@ -389,7 +389,7 @@
     expr : WHILE expr LOOP expr POOL
     { 
         @$ = @5;
-        SET_NODELOC(@5)
+        SET_NODELOC(@5);
         $$ = loop($2, $4); 
     };
 
@@ -401,7 +401,7 @@
     expr :  '{' expr_list_semicolon '}'
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = block($2); 
     };
 
@@ -420,8 +420,29 @@
     expr : CASE expr OF case_list ESAC
     { 
         @$ = @5;
-        SET_NODELOC(@5)
+        SET_NODELOC(@5);
         $$ = typcase($2, $4); 
+    };
+
+    case: OBJECTID ':' TYPEID DARROW expr ';'
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = branch($1, $3, $6); 
+    };
+
+    case_list: case
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = single_Cases($1); 
+    };
+
+    case_list: case_list case
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = append_Cases($1, single_Cases($2)); 
     };
 
     /*******************************************************************/
@@ -432,7 +453,7 @@
     expr : NEW TYPEID
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = new_($2); 
     };
     
@@ -444,7 +465,7 @@
     expr : ISVOID expr
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = isvoid($2); 
     };
     
@@ -456,7 +477,7 @@
     expr : expr '+' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = plus($1, $3); 
     };
     
@@ -468,7 +489,7 @@
     expr : expr '-' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = sub($1, $3); 
     };
 
@@ -480,7 +501,7 @@
     expr : expr '*' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = mul($1, $3); 
     };
 
@@ -492,7 +513,7 @@
     expr : expr '/' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = divide($1, $3); 
     };
 
@@ -504,7 +525,7 @@
     expr : '~' expr
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = neg($2); 
     };
 
@@ -515,7 +536,7 @@
     expr : expr '<' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = lt($1, $3); 
     };
 
@@ -527,7 +548,7 @@
     expr : expr LE expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = leq($1, $4); 
     };
 
@@ -539,7 +560,7 @@
     expr : expr '=' expr
     { 
         @$ = @3;
-        SET_NODELOC(@3)
+        SET_NODELOC(@3);
         $$ = eq($1, $3); 
     };
 
@@ -551,7 +572,7 @@
     expr : NOT expr
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = comp($2); 
     };
 
@@ -563,7 +584,7 @@
     expr : '(' expr ')'
     { 
         @$ = @2;
-        SET_NODELOC(@2)
+        SET_NODELOC(@2);
         $$ = $2; 
     };
 
@@ -575,7 +596,7 @@
     expr : OBJECTID
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = object($1); 
     };
 
@@ -587,7 +608,7 @@
     expr : INT_CONST
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = int_const($1); 
     };
 
@@ -599,7 +620,7 @@
     expr : STR_CONST
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = string_const($1); 
     };
 
@@ -611,36 +632,35 @@
     expr : BOOL_CONST
     { 
         @$ = @1;
-        SET_NODELOC(@1)
+        SET_NODELOC(@1);
         $$ = bool_const($1); 
     };
 
     /*******************************************************************/
-    /************************   EXPR 2   ******************************/
+    /**********************   EXPR List Semicolon   ********************/
     /*******************************************************************/
 
+    expr_list_semicolon : expr ';'
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = single_Expressions($1); 
+    };
+
+    expr_list_semicolon : expr_list_semicolon expr ';'
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = append_Expressions($1, single_Expressions($2)); 
+    };
 
 
 
 
-    case_list:
-    case
-    { $$ = single_Cases($1); }
-    | case_list case
-    { $$ = append_Cases($1, single_Cases($2)); }
-    ;
 
-    case:
-    OBJECTID ':' TYPEID '=' '>' expr ';'
-    { $$ = branch($1, $3, $6); }
-    ;
 
-    expr_list_semicolon:
-    expr ';'
-    { $$ = single_Expressions($1); }
-    | expr_list_semicolon expr ';'
-    { $$ = append_Expressions($1, single_Expressions($2)); }
-    ;
+
+
 
     expr_list_comma:
     expr
