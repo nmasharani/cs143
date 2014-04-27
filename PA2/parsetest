@@ -1,0 +1,10 @@
+rm mine
+y
+for file in Testfiles/*
+        do
+                echo $file
+                ./myparser $file > mine
+                /usr/class/cs143/bin/coolc -k $file
+                diff ./mine ./parser.out
+                echo ""
+        done

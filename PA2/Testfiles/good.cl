@@ -1,6 +1,6 @@
 class A {
 ana(): Int {
-	x:Int <- 1;
+(let x:Int <- 1 in 2)+3
 };
 };
 
