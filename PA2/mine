@@ -2,174 +2,90 @@
 _program
   #1
   _class
-    Test1
+    Test
     Object
-    "Testfiles_good/dispatch_test.cl"
+    "Testfiles_good/let_test.cl"
     (
     #2
-    _attr
-      x
-      Int
-      #2
-      _int
-        0
-      : _no_type
-    #3
-    _attr
-      y
+    _method
+      let_test
       Int
       #3
-      _int
-        0
-      : _no_type
-    #5
-    _method
-      get_x
-      Int
-      #6
-      _object
+      _let
         x
-      : _no_type
-    #9
-    _method
-      get_y
-      Int
-      #10
-      _object
-        y
-      : _no_type
-    )
-  #14
-  _class
-    Test2
-    Test1
-    "Testfiles_good/dispatch_test.cl"
-    (
-    #16
-    _method
-      get_x_plus_y
-      Int
-      #17
-      _plus
-        #17
-        _static_dispatch
-          #17
-          _object
-            self
-          : _no_type
-          Test1
-          get_x
-          (
-          )
-        : _no_type
-        #17
-        _static_dispatch
-          #17
-          _object
-            self
-          : _no_type
-          Test1
-          get_y
-          (
-          )
-        : _no_type
-      : _no_type
-    )
-  #22
-  _class
-    Test3
-    Object
-    "Testfiles_good/dispatch_test.cl"
-    (
-    #23
-    _attr
-      a
-      Test1
-      #23
-      _new
-        Test1
-      : _no_type
-    #24
-    _attr
-      b
-      Test2
-      #24
-      _new
-        Test2
-      : _no_type
-    #26
-    _method
-      do_something
-      Bool
-      #27
-      _eq
-        #27
-        _dispatch
-          #27
-          _object
-            a
-          : _no_type
-          get_x
-          (
-          )
-        : _no_type
-        #27
-        _static_dispatch
-          #27
-          _object
-            b
-          : _no_type
-          Test1
-          get_x
-          (
-          )
-        : _no_type
-      : _no_type
-    #30
-    _method
-      do_something_else
-      #30
-      _formal
-        q
-        String
-      Bool
-      #31
-      _cond
-        #31
-        _dispatch
-          #31
-          _object
-            self
-          : _no_type
-          do_something
-          (
-          )
-        : _no_type
-        #31
-        _bool
+        Int
+        #3
+        _int
           1
         : _no_type
-        #31
-        _bool
-          0
+        #3
+        _let
+          y
+          Int
+          #3
+          _int
+            2
+          : _no_type
+          #3
+          _let
+            z
+            Int
+            #3
+            _int
+              3
+            : _no_type
+            #3
+            _plus
+              #3
+              _plus
+                #3
+                _object
+                  x
+                : _no_type
+                #3
+                _object
+                  y
+                : _no_type
+              : _no_type
+              #3
+              _object
+                z
+              : _no_type
+            : _no_type
+          : _no_type
         : _no_type
       : _no_type
-    #34
+    #6
     _method
-      do_something_even_more
-      Bool
-      #35
-      _dispatch
-        #35
-        _object
-          self
+      nested_let_test
+      Int
+      #7
+      _let
+        x
+        Int
+        #7
+        _int
+          1
         : _no_type
-        do_something_else
-        (
-        #35
-        _string
-          "hello, world!"
+        #7
+        _let
+          y
+          Int
+          #7
+          _int
+            2
+          : _no_type
+          #7
+          _plus
+            #7
+            _object
+              x
+            : _no_type
+            #7
+            _object
+              y
+            : _no_type
+          : _no_type
         : _no_type
-        )
       : _no_type
     )
