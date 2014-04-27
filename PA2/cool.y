@@ -143,8 +143,7 @@
     %type <expressions> expr_list_comma
     %type <expressions> expr_list_semicolon
     
-    /*%type <features> let_list*/
-    /*%type <feature> let_attr*/
+    %type <expression> let_list
     
     %type <case_> case
     %type <cases> case_list
@@ -418,8 +417,43 @@
     /************************   EXPR 7    ******************************/
     /*******************************************************************/
     /* 7: let statements */
-    /*expr : LET let_list IN expr
-    {}*/
+    
+    expr : LET let_list 
+    {
+        @$ = @2;
+        SET_NODELOC(@2);
+        $$ = $2;
+    };
+
+    let_list : OBJECTID ':' TYPEID IN expr
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = let($1, $3, no_expr(), $5); 
+    };
+
+    
+    let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = let($1, $3, $5, $7); 
+    };
+    
+    let_list : OBJECTID ':' TYPEID ',' let_list
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = let($1, $3, no_expr(), $5); 
+    };
+
+    let_list: OBJECTID ':' TYPEID ASSIGN expr ',' let_list
+    { 
+        @$ = @1;
+        SET_NODELOC(@1);
+        $$ = let($1, $3, $5, $7); 
+    };
+
 
     /*******************************************************************/
     /************************   EXPR 8    ******************************/
