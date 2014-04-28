@@ -238,7 +238,7 @@
     /********************  CLASS ERROR CASES  **************************/
     /*******************************************************************/
 
-	/*
+/*
     class : CLASS TYPEID '{' error '}' ';' 
     {
         yyclearin;
@@ -255,7 +255,7 @@
         yyclearin;
     };
 
-    class : CLASS error '{' error'}' ';'
+    class : CLASS error '{' error '}' ';'
     {
         yyclearin;
     };
@@ -321,6 +321,7 @@
     /*********************   FEATURE ERRORS    *************************/
     /*******************************************************************/
 
+/*
     feature: OBJECTID '(' error ')' ':' TYPEID '{' expr '}'
     {
         yyclearin;
@@ -330,6 +331,7 @@
     {
         yyclearin;
     };
+    */
 
     feature_list: error ';'
     {
