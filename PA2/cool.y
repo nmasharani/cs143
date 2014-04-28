@@ -221,7 +221,7 @@
     /********************  CLASS ERROR CASES  **************************/
     /*******************************************************************/
 
-	class : CLASS error '{' feature_list '}' {};
+	class : CLASS error '{' feature_list '}' ';' {};
 
     /*******************************************************************/
    /************************   FEATURE LIST   *************************/
@@ -242,10 +242,9 @@
     /*******************************************************************/
     /************************   FEATURE    *****************************/
     /*******************************************************************/
-    /* Currently, does not modify idtables, etc. TODO: maybe should?   */
 
     /* method: no formal list */
-    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -253,7 +252,7 @@
     };
     
     /* method: formal list */
-    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -271,7 +270,7 @@
     };
 
     /* attribute: assignment */
-    feature: OBJECTID ':' TYPEID ASSIGN expr  
+    feature: OBJECTID ':' TYPEID ASSIGN expr
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -692,9 +691,9 @@
     };
 
     /*******************************************************************/
-    /************************   EXPR 24   ******************************/
+    /************************   EXPR 24/25   ***************************/
     /*******************************************************************/
-    /* 24: expression boolean constant */
+    /* 24/25: expression boolean constant */
 
     expr : BOOL_CONST
     { 
