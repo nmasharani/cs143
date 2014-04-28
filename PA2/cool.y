@@ -200,16 +200,8 @@
     /******************  CLASS_LIST ERROR CASES  ***********************/
     /*******************************************************************/
 
-    class_list: error ';'
-    {
-        yyclearin;
-    };
+	class : CLASS error '{' feature_list '}' {};
 
-    class_list: class_list error ';' 
-    {
-        yyclearin;
-    };
-    
     /*******************************************************************/
     /************************   CLASS   ********************************/
     /*******************************************************************/
@@ -229,23 +221,6 @@
         @$ = @1;
         SET_NODELOC(@1);
         $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
-    };
-
-    /* If no parent is specified, the class inherits from the Object class. */
-    /* With empty feature list. */
-    class : CLASS TYPEID '{' '}'  
-    { 
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = class_($2,idtable.add_string("Object"),nil_Features(),stringtable.add_string(curr_filename)); 
-    };
-
-    /* Standard class definition with an inherits and empty feature list */
-    class : CLASS TYPEID INHERITS TYPEID '{' '}'
-    { 
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = class_($2,$4,nil_Features(),stringtable.add_string(curr_filename)); 
     };
 
     /*******************************************************************/
@@ -278,11 +253,9 @@
     /************************   FEATURE LIST   *************************/
     /*******************************************************************/
     
-    feature_list: feature ';'
-    {   
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = single_Features($1); 
+    feature_list: /* empty */ 
+    {  
+        $$ = nil_Features(); 
     };
 
     feature_list: feature_list feature ';'
@@ -335,7 +308,7 @@
     /*********************   FEATURE ERRORS    *************************/
     /*******************************************************************/
 
-    /*
+	/*
     feature: OBJECTID '(' error ')' ':' TYPEID '{' expr '}'
     {
         yyclearin;
@@ -347,24 +320,8 @@
     };
     */
 
-    feature_list: error ';'
+    feature_list: feature_list error ';' 
     {
-        yyclearin;
-    };
-
-    feature_list: feature error ';' 
-    {
-        yyclearin;
-    };
-
-    feature_list: feature_list error ';'
-    {
-        yyclearin;
-    };
-
-    feature_list : feature expr ';'
-    {
-        yyclearin;
     };
 
     /*******************************************************************/
@@ -517,7 +474,6 @@
 
     expr :  '{' error '}'
     {
-        yyclearin;
     };
 
     /*******************************************************************/
@@ -565,16 +521,26 @@
     /*******************   LET STATEMENT ERRORS    *********************/
     /*******************************************************************/
 
+/*
     let_list: OBJECTID ':' TYPEID ASSIGN error ',' let_list
     {
-        yyclearin;
     };
 
     let_list: OBJECTID ':' TYPEID ASSIGN error IN expr %prec LET_PREC
     {
-        yyclearin;
     };
+	*/
 
+	let_list: error ',' let_list
+	{
+	};
+/*
+
+	let_list: error
+	{
+		yyclearin;
+	};
+	*/
 
     /*******************************************************************/
     /************************   EXPR 8    ******************************/
@@ -822,6 +788,7 @@
     /******************   EXPR List SEMICOLON ERROR   ******************/
     /*******************************************************************/
 
+/*
     expr_list_semicolon : error ';'
     {
         yyclearin;
@@ -832,6 +799,7 @@
         yyclearin;
     };
 
+*/
     /*******************************************************************/
     /**********************   EXPR List Comma   ************************/
     /*******************************************************************/
@@ -854,10 +822,12 @@
     /********************   EXPR List Comma ERROR   ********************/
     /*******************************************************************/
 
+/*
     expr_list_comma : expr_list_comma ',' error
     {
         yyclearin;
     };
+    */
 
 
     /*******************************************************************/

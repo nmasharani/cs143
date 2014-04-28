@@ -3,8 +3,8 @@ class Test3 {
 	y : Int <- 0;
 
 	get_x() : Int {
-		x;
-	}
+		x
+	};
 
 	set_x(a : Int) : Bool {
 		{

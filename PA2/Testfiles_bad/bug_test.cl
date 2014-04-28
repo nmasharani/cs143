@@ -34,7 +34,7 @@ class Test3 {
 	};
 
 	expr10() : Bool {
-		isvoid 
+		isvoid x
 	};
 
 	expr11() : Int {

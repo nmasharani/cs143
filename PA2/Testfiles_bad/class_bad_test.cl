@@ -11,7 +11,6 @@ class Test3 {
 class A {
 	val : Value <- {
 		1
-		2
 	};
 };
 
