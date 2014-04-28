@@ -574,7 +574,7 @@ static const yytype_uint8 yytranslate[] =
    YYRHS.  */
 static const yytype_uint16 yyprhs[] =
 {
-       0,     0,     3,     5,     8,    12,    18,    24,    32,    33,
+       0,     0,     3,     5,     8,    12,    18,    26,    32,    33,
       37,    46,    56,    60,    66,    70,    72,    76,    80,    84,
       93,   101,   108,   114,   119,   123,   131,   137,   141,   145,
      148,   154,   162,   168,   176,   180,   186,   193,   195,   198,
@@ -586,8 +586,8 @@ static const yytype_uint16 yyprhs[] =
 static const yytype_int8 yyrhs[] =
 {
       47,     0,    -1,    48,    -1,    49,    39,    -1,    48,    49,
-      39,    -1,     3,     1,    40,    50,    41,    -1,     3,    23,
-      40,    50,    41,    -1,     3,    23,     8,    23,    40,    50,
+      39,    -1,     3,    23,    40,    50,    41,    -1,     3,    23,
+       8,    23,    40,    50,    41,    -1,     3,     1,    40,    50,
       41,    -1,    -1,    50,    51,    39,    -1,    24,    42,    43,
       44,    23,    40,    54,    41,    -1,    24,    42,    52,    43,
       44,    23,    40,    54,    41,    -1,    24,    44,    23,    -1,
@@ -617,12 +617,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   175,   175,   182,   191,   203,   211,   219,   257,   261,
-     274,   282,   290,   300,   323,   332,   339,   350,   362,   375,
-     383,   392,   402,   417,   427,   440,   452,   464,   475,   484,
-     491,   499,   506,   513,   534,   550,   557,   564,   571,   583,
-     595,   607,   619,   631,   643,   655,   666,   678,   690,   702,
-     714,   726,   738,   750,   762,   773,   780,   807,   814
+       0,   175,   175,   182,   191,   205,   213,   224,   231,   235,
+     248,   256,   264,   274,   285,   292,   299,   310,   322,   335,
+     343,   352,   362,   377,   387,   400,   412,   424,   435,   442,
+     449,   457,   464,   471,   482,   489,   496,   503,   510,   522,
+     534,   546,   558,   570,   582,   594,   605,   617,   629,   641,
+     653,   665,   677,   689,   701,   712,   719,   730,   737
 };
 #endif
 
@@ -670,7 +670,7 @@ static const yytype_uint8 yyr1[] =
 /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     1,     2,     3,     5,     5,     7,     0,     3,
+       0,     2,     1,     2,     3,     5,     7,     5,     0,     3,
        8,     9,     3,     5,     3,     1,     3,     3,     3,     8,
        7,     6,     5,     4,     3,     7,     5,     3,     3,     2,
        5,     7,     5,     7,     3,     5,     6,     1,     2,     2,
@@ -684,9 +684,9 @@ static const yytype_uint8 yyr2[] =
 static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     2,     0,     0,     0,     1,     0,     3,
-       8,     0,     8,     4,     0,     0,     0,     0,     0,     5,
-       0,     8,     6,    14,     0,     0,     9,     0,     0,     0,
-       0,    15,    12,     7,     0,     0,     0,     0,     0,    17,
+       8,     0,     8,     4,     0,     0,     0,     0,     0,     7,
+       0,     8,     5,    14,     0,     0,     9,     0,     0,     0,
+       0,    15,    12,     6,     0,     0,     0,     0,     0,    17,
        0,     0,    16,     0,     0,     0,     0,     0,     0,    53,
       52,    54,    51,     0,     0,     0,     0,    13,     0,     0,
        0,     0,     0,    29,     0,     0,    39,    40,     0,     0,
@@ -1778,14 +1778,7 @@ yyreduce:
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 203 "cool.y"
-    {}
-    break;
-
-  case 6:
-
-/* Line 1806 of yacc.c  */
-#line 212 "cool.y"
+#line 206 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (5)]);
         SET_NODELOC((yylsp[(1) - (5)]));
@@ -1793,10 +1786,10 @@ yyreduce:
     }
     break;
 
-  case 7:
+  case 6:
 
 /* Line 1806 of yacc.c  */
-#line 220 "cool.y"
+#line 214 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (7)]);
         SET_NODELOC((yylsp[(1) - (7)]));
@@ -1804,10 +1797,17 @@ yyreduce:
     }
     break;
 
+  case 7:
+
+/* Line 1806 of yacc.c  */
+#line 224 "cool.y"
+    {}
+    break;
+
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 257 "cool.y"
+#line 231 "cool.y"
     {  
         (yyval.features) = nil_Features(); 
     }
@@ -1816,7 +1816,7 @@ yyreduce:
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 262 "cool.y"
+#line 236 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(2) - (3)]));
@@ -1827,7 +1827,7 @@ yyreduce:
   case 10:
 
 /* Line 1806 of yacc.c  */
-#line 275 "cool.y"
+#line 249 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (8)]);
         SET_NODELOC((yylsp[(1) - (8)]));
@@ -1838,7 +1838,7 @@ yyreduce:
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 283 "cool.y"
+#line 257 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (9)]);
         SET_NODELOC((yylsp[(1) - (9)]));
@@ -1849,7 +1849,7 @@ yyreduce:
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 291 "cool.y"
+#line 265 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC(0);
@@ -1862,7 +1862,7 @@ yyreduce:
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 301 "cool.y"
+#line 275 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (5)]);
         SET_NODELOC((yylsp[(1) - (5)]));
@@ -1873,15 +1873,14 @@ yyreduce:
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 324 "cool.y"
-    {
-    }
+#line 285 "cool.y"
+    { }
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 333 "cool.y"
+#line 293 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -1892,7 +1891,7 @@ yyreduce:
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 340 "cool.y"
+#line 300 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -1903,7 +1902,7 @@ yyreduce:
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 351 "cool.y"
+#line 311 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -1914,7 +1913,7 @@ yyreduce:
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 363 "cool.y"
+#line 323 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -1925,7 +1924,7 @@ yyreduce:
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 376 "cool.y"
+#line 336 "cool.y"
     { 
         (yyloc) = (yylsp[(5) - (8)]);
         SET_NODELOC((yylsp[(5) - (8)]));
@@ -1936,7 +1935,7 @@ yyreduce:
   case 20:
 
 /* Line 1806 of yacc.c  */
-#line 384 "cool.y"
+#line 344 "cool.y"
     { 
         (yyloc) = (yylsp[(5) - (7)]);
         SET_NODELOC((yylsp[(5) - (7)]));
@@ -1947,7 +1946,7 @@ yyreduce:
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 393 "cool.y"
+#line 353 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (6)]);
         SET_NODELOC((yylsp[(3) - (6)]));
@@ -1959,7 +1958,7 @@ yyreduce:
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 403 "cool.y"
+#line 363 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (5)]);
         SET_NODELOC((yylsp[(3) - (5)]));
@@ -1971,7 +1970,7 @@ yyreduce:
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 418 "cool.y"
+#line 378 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (4)]);
         SET_NODELOC((yylsp[(1) - (4)]));
@@ -1983,7 +1982,7 @@ yyreduce:
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 428 "cool.y"
+#line 388 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -1995,7 +1994,7 @@ yyreduce:
   case 25:
 
 /* Line 1806 of yacc.c  */
-#line 441 "cool.y"
+#line 401 "cool.y"
     { 
         (yyloc) = (yylsp[(7) - (7)]);
         SET_NODELOC((yylsp[(7) - (7)]));
@@ -2006,7 +2005,7 @@ yyreduce:
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 453 "cool.y"
+#line 413 "cool.y"
     { 
         (yyloc) = (yylsp[(5) - (5)]);
         SET_NODELOC((yylsp[(5) - (5)]));
@@ -2017,7 +2016,7 @@ yyreduce:
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 465 "cool.y"
+#line 425 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (3)]);
         SET_NODELOC((yylsp[(2) - (3)]));
@@ -2028,15 +2027,14 @@ yyreduce:
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 476 "cool.y"
-    {
-    }
+#line 435 "cool.y"
+    { }
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 485 "cool.y"
+#line 443 "cool.y"
     {
         (yyloc) = (yylsp[(2) - (2)]);
         SET_NODELOC((yylsp[(2) - (2)]));
@@ -2047,7 +2045,7 @@ yyreduce:
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 492 "cool.y"
+#line 450 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (5)]);
         SET_NODELOC((yylsp[(1) - (5)]));
@@ -2058,7 +2056,7 @@ yyreduce:
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 500 "cool.y"
+#line 458 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (7)]);
         SET_NODELOC((yylsp[(1) - (7)]));
@@ -2069,7 +2067,7 @@ yyreduce:
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 507 "cool.y"
+#line 465 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (5)]);
         SET_NODELOC((yylsp[(1) - (5)]));
@@ -2080,7 +2078,7 @@ yyreduce:
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 514 "cool.y"
+#line 472 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (7)]);
         SET_NODELOC((yylsp[(1) - (7)]));
@@ -2091,15 +2089,14 @@ yyreduce:
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 535 "cool.y"
-    {
-	}
+#line 482 "cool.y"
+    { }
     break;
 
   case 35:
 
 /* Line 1806 of yacc.c  */
-#line 551 "cool.y"
+#line 490 "cool.y"
     { 
         (yyloc) = (yylsp[(5) - (5)]);
         SET_NODELOC((yylsp[(5) - (5)]));
@@ -2110,7 +2107,7 @@ yyreduce:
   case 36:
 
 /* Line 1806 of yacc.c  */
-#line 558 "cool.y"
+#line 497 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (6)]);
         SET_NODELOC((yylsp[(1) - (6)]));
@@ -2121,7 +2118,7 @@ yyreduce:
   case 37:
 
 /* Line 1806 of yacc.c  */
-#line 565 "cool.y"
+#line 504 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2132,7 +2129,7 @@ yyreduce:
   case 38:
 
 /* Line 1806 of yacc.c  */
-#line 572 "cool.y"
+#line 511 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (2)]);
         SET_NODELOC((yylsp[(1) - (2)]));
@@ -2143,7 +2140,7 @@ yyreduce:
   case 39:
 
 /* Line 1806 of yacc.c  */
-#line 584 "cool.y"
+#line 523 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (2)]);
         SET_NODELOC((yylsp[(2) - (2)]));
@@ -2154,7 +2151,7 @@ yyreduce:
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 596 "cool.y"
+#line 535 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (2)]);
         SET_NODELOC((yylsp[(2) - (2)]));
@@ -2165,7 +2162,7 @@ yyreduce:
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 608 "cool.y"
+#line 547 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2176,7 +2173,7 @@ yyreduce:
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 620 "cool.y"
+#line 559 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2187,7 +2184,7 @@ yyreduce:
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 632 "cool.y"
+#line 571 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2198,7 +2195,7 @@ yyreduce:
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 644 "cool.y"
+#line 583 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2209,7 +2206,7 @@ yyreduce:
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 656 "cool.y"
+#line 595 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (2)]);
         SET_NODELOC((yylsp[(2) - (2)]));
@@ -2220,7 +2217,7 @@ yyreduce:
   case 46:
 
 /* Line 1806 of yacc.c  */
-#line 667 "cool.y"
+#line 606 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2231,7 +2228,7 @@ yyreduce:
   case 47:
 
 /* Line 1806 of yacc.c  */
-#line 679 "cool.y"
+#line 618 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2242,7 +2239,7 @@ yyreduce:
   case 48:
 
 /* Line 1806 of yacc.c  */
-#line 691 "cool.y"
+#line 630 "cool.y"
     { 
         (yyloc) = (yylsp[(3) - (3)]);
         SET_NODELOC((yylsp[(3) - (3)]));
@@ -2253,7 +2250,7 @@ yyreduce:
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 703 "cool.y"
+#line 642 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (2)]);
         SET_NODELOC((yylsp[(2) - (2)]));
@@ -2264,7 +2261,7 @@ yyreduce:
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 715 "cool.y"
+#line 654 "cool.y"
     { 
         (yyloc) = (yylsp[(2) - (3)]);
         SET_NODELOC((yylsp[(2) - (3)]));
@@ -2275,7 +2272,7 @@ yyreduce:
   case 51:
 
 /* Line 1806 of yacc.c  */
-#line 727 "cool.y"
+#line 666 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2286,7 +2283,7 @@ yyreduce:
   case 52:
 
 /* Line 1806 of yacc.c  */
-#line 739 "cool.y"
+#line 678 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2297,7 +2294,7 @@ yyreduce:
   case 53:
 
 /* Line 1806 of yacc.c  */
-#line 751 "cool.y"
+#line 690 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2308,7 +2305,7 @@ yyreduce:
   case 54:
 
 /* Line 1806 of yacc.c  */
-#line 763 "cool.y"
+#line 702 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2319,7 +2316,7 @@ yyreduce:
   case 55:
 
 /* Line 1806 of yacc.c  */
-#line 774 "cool.y"
+#line 713 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (2)]);
         SET_NODELOC((yylsp[(1) - (2)]));
@@ -2330,7 +2327,7 @@ yyreduce:
   case 56:
 
 /* Line 1806 of yacc.c  */
-#line 781 "cool.y"
+#line 720 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -2341,7 +2338,7 @@ yyreduce:
   case 57:
 
 /* Line 1806 of yacc.c  */
-#line 808 "cool.y"
+#line 731 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (1)]);
         SET_NODELOC((yylsp[(1) - (1)]));
@@ -2352,7 +2349,7 @@ yyreduce:
   case 58:
 
 /* Line 1806 of yacc.c  */
-#line 815 "cool.y"
+#line 738 "cool.y"
     { 
         (yyloc) = (yylsp[(1) - (3)]);
         SET_NODELOC((yylsp[(1) - (3)]));
@@ -2363,7 +2360,7 @@ yyreduce:
 
 
 /* Line 1806 of yacc.c  */
-#line 2367 "cool.tab.c"
+#line 2364 "cool.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2601,7 +2598,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 838 "cool.y"
+#line 749 "cool.y"
 
     
     
