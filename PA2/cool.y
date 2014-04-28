@@ -179,7 +179,7 @@
     };
     
     /* single class */
-    class_list : class ';'	
+    class_list : class 	
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -188,7 +188,7 @@
     };
 
     /* several classes */
-    class_list : class_list class ';'
+    class_list : class_list class 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -197,26 +197,12 @@
     };
 
     /*******************************************************************/
-    /******************  CLASS_LIST ERROR CASES  ***********************/
-    /*******************************************************************/
-
-    class_list: error ';'
-    {
-        yyclearin;
-    };
-
-    class_list: class_list error ';' 
-    {
-        yyclearin;
-    };
-    
-    /*******************************************************************/
     /************************   CLASS   ********************************/
     /*******************************************************************/
 
     /* If no parent is specified, the class inherits from the Object class. */
     /* Note, we add the object to the stringtable here */
-    class : CLASS TYPEID '{' feature_list '}'  
+    class : CLASS TYPEID '{' feature_list '}' ';'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -224,81 +210,41 @@
     };
 
     /* Standard class definition with an inherits */
-    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}'
+    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { 
         @$ = @1;
         SET_NODELOC(@1);
         $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
     };
 
-    /* If no parent is specified, the class inherits from the Object class. */
-    /* With empty feature list. */
-    class : CLASS TYPEID '{' '}'  
-    { 
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = class_($2,idtable.add_string("Object"),nil_Features(),stringtable.add_string(curr_filename)); 
-    };
-
-    /* Standard class definition with an inherits and empty feature list */
-    class : CLASS TYPEID INHERITS TYPEID '{' '}'
-    { 
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = class_($2,$4,nil_Features(),stringtable.add_string(curr_filename)); 
-    };
-
     /*******************************************************************/
     /********************  CLASS ERROR CASES  **************************/
     /*******************************************************************/
 
-	/*
-    class : CLASS TYPEID '{' error '}' ';' 
-    {
-        yyclearin;
-    };
-
-    class : CLASS TYPEID INHERITS TYPEID '{' error '}' ';'
-    {
-        yyclearin;
-    };
-
-    class : CLASS error '{' '}' ';'
-    {
-        yyclearin;
-    };
-
-    class : CLASS error '{' error'}' ';'
-    {
-        yyclearin;
-    }; 
-    */
+	class : CLASS error '{' feature_list '}' ';' {};
 
     /*******************************************************************/
-    /************************   FEATURE LIST   *************************/
+   /************************   FEATURE LIST   *************************/
     /*******************************************************************/
     
-    feature_list: feature ';'
-    {   
-        @$ = @1;
-        SET_NODELOC(@1);
-        $$ = single_Features($1); 
+    feature_list: /* empty */ 
+    {  
+        $$ = nil_Features(); 
     };
 
     feature_list: feature_list feature ';'
     { 
         @$ = @1;
-        SET_NODELOC(@2);
+        SET_NODELOC(@1);
         $$ = append_Features($1, single_Features($2)); 
     };
 
     /*******************************************************************/
     /************************   FEATURE    *****************************/
     /*******************************************************************/
-    /* Currently, does not modify idtables, etc. TODO: maybe should?   */
 
     /* method: no formal list */
-    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -306,7 +252,7 @@
     };
     
     /* method: formal list */
-    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -324,7 +270,7 @@
     };
 
     /* attribute: assignment */
-    feature: OBJECTID ':' TYPEID ASSIGN expr  
+    feature: OBJECTID ':' TYPEID ASSIGN expr
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -335,6 +281,7 @@
     /*********************   FEATURE ERRORS    *************************/
     /*******************************************************************/
 
+<<<<<<< HEAD
     /*
     feature: OBJECTID '(' error ')' ':' TYPEID '{' expr '}'
     {
@@ -361,11 +308,13 @@
     {
         yyclearin;
     };
+=======
+    feature_list: feature_list error ';' { };
+>>>>>>> nm3
 
     /*******************************************************************/
     /************************   FORMAL LIST    *************************/
     /*******************************************************************/
-    /* TODO: also rules here */
 
     formal_list: formal
     { 
@@ -501,8 +450,8 @@
 
     expr :  '{' expr_list_semicolon '}'
     { 
-        @$ = @2;
-        SET_NODELOC(@2);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = block($2); 
     };
 
@@ -510,10 +459,7 @@
     /**********************   BLOCK ERROR   ****************************/
     /*******************************************************************/
 
-    expr :  '{' error '}'
-    {
-        yyclearin;
-    };
+    expr :  '{' error '}'{ };
 
     /*******************************************************************/
     /************************   EXPR 7    ******************************/
@@ -534,7 +480,6 @@
         $$ = let($1, $3, no_expr(), $5); 
     };
 
-    
     let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr %prec LET_PREC
     { 
         @$ = @1;
@@ -560,16 +505,7 @@
     /*******************   LET STATEMENT ERRORS    *********************/
     /*******************************************************************/
 
-    let_list: OBJECTID ':' TYPEID ASSIGN error ',' let_list
-    {
-        yyclearin;
-    };
-
-    let_list: OBJECTID ':' TYPEID ASSIGN error IN expr %prec LET_PREC
-    {
-        yyclearin;
-    };
-
+	let_list: error ',' let_list { };
 
     /*******************************************************************/
     /************************   EXPR 8    ******************************/
@@ -578,8 +514,8 @@
 
     expr : CASE expr OF case_list ESAC
     { 
-        @$ = @5;
-        SET_NODELOC(@5);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = typcase($2, $4); 
     };
 
@@ -599,8 +535,8 @@
 
     case_list: case_list case
     { 
-        @$ = @1;
-        SET_NODELOC(@1);
+        @$ = @2;
+        SET_NODELOC(@2);
         $$ = append_Cases($1, single_Cases($2)); 
     };
 
@@ -784,9 +720,9 @@
     };
 
     /*******************************************************************/
-    /************************   EXPR 24   ******************************/
+    /************************   EXPR 24/25   ***************************/
     /*******************************************************************/
-    /* 24: expression boolean constant */
+    /* 24/25: expression boolean constant */
 
     expr : BOOL_CONST
     { 
@@ -814,20 +750,6 @@
     };
 
     /*******************************************************************/
-    /******************   EXPR List SEMICOLON ERROR   ******************/
-    /*******************************************************************/
-
-    expr_list_semicolon : error ';'
-    {
-        yyclearin;
-    };
-
-    expr_list_semicolon : expr_list_semicolon error ';'
-    {
-        yyclearin;
-    };
-
-    /*******************************************************************/
     /**********************   EXPR List Comma   ************************/
     /*******************************************************************/
 
@@ -844,16 +766,6 @@
         SET_NODELOC(@1);
         $$ = append_Expressions($1, single_Expressions($3)); 
     };
-
-    /*******************************************************************/
-    /********************   EXPR List Comma ERROR   ********************/
-    /*******************************************************************/
-
-    expr_list_comma : expr_list_comma ',' error
-    {
-        yyclearin;
-    };
-
 
     /*******************************************************************/
     /**********************    END OF GRAMMAR   ************************/

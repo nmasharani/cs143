@@ -10,8 +10,7 @@ class Test3 {
 (* Taken from piazza post https://piazza.com/class/hs6dfpbn1ot3wf?cid=161 *)
 class A {
 	val : Value <- {
-		1
-		2
+		1;
 	};
 };
 
