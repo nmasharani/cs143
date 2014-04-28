@@ -329,6 +329,18 @@
         yyclearin;
     };
 
+    feature: OBJECTID '(' ')' ':' TYPEID '{' error '}'
+    { 
+        yyclearin;
+    };
+
+    /*
+    feature: error
+    {
+        yyclearin;
+    };
+    */
+    
     feature_list: error ';'
     {
         yyclearin;
@@ -338,6 +350,17 @@
     {
         yyclearin;
     };
+
+    feature_list: feature_list error ';' feature_list
+    {
+        yyclearin;
+    };
+
+    feature_list: error ';' feature_list
+    {
+        yyclearin;
+    };
+    
 
     /*******************************************************************/
     /************************   FORMAL LIST    *************************/

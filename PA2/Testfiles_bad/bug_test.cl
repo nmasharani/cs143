@@ -46,24 +46,12 @@ class Test3 {
 		( - )3
 	};
 
-	expr13() : Int {
-		4 * 3
-	};
-
 	expr14) : Int {
 		12 / 3
 	};
 
 	expr15() : Int {
 		~ 1
-	};
-
-	expr16() : Bool {
-		3 < 4
-	};
-
-	expr17()  Bool {
-		3 <= 4
 	};
 
 	expr18() : Bool {
@@ -74,28 +62,4 @@ class Test3 {
 	expr19() : ool {
 		true
 	};
-
-	expr20() : Bool {
-		(y = 1)
-	};
-
-	expr21() : Int {
-		y
-	}
-
-	Bool() : Int {
-		1
-	};
-
-	expr23() : String {
-		"hello, world!"
-	};
-
-	expr24() : Bool {
-		true
-	};
-
-	expr25() : Bool {
-		false
-	}
 };
