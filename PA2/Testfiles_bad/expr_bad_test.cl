@@ -26,7 +26,7 @@ class Test3 {
 		}
 	};
 
-	expr9 : Bool { 
+	expr9() : Bool { 
 		{
 			new Int;
 			true;

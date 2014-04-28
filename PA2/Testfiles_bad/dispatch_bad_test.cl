@@ -21,8 +21,8 @@ class Test2 inherits Test1 {
 	};
 
 	test_method(a : Int, b : Int, c : Int) : Int {
-		1;
-	}
+		1
+	};
 
 };
 

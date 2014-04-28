@@ -195,6 +195,20 @@
         $$ = append_Classes($1,single_Classes($2)); 
         parse_results = $$; 
     };
+
+    /*******************************************************************/
+    /******************  CLASS_LIST ERROR CASES  ***********************/
+    /*******************************************************************/
+
+    class_list: error ';'
+    {
+        yyclearin;
+    };
+
+    class_list: class_list error ';' 
+    {
+        yyclearin;
+    };
     
     /*******************************************************************/
     /************************   CLASS   ********************************/
@@ -321,7 +335,7 @@
     /*********************   FEATURE ERRORS    *************************/
     /*******************************************************************/
 
-	/*
+    /*
     feature: OBJECTID '(' error ')' ':' TYPEID '{' expr '}'
     {
         yyclearin;
@@ -338,7 +352,17 @@
         yyclearin;
     };
 
+    feature_list: feature error ';' 
+    {
+        yyclearin;
+    };
+
     feature_list: feature_list error ';'
+    {
+        yyclearin;
+    };
+
+    feature_list : feature expr ';'
     {
         yyclearin;
     };
