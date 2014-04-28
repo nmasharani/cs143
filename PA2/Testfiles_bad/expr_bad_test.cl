@@ -21,12 +21,12 @@ class Test3 {
 	expr5() : Bool {
 		{
 			x <- Bool;
-			while x < 5 loop x = x + 1 pool;
+			while x < 5 lop x = x + 1 pool;
 			true;
 		}
 	};
 
-	expr9() : Bool { 
+	expr9 : Bool { 
 		{
 			new Int;
 			true;
@@ -42,6 +42,7 @@ class Test3 {
 	};
 
 	expr12() : Int {
+	(* should be error here *)
 		( - )3
 	};
 
@@ -69,6 +70,7 @@ class Test3 {
 		3 => 4
 	};
 
+	(* should be error here *)
 	expr19() : ool {
 		not true
 	};
@@ -81,7 +83,7 @@ class Test3 {
 		y
 	}
 
-	expr22() : Int {
+	Bool() : Int {
 		1
 	};
 
@@ -95,5 +97,5 @@ class Test3 {
 
 	expr25() : Bool {
 		false
-	};
+	}
 };
