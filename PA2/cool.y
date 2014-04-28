@@ -179,7 +179,7 @@
     };
     
     /* single class */
-    class_list : class ';'	
+    class_list : class 	
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -188,7 +188,7 @@
     };
 
     /* several classes */
-    class_list : class_list class ';'
+    class_list : class_list class 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -202,7 +202,7 @@
 
     /* If no parent is specified, the class inherits from the Object class. */
     /* Note, we add the object to the stringtable here */
-    class : CLASS TYPEID '{' feature_list '}'  
+    class : CLASS TYPEID '{' feature_list '}' ';'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -210,7 +210,7 @@
     };
 
     /* Standard class definition with an inherits */
-    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}'
+    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -224,7 +224,7 @@
 	class : CLASS error '{' feature_list '}' {};
 
     /*******************************************************************/
-    /************************   FEATURE LIST   *************************/
+   /************************   FEATURE LIST   *************************/
     /*******************************************************************/
     
     feature_list: /* empty */ 
@@ -287,7 +287,6 @@
     /*******************************************************************/
     /************************   FORMAL LIST    *************************/
     /*******************************************************************/
-    /* TODO: also rules here */
 
     formal_list: formal
     { 
@@ -453,7 +452,6 @@
         $$ = let($1, $3, no_expr(), $5); 
     };
 
-    
     let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr %prec LET_PREC
     { 
         @$ = @1;
