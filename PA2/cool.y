@@ -351,7 +351,6 @@
     { 
         @$ = @3;
         SET_NODELOC(@3);
-        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, $5); 
     };
 
@@ -361,7 +360,6 @@
     { 
         @$ = @3;
         SET_NODELOC(@3);
-        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, nil_Expressions()); 
     };
 
