@@ -237,12 +237,14 @@
     /*******************************************************************/
     /********************  CLASS ERROR CASES  **************************/
     /*******************************************************************/
-    /*
+
+	/*
     class : CLASS TYPEID '{' error '}' ';' 
     {
         yyclearin;
     };
     */
+
     class : CLASS TYPEID INHERITS TYPEID '{' error '}' ';'
     {
         yyclearin;
@@ -252,12 +254,11 @@
     {
         yyclearin;
     };
-    
-    class : CLASS error '{' error '}' ';'
+
+    class : CLASS error '{' error'}' ';'
     {
         yyclearin;
     };
-    
 
     /*******************************************************************/
     /************************   FEATURE LIST   *************************/
@@ -330,30 +331,25 @@
         yyclearin;
     };
 
-    feature: OBJECTID '(' ')' ':' TYPEID '{' error '}'
-    { 
-        yyclearin;
-    };
-
     feature_list: error ';'
-    {   
+    {
         yyclearin;
     };
 
     feature_list: feature_list error ';'
-    { 
+    {
         yyclearin;
     };
 
-    feature_list: error ';' feature_list
-    { 
-        yyclearin;
-    };
+	feature_list: error ';' feature_list
+	{
+		yyclearin;
+	};
 
-    feature_list: feature_list error ';' feature_list
-    { 
-        yyclearin;
-    };
+	feature_list: feature_list error ';' feature_list
+	{
+		yyclearin;
+	};
 
     /*******************************************************************/
     /************************   FORMAL LIST    *************************/
