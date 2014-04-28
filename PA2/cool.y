@@ -179,7 +179,7 @@
     };
     
     /* single class */
-    class_list : class		
+    class_list : class ';'	
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -188,7 +188,7 @@
     };
 
     /* several classes */
-    class_list : class_list class	
+    class_list : class_list class ';'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -202,7 +202,7 @@
 
     /* If no parent is specified, the class inherits from the Object class. */
     /* Note, we add the object to the stringtable here */
-    class : CLASS TYPEID '{' feature_list '}' ';'  
+    class : CLASS TYPEID '{' feature_list '}'  
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -210,7 +210,7 @@
     };
 
     /* Standard class definition with an inherits */
-    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}' ';'
+    class : CLASS TYPEID INHERITS TYPEID '{' feature_list '}'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -219,7 +219,7 @@
 
     /* If no parent is specified, the class inherits from the Object class. */
     /* With empty feature list. */
-    class : CLASS TYPEID '{' '}' ';'  
+    class : CLASS TYPEID '{' '}'  
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -227,7 +227,7 @@
     };
 
     /* Standard class definition with an inherits and empty feature list */
-    class : CLASS TYPEID INHERITS TYPEID '{' '}' ';'
+    class : CLASS TYPEID INHERITS TYPEID '{' '}'
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -243,7 +243,6 @@
     {
         yyclearin;
     };
-    */
 
     class : CLASS TYPEID INHERITS TYPEID '{' error '}' ';'
     {
@@ -258,7 +257,8 @@
     class : CLASS error '{' error'}' ';'
     {
         yyclearin;
-    };
+    }; 
+    */
 
     /*******************************************************************/
     /************************   FEATURE LIST   *************************/
