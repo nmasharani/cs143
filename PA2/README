@@ -221,7 +221,11 @@ With respect to error checking, our parser recovers from the errors
 specified in the assignment specification. We have written test files
 for each of these specifications, and have verified our output accordingly
 both by visual inspection of the output, and by automated inspection (diff
-with the reference solution). 
+with the reference solution). Note, on some files containing errors, our 
+parser and reference solution report errors differently. We visually compared
+our ouput to the reference and are confident that our output follows
+the assignment specification, and that the reference does not. We also
+walked through our error handling cases in OH, and confirmed this. 
 
 This assignment invovled proper translation of figure 1 and precedence
 declerations in the the COOL MANUAL into bison syntax, proper invoking
