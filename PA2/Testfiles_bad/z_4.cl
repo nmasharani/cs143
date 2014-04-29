@@ -1,14 +1,17 @@
 (*Test of blocks taken from piazza.*)
 class A {
 	block_test() : Int {
-		{
-		  let x : Y in (* No body *);
-		  let x Y in 1;
+		x: Int <- {
+		  omaha <- nebraska;
+		}
+		y : Int <- {
+			x - f +;
+			z if then 343 fi;
 		}
 	};
 };
 
-class A {
+(*class A {
 	block_test() : Int {
 		{
 		  let x Y in 1;
@@ -24,5 +27,4 @@ class A {
 		  2 + ;
 		}
 	};
-};
-
+};*)

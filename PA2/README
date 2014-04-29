@@ -233,6 +233,9 @@ of provided AST constructors, and error checking. Assuming that the COOL
 MANUAL and the AST constructors are written correctly (which we are
 told to assume on piazza), then our code is correct. 
 
+Note, we account for every edge case discussed on piazza as of 
+April 29, 2014 10:06:40
+
 TESTING
 
 As mentioned in the above correctness section, we have defined test
@@ -246,7 +249,7 @@ Having moved past the lexer stage of the assignment, our test cases
 in this parser phase contain actual COOL code, both comments and 
 programming syntax, used correctly and incorrectly. 
 
-our test files reside in two directories. Testfiles_good contains the 
+Our test files reside in two directories. Testfiles_good contains the 
 test files that contain proper usage of the COOL programming language. 
 These files should result in a valid AST. Testfiles_bad contains the 
 test files that contain improper usage of the COOL programming language. 
@@ -314,3 +317,4 @@ This class allows us to test the valid syntaxes for classes. We wanted to ensure
 that we matched empty classes as well as classes with features, and that we 
 matched both inherited classes and classes that inherit from Object correctly. 
 This file also allowed us to test the correctness of block expressions.
+
