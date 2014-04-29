@@ -395,8 +395,8 @@
 
     expr : IF expr THEN expr ELSE expr FI
     { 
-        @$ = @7;
-        SET_NODELOC(@7);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = cond($2, $4, $6); 
     };
 
@@ -407,8 +407,8 @@
 
     expr : WHILE expr LOOP expr POOL
     { 
-        @$ = @5;
-        SET_NODELOC(@5);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = loop($2, $4); 
     };
 
@@ -437,16 +437,18 @@
 
     expr : LET let_list 
     {
-        @$ = @2;
-        SET_NODELOC(@2);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = $2;
     };
 
     let_list : OBJECTID ':' TYPEID IN expr %prec LET_PREC
     { 
         @$ = @1;
+        SET_NODELOC(0);
+        Expression x = no_expr();
         SET_NODELOC(@1);
-        $$ = let($1, $3, no_expr(), $5); 
+        $$ = let($1, $3, x, $5); 
     };
 
     let_list: OBJECTID ':' TYPEID ASSIGN expr IN expr %prec LET_PREC
