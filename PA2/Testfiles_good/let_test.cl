@@ -6,4 +6,8 @@ class Test {
 	nested_let_test() : Int {
 		let x : Int <- 1 in let y : Int <- 2 in x + y
 	};
+
+	piazzaLet() : Int {
+		let a : Int <- 1, b : Int <- 3 in a + b
+	};
 };
