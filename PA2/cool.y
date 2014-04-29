@@ -221,7 +221,7 @@
     /********************  CLASS ERROR CASES  **************************/
     /*******************************************************************/
 
-	class : CLASS error '{' feature_list '}' {};
+	class : CLASS error '{' feature_list '}' ';' {};
 
     /*******************************************************************/
    /************************   FEATURE LIST   *************************/
@@ -235,17 +235,16 @@
     feature_list: feature_list feature ';'
     { 
         @$ = @1;
-        SET_NODELOC(@2);
+        SET_NODELOC(@1);
         $$ = append_Features($1, single_Features($2)); 
     };
 
     /*******************************************************************/
     /************************   FEATURE    *****************************/
     /*******************************************************************/
-    /* Currently, does not modify idtables, etc. TODO: maybe should?   */
 
     /* method: no formal list */
-    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -253,7 +252,7 @@
     };
     
     /* method: formal list */
-    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}'
+    feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expr '}' 
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -271,7 +270,7 @@
     };
 
     /* attribute: assignment */
-    feature: OBJECTID ':' TYPEID ASSIGN expr  
+    feature: OBJECTID ':' TYPEID ASSIGN expr
     { 
         @$ = @1;
         SET_NODELOC(@1);
@@ -352,7 +351,6 @@
     { 
         @$ = @3;
         SET_NODELOC(@3);
-        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, $5); 
     };
 
@@ -362,7 +360,6 @@
     { 
         @$ = @3;
         SET_NODELOC(@3);
-        idtable.add_string("SELF_TYPE");
         $$ = dispatch($1, $3, nil_Expressions()); 
     };
 
@@ -422,8 +419,8 @@
 
     expr :  '{' expr_list_semicolon '}'
     { 
-        @$ = @2;
-        SET_NODELOC(@2);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = block($2); 
     };
 
@@ -486,8 +483,8 @@
 
     expr : CASE expr OF case_list ESAC
     { 
-        @$ = @5;
-        SET_NODELOC(@5);
+        @$ = @1;
+        SET_NODELOC(@1);
         $$ = typcase($2, $4); 
     };
 
@@ -507,8 +504,8 @@
 
     case_list: case_list case
     { 
-        @$ = @1;
-        SET_NODELOC(@1);
+        @$ = @2;
+        SET_NODELOC(@2);
         $$ = append_Cases($1, single_Cases($2)); 
     };
 
@@ -692,9 +689,9 @@
     };
 
     /*******************************************************************/
-    /************************   EXPR 24   ******************************/
+    /************************   EXPR 24/25   ***************************/
     /*******************************************************************/
-    /* 24: expression boolean constant */
+    /* 24/25: expression boolean constant */
 
     expr : BOOL_CONST
     { 
