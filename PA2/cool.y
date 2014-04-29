@@ -461,8 +461,10 @@
     let_list : OBJECTID ':' TYPEID ',' let_list
     { 
         @$ = @1;
+        SET_NODELOC(0);
+        Expression x = no_expr();
         SET_NODELOC(@1);
-        $$ = let($1, $3, no_expr(), $5); 
+        $$ = let($1, $3, x, $5); 
     };
 
     let_list: OBJECTID ':' TYPEID ASSIGN expr ',' let_list
