@@ -264,4 +264,53 @@ We now detail five test cases from good and bad directories. Note, the files
 of each test case contain comments explaing test case purpose as well. 
 
 
+Testfiles_bad/expr_bad_test.cl
 
+This is a fairly comprehensive test file that contains errors within 
+expressions. This includes errors within block expressions as well as errors 
+within all other expression productions. This file tested two things: firstly, 
+that all of our productions for expressions were correct and specific--that no 
+other incorrect programs would be matched by our expression productions. 
+Secondly, it tested error recovery within the body of a class from one feature 
+to the next. In this case, we found that our output was slightly different to 
+the reference compiler's output, but, from examining the file, we are confident 
+that our output is correct. (The reference compiler gives an error at line 15, 
+which is a valid line, while our compiler gives an error at line 17, which is 
+an invalid expression.)
+
+Testfiles_bad/let_bad_test.cl
+
+This is a test file to test errors and error recovery within let statements. 
+We test errors in expressions in both nested and non-nested let statements, as 
+well as the omission of the "in" keyword from a let statement. Again, in this 
+case, we found that our output was slightly different to the reference 
+compiler's output. The reference compiler gives an error on line 8, which is 
+valid, while our compiler gives an error on line 9, which is an invalid line.
+
+Testfiles_bad/block_error_test.cl
+
+This file tests errors within block expressions. The file looks specifically at 
+the omission of semicolons after expressions within the block, as well as empty 
+blocks. There are four test cases: one with a semicolon missing after the first 
+line, one with a semicolon missing after the last line, one with a semicolon 
+missing after the middle line, and one without anything in the block. The first 
+three test cases should theoretically have the same error reporting behavior, 
+and that is the behavior that our parser exhibits. Here, the reference compiler 
+and our parser report the same errors, but the reference compiler reports an 
+additional error on line 20 that we feel is not an error. 
+
+Testfiles_good/dispatch_test.cl
+
+This file tests the correct behavior of dispatch. There are many different 
+cases for dispatch (with or without type, with or without caller, with or 
+without arguments), so it made sense to test all of those syntaxes with our 
+parser. In addition to testing dispatch, this file also indirectly tests the 
+structure of classes and inheritance, as well as the declaration of features. 
+Our parser and the reference compiler have the same parser output for this file.
+
+Testfiles_good/class_test.cl
+
+This class allows us to test the valid syntaxes for classes. We wanted to ensure 
+that we matched empty classes as well as classes with features, and that we 
+matched both inherited classes and classes that inherit from Object correctly. 
+This file also allowed us to test the correctness of block expressions.
