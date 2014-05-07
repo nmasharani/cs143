@@ -45,7 +45,7 @@ public:
    virtual Symbol get_parent() = 0;
    virtual Features get_features() = 0;
    virtual Symbol get_filename() = 0;
-   //virtual typcheck() = 0;
+   virtual typecheck() = 0;
    /* ******** End LP added functions ******** */
    
 
@@ -62,6 +62,19 @@ class Feature_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+
+   /* ********** LP added functions ********** */
+   virtual Symbol get_method_name() = 0;
+   virtual Formals get_method_features() = 0;
+   virtual Symbol get_method_return_type() = 0;
+   virtual Expression get_method_expression() = 0;
+
+   virtual Symbol get_attribute_name() = 0;
+   virtual Symbol get_attribute_type_decl() = 0;
+   virtual Expression get_attribute_init() = 0;
+
+   virtual typecheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -213,6 +226,14 @@ public:
    Feature copy_Feature();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_method_name()             { return name; }
+   Formals get_method_features()        { return formals; }
+   Symbol get_method_return_type()      { return return_type; }
+   Expression get_method_expression()   { return expr; }
+   typecheck() {}
+   /* ******** End LP added functions ******** */
+
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
 #endif
@@ -236,6 +257,13 @@ public:
    }
    Feature copy_Feature(); //override to return a copy of this tree node for attributes
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_attribute_name()      { return name; }
+   Symbol get_attribute_type_decl() { return type_decl; }
+   Expression get_attribute_init()  { return init; }
+   typecheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
