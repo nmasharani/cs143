@@ -42,6 +42,9 @@ public:
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
+   virtual Symbol get_parent() = 0;
+   virtual Features get_features() = 0;
+   virtual Symbol get_filename() = 0;
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
    
@@ -177,7 +180,10 @@ public:
    void dump(ostream& stream, int n);
 
    /* ********** LP added functions ********** */
-   Symbol get_name() { return name; }
+   Symbol   get_name()     { return name; }
+   Symbol   get_parent()   { return parent; }
+   Features get_features() { return features; }
+   Symbol   get_filename() { return filename; }
    /* ******** End LP added functions ******** */
 
 
