@@ -19,3 +19,7 @@ class Main_4 {
 class Main_5 {
 	-- empty
 };
+
+class Main_5 {
+	-- empty
+};

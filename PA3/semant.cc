@@ -91,23 +91,44 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     /* Fill this in */
     Classes classes_of_program = classes;
     classes_of_program = install_basic_classes(classes_of_program);
-    print_class_names(classes_of_program);
+
+    /* Check for possible class inheritcance cycles */
+    //int status = check_inheritance_graph(classes_of_program);
+    
 
 }
 
-/* ***************************************************/
-/*       Class Table Debug Helper methods            */
-/*   *************************************************/
+/**
+* This method checks to ensure that the inheritance graph is well-defined. 
+* This means that there are no duplicate names, no cycles, and that all
+* classes that another class inherits from are defined. 
+*/
+int ClassTable::check_inheritance_graph(Classes classes_of_program) {
+    int status;
+    // step1: Make sure no class has the same name as other class
+    status = ensure_unique_class_names(classes_of_program);
+}
 
-void ClassTable::print_class_names(Classes classes) {
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        dump_Symbol(cout, 0, classes->nth(i)->get_name());
-        cout << "and now dump parent" << "\n";
-        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
-        //note changing 0 to i will cause the value to printed 
-        //at an offset. 0 aligns to the right.
+int ClassTable::ensure_unique_class_names(Classes classes_of_program) {
+    hash_set<Symbol, hash<Symbol>, eqsym> duplicate_finder;
+    int status = 0;
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        if (isduplicate(duplicate_finder, classes_of_program->nth(i)->get_name())) {
+            status = 1;
+            cout << "found duplicate \n";
+        }
     }
+    return status;
 }
+ 
+bool ClassTable::isduplicate(hash_set<Symbol, hash<Symbol>, eqsym>& class_names, Symbol s) {
+    if (class_names.find(s) == class_names.end()) {
+        class_names.insert(s);
+        return false;
+    } 
+    return true;
+}
+
 
 /*
 - LP added these basic classes to the classes list passed in. 
@@ -290,5 +311,33 @@ void program_class::semant()
 
     //typecheck
 }
+
+
+
+
+/* ***************************************************/
+/*       Class Table Debug Helper methods            */
+/*   *************************************************/
+
+void ClassTable::print_class_names(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        dump_Symbol(cout, 0, classes->nth(i)->get_name());
+        cout << "and now dump parent" << "\n";
+        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
+    }
+}
+
+void ClassTable::check_equality(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        for (int j = classes->first(); classes->more(j); j = classes->next(j)) {
+            if (j != i) {
+                if (strcmp(classes->nth(i)->get_name()->get_string(), classes->nth(j)->get_name()->get_string()) == 0) {
+                    //cout << classes->nth(i)get_name()->get_string() + "==" + classes->nth(j);
+                }
+            }
+        }
+    }
+}
+
 
 
