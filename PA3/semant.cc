@@ -317,6 +317,33 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
+void program_class::check_naming_and_scope() {
+    SymbolTable<Symbol, Entry> scopes;
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        Class_ curr_class = classes->nth(i);
+        scopes.enterscope();
+        Features features = curr_class->get_features();
+
+        /* Add all attributes to the current class scope */
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            if (curr_feature->get_formals() == NULL) {
+                scopes.addid(curr_feature->get_name(), curr_feature->get_type());
+            }
+        }
+
+        /* Descend into each method of the class and evaluate it */
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            if (curr_feature->get_formals() != NULL) {
+                scopes.addid(curr_feature->get_name(), curr_feature->get_type());
+            }
+        }
+
+
+        scopes.exitscope();
+    }
+}
 
 
 /*   This is the entry point to the semantic checker.
@@ -346,7 +373,7 @@ void program_class::semant()
 	   exit(1);
     }
 
-    check_scope();
+    check_naming_and_scope();
 
 
     //typecheck

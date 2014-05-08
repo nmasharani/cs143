@@ -63,6 +63,14 @@ public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
 
+   /* ********** LP added functions ********** */
+   virtual Symbol get_name() = 0;
+   virtual Symbol get_type() = 0;
+   virtual Formals get_formals() = 0;
+   virtual Expression get_expression() = 0;
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
 #endif
@@ -151,6 +159,7 @@ public:
 
    /* ********** LP added functions ********** */
    Classes get_classes() { return classes; }
+   void check_naming_and_scope();
    /* ******** End LP added functions ******** */
 
 #ifdef Program_SHARED_EXTRAS
@@ -195,7 +204,6 @@ public:
 #endif
 };
 
-
 // define constructor - method
 class method_class : public Feature_class {
 protected:
@@ -212,6 +220,14 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()             { return name; }
+   Symbol get_type()             { return return_type; }
+   Formals get_formals()         { return formals; }
+   Expression get_expression()   { return expr; }
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
@@ -236,6 +252,14 @@ public:
    }
    Feature copy_Feature(); //override to return a copy of this tree node for attributes
    void dump(ostream& stream, int n);
+
+  /* ********** LP added functions ********** */
+   Symbol get_name()             { return name; }
+   Symbol get_type()             { return type_decl; }
+   Formals get_formals()         { return NULL; }
+   Expression get_expression()   { return init; }
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
    Feature_SHARED_EXTRAS
