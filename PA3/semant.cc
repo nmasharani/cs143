@@ -164,6 +164,12 @@ int ClassTable::check_for_cycles(Classes classes_of_program) {
                 break;
              } else {
                 curr_parent = parents.lookup(curr_parent);
+                if (curr_parent == NULL) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Class " << base_class->get_string() << " inherits from an undefined class " << curr_class->get_parent()->get_string() << ".\n";
+                    status = 1;
+                    break;
+                }
              }
         }
     }
