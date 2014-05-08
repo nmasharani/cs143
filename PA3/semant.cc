@@ -110,13 +110,19 @@ int ClassTable::check_inheritance_graph(Classes classes_of_program) {
     return status;
 }
 
+/* Note, checks for unique class names and for SELF_TYPE */
 int ClassTable::ensure_unique_class_names(Classes classes_of_program) {
     int status = 0;
     SymbolTable<Symbol, int> duplicate_finder;
     duplicate_finder.enterscope();
     for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
         Symbol curr_class_name = classes_of_program->nth(i)->get_name();
-        if (duplicate_finder.lookup(curr_class_name) != NULL) {
+        if (strcmp(curr_class_name->get_string(), "SELF_TYPE") == 0) {
+            ostream& err_stream = semant_error(classes_of_program->nth(i));
+            err_stream << curr_class_name->get_string();
+            err_stream << " cannot be used as a class name.\n";
+            status = 1;
+        } else if (duplicate_finder.lookup(curr_class_name) != NULL) {
             ostream& err_stream = semant_error(classes_of_program->nth(i));
             err_stream << curr_class_name->get_string();
             err_stream << " is already defined, and duplicate names are not allowed.\n";
