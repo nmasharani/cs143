@@ -45,7 +45,7 @@ public:
    virtual Symbol get_parent() = 0;
    virtual Features get_features() = 0;
    virtual Symbol get_filename() = 0;
-   virtual typecheck() = 0;
+   virtual void typecheck() = 0;
    /* ******** End LP added functions ******** */
    
 
@@ -73,7 +73,7 @@ public:
    virtual Symbol get_attribute_type_decl() = 0;
    virtual Expression get_attribute_init() = 0;
 
-   virtual typecheck() = 0;
+   virtual void typecheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_EXTRAS
@@ -89,6 +89,12 @@ class Formal_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
+
+   /* ********** LP added functions ********** */
+   virtual Symbol get_name() = 0;
+   virtual Symbol get_type_decl() = 0;
+   virtual void typecheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Formal_EXTRAS
    Formal_EXTRAS
@@ -197,6 +203,7 @@ public:
    Symbol   get_parent()   { return parent; }
    Features get_features() { return features; }
    Symbol   get_filename() { return filename; }
+   void typecheck() {}
    /* ******** End LP added functions ******** */
 
 
@@ -231,7 +238,7 @@ public:
    Formals get_method_features()        { return formals; }
    Symbol get_method_return_type()      { return return_type; }
    Expression get_method_expression()   { return expr; }
-   typecheck() {}
+   void typecheck() {}
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -262,7 +269,7 @@ public:
    Symbol get_attribute_name()      { return name; }
    Symbol get_attribute_type_decl() { return type_decl; }
    Expression get_attribute_init()  { return init; }
-   typecheck() = 0;
+   void typecheck() {}
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -286,6 +293,12 @@ public:
    }
    Formal copy_Formal();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name() { return name; }
+   Symbol get_type_decl() { return type_decl; }
+   void typecheck() {}
+   /* ******** End LP added functions ******** */
 
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS
