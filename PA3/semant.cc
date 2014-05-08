@@ -102,6 +102,8 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
 void ClassTable::print_class_names(Classes classes) {
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
         dump_Symbol(cout, 0, classes->nth(i)->get_name());
+        cout << "and now dump parent" << "\n";
+        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
         //note changing 0 to i will cause the value to printed 
         //at an offset. 0 aligns to the right.
     }
