@@ -107,6 +107,36 @@ int ClassTable::check_inheritance_graph(Classes classes_of_program) {
     int status;
     // step1: Make sure no class has the same name as other class
     status = ensure_unique_class_names(classes_of_program);
+    status = check_for_cycles(classes_of_program);
+    return status;
+}
+
+int ClassTable::check_for_cycles(Classes classes_of_program) {
+    int status = 0;
+    SymbolTable<Symbol, Entry> parents;
+    parents.enterscope();
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        parents.addid(curr_class->get_name(), curr_class->get_parent());
+    }
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        Symbol base_class = curr_class->get_name();
+        Symbol curr_parent = curr_class->get_parent();
+        while (true) {
+            if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << base_class->get_string();
+                err_stream << " contains an inheritance cycle.\n";
+                status = 1;
+                break;
+             } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) {
+                break;
+             } else {
+                curr_parent = parents.lookup(curr_parent);
+             }
+        }
+    }
     return status;
 }
 
@@ -311,12 +341,13 @@ void program_class::semant()
     // Shawn also did all other checking here. 
     ClassTable *classtable = new ClassTable(classes);
 
-    /* some semantic analysis code may go here */
-
     if (classtable->errors()) {
-	cerr << "Compilation halted due to static semantic errors." << endl;
-	exit(1);
+	   cerr << "Compilation halted due to static semantic errors." << endl;
+	   exit(1);
     }
+
+    check_scope();
+
 
     //typecheck
 }

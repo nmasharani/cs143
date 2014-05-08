@@ -28,6 +28,7 @@ private:
   /* ***** LP added Class Table Helper methods ******** */
   int check_inheritance_graph(Classes classes_of_program);
   int ensure_unique_class_names(Classes classes_of_program);
+  int check_for_cycles(Classes classes_of_program);
   /* ***** End Class Table Helper methods ************* */
 
   /* ***** LP added Class Table Debug Helper methods ******** */
