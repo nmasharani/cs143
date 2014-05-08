@@ -493,7 +493,12 @@ void program_class::check_naming_and_scope() {
         for (int j = features->first(); features->more(j); j = features->next(j)) {
             Feature curr_feature = features->nth(j);
             if (curr_feature->get_formals() == NULL) {
-                scopes.addid(curr_feature->get_name(), curr_feature->get_type());
+                if (scopes.lookup(curr_feature->get_name()) == NULL) {
+                    scopes.addid(curr_feature->get_name(), curr_feature->get_type());
+                } else {
+                    cerr << "TO DO: Add filename" << ":" << curr_feature->get_line_number() << ": ";
+                    cerr << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class."<< endl;
+                }
             }
         }
 
@@ -507,7 +512,13 @@ void program_class::check_naming_and_scope() {
                 Formals formals = curr_feature->get_formals();
                 for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
                     Formal curr_formal = formals->nth(k);
-                    scopes.addid(curr_formal->get_name(), curr_formal->get_type());
+                    if (scopes.probe(curr_formal->get_name()) == NULL)
+                    {
+                        scopes.addid(curr_formal->get_name(), curr_formal->get_type());
+                    } else {
+                        cerr << "TO DO: Add filename" << ":" << curr_formal->get_line_number() << ": ";
+                        cerr << "Formal parameter " << curr_formal->get_name()->get_string() << " is multiply defined."<< endl;
+                    }
                 }
 
                 /* recursively evaluate the expression in a method */

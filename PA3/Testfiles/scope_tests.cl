@@ -1,12 +1,13 @@
 (* This is a basic test file to see how things are called with inhertance. *)
 
 class Main {
-	a(b : Int) : Int {
+	a(b : Int, b : Int) : Int {
 		case b of
 			y: Int => 5;
-			x: Int => 6;
+			x: String => 6;
 		esac
 	};
+	a : Int;
 	a : Int;
 
 
