@@ -362,7 +362,7 @@ public:
    Expression get_expression_1()  { return expr; }
    Expression get_expression_2()  { return NULL; }
    Expression get_expression_3()  { return NULL; }
-   Symbol get_type()              { return NULL; } 
+   Symbol get_var_type()              { return NULL; } 
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; } 
    Boolean get_bool_val()         { return true; }
@@ -403,7 +403,7 @@ public:
    Expression get_expression_1()  { return expr; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return type_name; }  
+   Symbol get_var_type()              { return type_name; }  
    Expressions get_expressions()  { return actual; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -441,7 +441,7 @@ public:
    Expression get_expression_1()  { return expr; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return actual; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -479,7 +479,7 @@ public:
    Expression get_expression_1()  { return pred; } 
    Expression get_expression_2()  { return then_exp; } 
    Expression get_expression_3()  { return else_exp; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -515,7 +515,7 @@ public:
    Expression get_expression_1()  { return pred; } 
    Expression get_expression_2()  { return body; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -551,7 +551,7 @@ public:
    Expression get_expression_1()  { return expr; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return cases; }
    Boolean get_bool_val()         { return true; } 
@@ -585,7 +585,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return body; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -625,7 +625,7 @@ public:
    Expression get_expression_1()  { return init; } 
    Expression get_expression_2()  { return body; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return type_decl; }  
+   Symbol get_var_type()              { return type_decl; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -661,7 +661,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -697,7 +697,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -733,7 +733,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -769,7 +769,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -803,7 +803,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -839,7 +839,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -875,7 +875,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -911,7 +911,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return e2; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -945,7 +945,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -979,7 +979,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -1013,7 +1013,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return val; } 
@@ -1047,7 +1047,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -1081,7 +1081,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return type_name; }  
+   Symbol get_var_type()              { return type_name; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -1115,7 +1115,7 @@ public:
    Expression get_expression_1()  { return e1; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -1147,7 +1147,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
@@ -1181,7 +1181,7 @@ public:
    Expression get_expression_1()  { return NULL; } 
    Expression get_expression_2()  { return NULL; } 
    Expression get_expression_3()  { return NULL; } 
-   Symbol get_type()              { return NULL; }  
+   Symbol get_var_type()              { return NULL; }  
    Expressions get_expressions()  { return NULL; } 
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
