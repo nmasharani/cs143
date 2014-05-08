@@ -2,7 +2,10 @@
 
 class Main {
 	a(b : Int) : Int {
-		c
+		case b of
+			y: Int => 5;
+			x: Int => 6;
+		esac
 	};
 	a : Int;
 

@@ -359,13 +359,127 @@ void program_class::evaluate_expressions(SymbolTable<Symbol, Entry>& scopes, Exp
         return;
     } 
 
-    /* Recurse case 1: comp */
-    if (strcmp(expr->get_type_name(), "comp") == 0) {
+    /* Recurse case 2: leq */
+    if (strcmp(expr->get_type_name(), "leq") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 3: eq */
+    if (strcmp(expr->get_type_name(), "eq") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 4: lt */
+    if (strcmp(expr->get_type_name(), "lt") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 5: divide */
+    if (strcmp(expr->get_type_name(), "divide") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 6: mul */
+    if (strcmp(expr->get_type_name(), "mul") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 7: sub */
+    if (strcmp(expr->get_type_name(), "sub") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 8: plus */
+    if (strcmp(expr->get_type_name(), "plus") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 9: block */
+    if (strcmp(expr->get_type_name(), "block") == 0) {
+        Expressions expressions = expr->get_expressions();
+        for (int j = expressions->first(); expressions->more(j); j = expressions->next(j)) {
+            Expression curr_expr = expressions->nth(j);
+            evaluate_expressions(scopes, curr_expr);
+        }
+        return;
+    } 
+
+    /* Recurse case 10: loop */
+    if (strcmp(expr->get_type_name(), "loop") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 11: cond */
+    if (strcmp(expr->get_type_name(), "cond") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        evaluate_expressions(scopes, expr->get_expression_3());
+        return;
+    } 
+
+     /* Recurse case 12: dispatch */
+    if (strcmp(expr->get_type_name(), "dispatch") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+     /* Recurse case 13: static dispatch */
+    if (strcmp(expr->get_type_name(), "static_dispatch") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        return;
+    } 
+
+     /* Recurse case 14: assign */
+    if (strcmp(expr->get_type_name(), "assign") == 0) {
+        if (scopes.lookup(expr->get_name()) == NULL) {
+            cerr << "TO DO: Add filename" << ":" << expr->get_line_number() << ": ";
+            cerr << "Undeclared identifier " << expr->get_name()->get_string() << endl;
+        }
         evaluate_expressions(scopes, expr->get_expression_1());
         return;
     } 
 
+    /* Recursive case with new scope 0: let statement */
+    if (strcmp(expr->get_type_name(), "let") == 0) {
+        scopes.enterscope();
+        scopes.addid(expr->get_name(), expr->get_var_type());
+        evaluate_expressions(scopes, expr->get_expression_1());
+        evaluate_expressions(scopes, expr->get_expression_2());
+        scopes.exitscope();
+        return;
+    } 
 
+    /* Recursive case with new scope 1: case statement */
+    if (strcmp(expr->get_type_name(), "typcase") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        Cases cases = expr->get_cases();
+        for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+            Case curr_case = cases->nth(i);
+            scopes.enterscope();
+            scopes.addid(curr_case->get_name(), curr_case->get_type_decl());
+            evaluate_expressions(scopes, curr_case->get_expr());
+            scopes.exitscope();
+        }
+        return;
+    }
 }
 
 void program_class::check_naming_and_scope() {
