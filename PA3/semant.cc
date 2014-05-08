@@ -322,6 +322,50 @@ ostream& ClassTable::semant_error()
 /*      - int literal, string literal, no_expr(), Bool_const, Object ... (MORE ?) */
 void program_class::evaluate_expressions(SymbolTable<Symbol, Entry>& scopes, Expression expr) {
 
+    /* Base case 0: expr is an Object expression */
+    if (strcmp(expr->get_type_name(), "object") == 0) {
+        /* check if the object is in the symbol table. If it is, we are happy, otherwise, error */
+        if (scopes.lookup(expr->get_name()) == NULL){
+            cerr << "TO DO: Add filename" << ":" << expr->get_line_number() << ": ";
+            cerr << "Undeclared identifier " << expr->get_name()->get_string() << endl;
+        }
+        return; 
+    }
+
+    /* Base case 1: No expression */
+    if (strcmp(expr->get_type_name(), "no_expr") == 0) return; 
+
+    /* Base case 2: new */
+    if (strcmp(expr->get_type_name(), "new_") == 0) return; 
+
+    /* Base case 3: string_const */
+    if (strcmp(expr->get_type_name(), "string_const") == 0) return; 
+
+    /* Base case 4: Bool_const */
+    if (strcmp(expr->get_type_name(), "bool_const") == 0) return; 
+
+    /* Base case 5: Int const */
+    if (strcmp(expr->get_type_name(), "int_const") == 0) return; 
+
+    /* Recurse case 0: Is void */
+    if (strcmp(expr->get_type_name(), "isvoid") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        return;
+    } 
+
+    /* Recurse case 1: comp */
+    if (strcmp(expr->get_type_name(), "comp") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        return;
+    } 
+
+    /* Recurse case 1: comp */
+    if (strcmp(expr->get_type_name(), "comp") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        return;
+    } 
+
+
 }
 
 void program_class::check_naming_and_scope() {

@@ -2,15 +2,17 @@
 
 class Main {
 	a(b : Int) : Int {
-		a
+		c
 	};
 	a : Int;
+
 
 	main() : SELF_TYPE {
 		self
 	};
 };
 
+(*
 class Test {
 	a(b : Int) : Int {
 		case b of 
@@ -23,3 +25,4 @@ class Test {
 		self
 	};
 };
+*)
