@@ -317,6 +317,13 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
+/* Recursively evaluate the expressions */
+/* Base cases are the leaves of the tree. These are: */
+/*      - int literal, string literal, no_expr(), Bool_const, Object ... (MORE ?) */
+void program_class::evaluate_expressions(SymbolTable<Symbol, Entry>& scopes, Expression expr) {
+
+}
+
 void program_class::check_naming_and_scope() {
     SymbolTable<Symbol, Entry> scopes;
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
@@ -336,7 +343,19 @@ void program_class::check_naming_and_scope() {
         for (int j = features->first(); features->more(j); j = features->next(j)) {
             Feature curr_feature = features->nth(j);
             if (curr_feature->get_formals() != NULL) {
-                scopes.addid(curr_feature->get_name(), curr_feature->get_type());
+                scopes.enterscope();
+
+                /* Now evaluate the formal paramenters of a method */
+                Formals formals = curr_feature->get_formals();
+                for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
+                    Formal curr_formal = formals->nth(k);
+                    scopes.addid(curr_formal->get_name(), curr_formal->get_type());
+                }
+
+                /* recursively evaluate the expression in a method */
+                evaluate_expressions(&scopes, curr_feature->get_expression());
+
+                scopes.exitscope();
             }
         }
 

@@ -377,17 +377,41 @@ IO_init:
 	addiu	$sp $sp 12
 	jr	$ra	
 Test.a:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	addiu	$sp $sp -20
+	sw	$fp 20($sp)
+	sw	$s0 16($sp)
+	sw	$ra 12($sp)
 	addiu	$fp $sp 4
 	move	$s0 $a0
-	lw	$a0 12($s0)
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
-	addiu	$sp $sp 16
+	sw	$s1 4($fp)
+	sw	$s2 0($fp)
+	lw	$a0 20($fp)
+	bne	$a0 $zero label1
+	la	$a0 str_const0
+	li	$t1 16
+	jal	_case_abort2
+label1:
+	lw	$t2 0($a0)
+	blt	$t2 2 label2
+	bgt	$t2 2 label2
+	move	$s2 $a0
+	move	$s1 $s2
+	lw	$a0 20($fp)
+	jal	Object.copy
+	lw	$t2 12($a0)
+	lw	$t1 12($s1)
+	add	$t1 $t1 $t2
+	sw	$t1 12($a0)
+	b	label0
+label2:
+	jal	_case_abort
+label0:
+	lw	$s1 4($fp)
+	lw	$s2 0($fp)
+	lw	$fp 20($sp)
+	lw	$s0 16($sp)
+	lw	$ra 12($sp)
+	addiu	$sp $sp 24
 	jr	$ra	
 Test.main:
 	addiu	$sp $sp -12

@@ -13,7 +13,9 @@ class Main {
 
 class Test {
 	a(b : Int) : Int {
-		a
+		case b of 
+		a : Int => a + b;
+		esac
 	};
 	a : Int;
 

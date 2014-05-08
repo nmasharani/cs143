@@ -85,6 +85,12 @@ public:
    tree_node *copy()		 { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
 
+   /* ********** LP added functions ********** */
+   virtual Symbol get_name() = 0;
+   virtual Symbol get_type() = 0;
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Formal_EXTRAS
    Formal_EXTRAS
 #endif
@@ -98,6 +104,21 @@ class Expression_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Expression(); }
    virtual Expression copy_Expression() = 0;
+
+   /* ********** LP added functions ********** */
+   virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
+   virtual Expression get_expression_1() = 0; // assign, static dispatch, normal dispatch, conditions, loop, case, let, plus, sub, mult, div, neg, lt, eq, leq, comp, isvoid, 
+   virtual Expression get_expression_2() = 0; // conditions, loop, let, plus, sub, mult, div, lt, eq, leq, 
+   virtual Expression get_expression_3() = 0; // conditions, 
+   virtual Symbol get_type() = 0; // static dispatch, let, new, 
+   virtual Expressions get_expressions() = 0; // static dispatch, normal dispatch, block, 
+   virtual Cases get_cases() = 0; // case, 
+   virtual Boolean get_bool_val() = 0; // Bool, 
+
+   virtual char* get_type() = 0; // assign, static dispatch, 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 
 #ifdef Expression_EXTRAS
    Expression_EXTRAS
@@ -160,6 +181,7 @@ public:
    /* ********** LP added functions ********** */
    Classes get_classes() { return classes; }
    void check_naming_and_scope();
+   void evaluate_expressions(SymbolTable<Symbol, Entry>& scopes, Expression expr);
    /* ******** End LP added functions ******** */
 
 #ifdef Program_SHARED_EXTRAS
@@ -269,7 +291,6 @@ public:
 #endif
 };
 
-
 // define constructor - formal
 class formal_class : public Formal_class {
 protected:
@@ -282,6 +303,12 @@ public:
    }
    Formal copy_Formal();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()  { return name; }
+   Symbol get_type()  { return type_decl; }
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS
