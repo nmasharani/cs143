@@ -93,7 +93,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     classes_of_program = install_basic_classes(classes_of_program);
 
     /* Check for possible class inheritcance cycles */
-    //int status = check_inheritance_graph(classes_of_program);
+    int status = check_inheritance_graph(classes_of_program);
     
 
 }
@@ -107,32 +107,35 @@ int ClassTable::check_inheritance_graph(Classes classes_of_program) {
     int status;
     // step1: Make sure no class has the same name as other class
     status = ensure_unique_class_names(classes_of_program);
+    return status;
 }
 
 int ClassTable::ensure_unique_class_names(Classes classes_of_program) {
-    hash_set<Symbol, hash<Symbol>, eqsym> duplicate_finder;
     int status = 0;
+    SymbolTable<Symbol, int> duplicate_finder;
+    duplicate_finder.enterscope();
     for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
-        if (isduplicate(duplicate_finder, classes_of_program->nth(i)->get_name())) {
+        Symbol curr_class_name = classes_of_program->nth(i)->get_name();
+        if (duplicate_finder.lookup(curr_class_name) != NULL) {
+            ostream& err_stream = semant_error(classes_of_program->nth(i));
+            err_stream << curr_class_name->get_string();
+            err_stream << " is already defined, and duplicate names are not allowed.\n";
             status = 1;
-            cout << "found duplicate \n";
+        } else {
+            duplicate_finder.addid(curr_class_name, new int(42));
         }
     }
     return status;
 }
- 
-bool ClassTable::isduplicate(hash_set<Symbol, hash<Symbol>, eqsym>& class_names, Symbol s) {
-    if (class_names.find(s) == class_names.end()) {
-        class_names.insert(s);
-        return false;
-    } 
-    return true;
-}
 
 
-/*
-- LP added these basic classes to the classes list passed in. 
-*/
+
+
+
+
+
+
+
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 
     // The tree package uses these globals to annotate the classes built below.

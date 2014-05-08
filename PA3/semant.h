@@ -33,12 +33,6 @@ private:
   /* ***** LP added Class Table Debug Helper methods ******** */
   void print_class_names(Classes classes);
   void check_equality(Classes classes);
-  bool isduplicate(hash_set<Symbol, hash<Symbol>, eqsym>& class_names, Symbol s);
-  struct eqsym {
-	  bool operator()(Symbol s1, Symbol s2) const {
-	    return strcmp(s1->get_string(), s2->get_string()) == 0;
-	  }
-  };
   /* ***** End Class Table Debug Helper methods ************* */
 
 public:
