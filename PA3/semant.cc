@@ -108,6 +108,36 @@ int ClassTable::check_inheritance_graph(Classes classes_of_program) {
     // step1: Make sure no class has the same name as other class
     status = ensure_unique_class_names(classes_of_program);
     status = check_for_cycles(classes_of_program);
+    status = check_inheritance_of_base_classes(classes_of_program);
+    return status;
+}
+
+int ClassTable::check_inheritance_of_base_classes(Classes classes_of_program) {
+    int status = 0;
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        if (strcmp(curr_class->get_parent()->get_string(), "IO") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class IO.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Int") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Int.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Bool") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Bool.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Str") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Str.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "SELF_TYPE") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class SELF_TYPE.\n";
+            status = 1;
+        }
+    }
     return status;
 }
 
@@ -126,8 +156,8 @@ int ClassTable::check_for_cycles(Classes classes_of_program) {
         while (true) {
             if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
                 ostream& err_stream = semant_error(curr_class);
-                err_stream << base_class->get_string();
-                err_stream << " contains an inheritance cycle.\n";
+                err_stream << "Class " << base_class->get_string() << ", or an ancestor of " << base_class->get_string();
+                err_stream << ", is involved in an inheritance cycle.\n";
                 status = 1;
                 break;
              } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) {
@@ -149,13 +179,11 @@ int ClassTable::ensure_unique_class_names(Classes classes_of_program) {
         Symbol curr_class_name = classes_of_program->nth(i)->get_name();
         if (strcmp(curr_class_name->get_string(), "SELF_TYPE") == 0) {
             ostream& err_stream = semant_error(classes_of_program->nth(i));
-            err_stream << curr_class_name->get_string();
-            err_stream << " cannot be used as a class name.\n";
+            err_stream << "Redefinition of basic class SELF_TYPE.\n";
             status = 1;
         } else if (duplicate_finder.lookup(curr_class_name) != NULL) {
             ostream& err_stream = semant_error(classes_of_program->nth(i));
-            err_stream << curr_class_name->get_string();
-            err_stream << " is already defined, and duplicate names are not allowed.\n";
+            err_stream << "Class "<< curr_class_name->get_string() << " was previously defined.\n";
             status = 1;
         } else {
             duplicate_finder.addid(curr_class_name, new int(42));
@@ -496,7 +524,7 @@ void program_class::check_naming_and_scope() {
                 if (scopes.lookup(curr_feature->get_name()) == NULL) {
                     scopes.addid(curr_feature->get_name(), curr_feature->get_type());
                 } else {
-                    cerr << "TO DO: Add filename" << ":" << curr_feature->get_line_number() << ": ";
+                    cerr << "TO DO: Add filename " << ":" << curr_feature->get_line_number() << ": ";
                     cerr << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class."<< endl;
                 }
             }
@@ -562,6 +590,7 @@ void program_class::semant()
     }
 
     check_naming_and_scope();
+
 
 
     //typecheck
