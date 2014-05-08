@@ -11,6 +11,7 @@
 
 #include "tree.h"
 #include "cool-tree.handcode.h"
+#include "symtab.h"
 
 
 // define the class for phylum
@@ -115,7 +116,7 @@ public:
    virtual Cases get_cases() = 0; // case, 
    virtual Boolean get_bool_val() = 0; // Bool, 
 
-   virtual char* get_type() = 0; // assign, static dispatch, 
+   virtual char* get_type_name() = 0; // assign, static dispatch, 
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
@@ -356,6 +357,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return name; }
+   Expression get_expression_1()  { return expr; }
+   Expression get_expression_2()  { return NULL; }
+   Expression get_expression_3()  { return NULL; }
+   Symbol get_type()              { return NULL; } 
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; } 
+   Boolean get_bool_val()         { return true; }
+
+   char* get_type_name()               { return "assign"; }
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -382,6 +397,21 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return name; } 
+   Expression get_expression_1()  { return expr; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return type_name; }  
+   Expressions get_expressions()  { return actual; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "static_dispatch"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -405,6 +435,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return name; } 
+   Expression get_expression_1()  { return expr; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return actual; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "dispatch"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -430,6 +474,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return pred; } 
+   Expression get_expression_2()  { return then_exp; } 
+   Expression get_expression_3()  { return else_exp; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "cond"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -451,6 +509,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return pred; } 
+   Expression get_expression_2()  { return body; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "loop"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -474,6 +546,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return expr; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return cases; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "typcase"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -493,6 +579,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return body; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "block"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -520,6 +620,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return identifier; } 
+   Expression get_expression_1()  { return init; } 
+   Expression get_expression_2()  { return body; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return type_decl; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "let"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -541,6 +655,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "plus"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -564,6 +692,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "sub"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -585,6 +727,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "mul"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -608,6 +764,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "divide"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -627,6 +797,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "neg"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -650,6 +834,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "lt"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -671,6 +869,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "eq"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -694,6 +906,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return e2; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "leq"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -713,6 +939,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "comp"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -734,6 +974,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return token; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "int_const"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -753,6 +1007,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return val; } 
+
+   char* get_type_name()               { return "bool_const"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -774,6 +1042,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return token; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "string_const"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -793,6 +1075,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return type_name; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "new"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -814,6 +1110,20 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
 
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return e1; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "isvoid"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
+
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
 #endif
@@ -831,6 +1141,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return NULL; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "no_expr"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -851,6 +1175,20 @@ public:
    }
    Expression copy_Expression();
    void dump(ostream& stream, int n);
+
+   /* ********** LP added functions ********** */
+   Symbol get_name()              { return name; } 
+   Expression get_expression_1()  { return NULL; } 
+   Expression get_expression_2()  { return NULL; } 
+   Expression get_expression_3()  { return NULL; } 
+   Symbol get_type()              { return NULL; }  
+   Expressions get_expressions()  { return NULL; } 
+   Cases get_cases()              { return NULL; }
+   Boolean get_bool_val()         { return true; } 
+
+   char* get_type_name()               { return "object"; } 
+   //virtual typcheck() = 0;
+   /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
