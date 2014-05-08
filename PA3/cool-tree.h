@@ -111,7 +111,7 @@ public:
    virtual Expression get_expression_1() = 0; // assign, static dispatch, normal dispatch, conditions, loop, case, let, plus, sub, mult, div, neg, lt, eq, leq, comp, isvoid, 
    virtual Expression get_expression_2() = 0; // conditions, loop, let, plus, sub, mult, div, lt, eq, leq, 
    virtual Expression get_expression_3() = 0; // conditions, 
-   virtual Symbol get_type() = 0; // static dispatch, let, new, 
+   virtual Symbol get_var_type() = 0; // static dispatch, let, new, 
    virtual Expressions get_expressions() = 0; // static dispatch, normal dispatch, block, 
    virtual Cases get_cases() = 0; // case, 
    virtual Boolean get_bool_val() = 0; // Bool, 

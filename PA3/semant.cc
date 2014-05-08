@@ -353,7 +353,7 @@ void program_class::check_naming_and_scope() {
                 }
 
                 /* recursively evaluate the expression in a method */
-                evaluate_expressions(&scopes, curr_feature->get_expression());
+                evaluate_expressions(scopes, curr_feature->get_expression());
 
                 scopes.exitscope();
             }
