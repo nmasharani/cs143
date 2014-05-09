@@ -521,6 +521,7 @@ void program_class::check_naming_and_scope() {
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
         Class_ curr_class = classes->nth(i);
         scopes.enterscope();
+        
         Features features = curr_class->get_features();
 
         /* Add all attributes to the current class scope */
