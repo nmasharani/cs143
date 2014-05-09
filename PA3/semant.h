@@ -22,15 +22,62 @@ typedef ClassTable *ClassTableP;
 class ClassTable {
 private:
   int semant_errors;
-  Classes install_basic_classes(Classes classes_of_program);
   ostream& error_stream;
 
-  /* ***** LP added Class Table Helper methods ******** */
-  int check_inheritance_graph(Classes classes_of_program);
-  int ensure_unique_class_names(Classes classes_of_program);
-  int check_for_cycles(Classes classes_of_program);
-  int check_inheritance_of_base_classes(Classes classes_of_program);
-  /* ***** End Class Table Helper methods ************* */
+  /**
+  * *****************************************************
+  * Description: keeps track of the types that are defined
+  *     for this program. Note, a type is simply a class
+  *     name, which can be both user defined, or basic
+  *     class. Use a single scope level of the symbol
+  *     table as a container.
+  * *****************************************************
+  */
+  SymbolTable<char*, int>* defined_types;
+
+  /**
+  * *****************************************************
+  * Description: returns a list of all classes contained
+  *     in the program, which consists of classes defined
+  *     defined by program, and the basic classes. 
+  * *****************************************************
+  */
+  Classes install_basic_classes(Classes classes_of_program);
+
+  /**
+  * *****************************************************
+  * Description: returns a pointer to a symbol table that
+  *     contains the valid types of the prgram. Checks
+  *     for duplicate class names, and class names that
+  *     are not allowed, ie SELF_TYPE, and the basic 
+  *     class defintions. 
+  * *****************************************************
+  */
+  SymbolTable<char*, int>* collect_all_valid_types(Classes classes_in_program);
+  bool name_is_reserved_classname(char* name);
+
+
+  /**
+  * *****************************************************
+  * Description: checks for valid inheritance.
+  *     meaning, cannot inherit from certain basic
+  *     classes or SELF_TYPE. 
+  * Returns 0 on success, 1 on error. 
+  * *****************************************************
+  */
+  int check_for_valid_inheritance(Classes classes, SymbolTable<char*, int>* defined_types);
+  bool parent_is_forbidden(char* name);
+
+
+
+
+
+
+
+
+
+
+
 
   /* ***** LP added Class Table Debug Helper methods ******** */
   void print_class_names(Classes classes);

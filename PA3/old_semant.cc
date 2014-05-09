@@ -81,102 +81,129 @@ static void initialize_constants(void)
     val         = idtable.add_string("_val");
 }
 
-/** 
+/*
 * ***************************************************
-*  ClassTable Constructor Implimentation.
+- To do: add in basic classes. 
 * ***************************************************
 */
 ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) {
 
-    /* Adds the basic classes to the user defined classes in the program */
-    Classes classes_in_program = install_basic_classes(classes);
+    /* Fill this in */
+    Classes classes_of_program = classes;
+    classes_of_program = install_basic_classes(classes_of_program);
 
-    /* Init the defined_types pointer. Note, no need to worry about memory management. */
-    defined_types = collect_all_valid_types(classes);
+    /* Check for possible class inheritcance cycles */
+    int status = check_inheritance_graph(classes_of_program);
+    
 
-    int status = check_for_valid_inheritance(classes, defined_types);
-    if (status != 0) return;
-
-    //status = check_for_inheritance_cycle(classes);
-    //if (status != 0) return;
-
-    //arrange the list of classes in order of inheritance. 
 }
 
 /**
-* *****************************************************
-* At this level we check for three things:
-*     - cannot inherit from an undefined class.
-*     - cannot inherit from Int, Str, Bool, SELF_TYPE
-* *****************************************************
+* This method checks to ensure that the inheritance graph is well-defined. 
+* This means that there are no duplicate names, no cycles, and that all
+* classes that another class inherits from are defined. 
 */
-int ClassTable::check_for_valid_inheritance(Classes classes, SymbolTable<char*, int>* defined_types) {
+int ClassTable::check_inheritance_graph(Classes classes_of_program) {
+    int status;
+    // step1: Make sure no class has the same name as other class
+    status = ensure_unique_class_names(classes_of_program);
+    status = check_for_cycles(classes_of_program);
+    status = check_inheritance_of_base_classes(classes_of_program);
+    return status;
+}
+
+int ClassTable::check_inheritance_of_base_classes(Classes classes_of_program) {
     int status = 0;
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        Class_ curr_class = classes->nth(i);
-        Symbol parent = curr_class->get_parent();
-        char* parent_name = parent->get_string();
-        if (parent_is_forbidden(parent_name) == true) {
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        if (strcmp(curr_class->get_parent()->get_string(), "IO") == 0) {
             ostream& err_stream = semant_error(curr_class);
-            err_stream << "Class " << curr_class->get_name()->get_string() << " cannot inherit class " << parent_name << ".\n";
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class IO.\n";
             status = 1;
-        } else if (defined_types->probe(parent_name) == NULL) {
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Int") == 0) {
             ostream& err_stream = semant_error(curr_class);
-            err_stream << "Class " << curr_class->get_name()->get_string() << " inherits from an undefined class " << parent_name << ".\n";
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Int.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Bool") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Bool.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "Str") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class Str.\n";
+            status = 1;
+        } else if (strcmp(curr_class->get_parent()->get_string(), "SELF_TYPE") == 0) {
+            ostream& err_stream = semant_error(curr_class);
+            err_stream << "Class " << curr_class->get_name()->get_string() << ", cannot inherit class SELF_TYPE.\n";
             status = 1;
         }
     }
     return status;
 }
 
-bool ClassTable::parent_is_forbidden(char* name) {
-    if (strcmp(name, "SELF_TYPE") == 0) return true;
-    if (strcmp(name, "Int") == 0) return true;
-    if (strcmp(name, "Bool") == 0) return true;
-    if (strcmp(name, "String") == 0) return true;
-    return false;
-}
-
-/** 
-* ***************************************************
-* Init valid symbols.
-*   - checks for duplicate class names
-*   - checks for class names using SELF_TYPE
-* ***************************************************
-*/
-SymbolTable<char*, int>* ClassTable::collect_all_valid_types(Classes classes) {
-    SymbolTable<char*, int>* defined_types = new SymbolTable<char*, int>;
-    defined_types->enterscope();
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        Class_ curr_class = classes->nth(i);
-        char* curr_class_name = curr_class->get_name()->get_string();
-        if (name_is_reserved_classname(curr_class_name) == true) {
-            ostream& err_stream = semant_error(curr_class);
-            err_stream << "Redefinition of basic class " << curr_class_name << ".\n";
-        } else if (defined_types->probe(curr_class_name) != NULL) {
-            ostream& err_stream = semant_error(curr_class);
-            err_stream << "Class " << curr_class_name << " was previously defined.\n";
-        } else {
-            defined_types->addid((curr_class_name), new int(42));
+int ClassTable::check_for_cycles(Classes classes_of_program) {
+    int status = 0;
+    SymbolTable<Symbol, Entry> parents;
+    parents.enterscope();
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        parents.addid(curr_class->get_name(), curr_class->get_parent());
+    }
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Class_ curr_class = classes_of_program->nth(i);
+        Symbol base_class = curr_class->get_name();
+        Symbol curr_parent = curr_class->get_parent();
+        while (true) {
+            if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << "Class " << base_class->get_string() << ", or an ancestor of " << base_class->get_string();
+                err_stream << ", is involved in an inheritance cycle.\n";
+                status = 1;
+                break;
+             } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) {
+                break;
+             } else {
+                curr_parent = parents.lookup(curr_parent);
+                if (curr_parent == NULL) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Class " << base_class->get_string() << " inherits from an undefined class " << curr_class->get_parent()->get_string() << ".\n";
+                    status = 1;
+                    break;
+                }
+             }
         }
     }
-    defined_types->addid(Object->get_string(), new int(42));
-    defined_types->addid(IO->get_string(), new int(42));
-    defined_types->addid(Int->get_string(), new int(42));
-    defined_types->addid(Bool->get_string(), new int(42));
-    defined_types->addid(Str->get_string(), new int(42));
-    return defined_types;
+    return status;
 }
 
-bool ClassTable::name_is_reserved_classname(char* name) {
-    if (strcmp(name, SELF_TYPE->get_string()) == 0) return true;
-    if (strcmp(name, Object->get_string()) == 0) return true;
-    if (strcmp(name, IO->get_string()) == 0) return true;
-    if (strcmp(name, Int->get_string()) == 0) return true;
-    if (strcmp(name, Bool->get_string()) == 0) return true;
-    if (strcmp(name, Str->get_string()) == 0) return true;
-    return false;
+/* Note, checks for unique class names and for SELF_TYPE */
+int ClassTable::ensure_unique_class_names(Classes classes_of_program) {
+    int status = 0;
+    SymbolTable<Symbol, int> duplicate_finder;
+    duplicate_finder.enterscope();
+    for (int i = classes_of_program->first(); classes_of_program->more(i); i = classes_of_program->next(i)) {
+        Symbol curr_class_name = classes_of_program->nth(i)->get_name();
+        if (strcmp(curr_class_name->get_string(), "SELF_TYPE") == 0) {
+            ostream& err_stream = semant_error(classes_of_program->nth(i));
+            err_stream << "Redefinition of basic class SELF_TYPE.\n";
+            status = 1;
+        } else if (duplicate_finder.lookup(curr_class_name) != NULL) {
+            ostream& err_stream = semant_error(classes_of_program->nth(i));
+            err_stream << "Class "<< curr_class_name->get_string() << " was previously defined.\n";
+            status = 1;
+        } else {
+            duplicate_finder.addid(curr_class_name, new int(42));
+        }
+    }
+    return status;
 }
+
+
+
+
+
+
+
 
 
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
@@ -323,142 +350,6 @@ ostream& ClassTable::semant_error()
     semant_errors++;                            
     return error_stream;
 } 
-
-
-
-/*   This is the entry point to the semantic checker.
-
-     Your checker should do the following two things:
-
-     1) Check that the program is semantically correct
-     2) Decorate the abstract syntax tree with type information
-        by setting the `type' field in each Expression node.
-        (see `tree.h')
-
-     You are free to first do 1), make sure you catch all semantic
-     errors. Part 2) can be done in a second stage, when you want
-     to build mycoolc.
- */
-void program_class::semant()
-{
-    initialize_constants();
-
-    /* ClassTable constructor may do some semantic analysis */
-    // put class checking into the constructor. 
-    // Shawn also did all other checking here. 
-    ClassTable *classtable = new ClassTable(classes);
-
-    if (classtable->errors()) {
-	   cerr << "Compilation halted due to static semantic errors." << endl;
-	   exit(1);
-    }
-
-    //check_naming_and_scope();
-
-
-
-    //typecheck
-}
-
-
-
-
-/* ***************************************************/
-/*       Class Table Debug Helper methods            */
-/*   *************************************************/
-
-void ClassTable::print_class_names(Classes classes) {
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        dump_Symbol(cout, 0, classes->nth(i)->get_name());
-        cout << "and now dump parent" << "\n";
-        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
-    }
-}
-
-void ClassTable::check_equality(Classes classes) {
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        for (int j = classes->first(); classes->more(j); j = classes->next(j)) {
-            if (j != i) {
-                if (strcmp(classes->nth(i)->get_name()->get_string(), classes->nth(j)->get_name()->get_string()) == 0) {
-                    //cout << classes->nth(i)get_name()->get_string() + "==" + classes->nth(j);
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /* Recursively evaluate the expressions */
 /* Base cases are the leaves of the tree. These are: */
@@ -678,4 +569,63 @@ void program_class::check_naming_and_scope() {
 }
 
 
+/*   This is the entry point to the semantic checker.
 
+     Your checker should do the following two things:
+
+     1) Check that the program is semantically correct
+     2) Decorate the abstract syntax tree with type information
+        by setting the `type' field in each Expression node.
+        (see `tree.h')
+
+     You are free to first do 1), make sure you catch all semantic
+     errors. Part 2) can be done in a second stage, when you want
+     to build mycoolc.
+ */
+void program_class::semant()
+{
+    initialize_constants();
+
+    /* ClassTable constructor may do some semantic analysis */
+    // put class checking into the constructor. 
+    // Shawn also did all other checking here. 
+    ClassTable *classtable = new ClassTable(classes);
+
+    if (classtable->errors()) {
+	   cerr << "Compilation halted due to static semantic errors." << endl;
+	   exit(1);
+    }
+
+    check_naming_and_scope();
+
+
+
+    //typecheck
+}
+
+
+
+
+/* ***************************************************/
+/*       Class Table Debug Helper methods            */
+/*   *************************************************/
+
+void ClassTable::print_class_names(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        dump_Symbol(cout, 0, classes->nth(i)->get_name());
+        cout << "and now dump parent" << "\n";
+        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
+    }
+}
+
+void ClassTable::check_equality(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        for (int j = classes->first(); classes->more(j); j = classes->next(j)) {
+            if (j != i) {
+                if (strcmp(classes->nth(i)->get_name()->get_string(), classes->nth(j)->get_name()->get_string()) == 0) {
+                    //cout << classes->nth(i)get_name()->get_string() + "==" + classes->nth(j);
+                }
+            }
+        }
+    }
+}

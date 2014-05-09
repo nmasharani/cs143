@@ -17,3 +17,11 @@ class A {
 class A_2 {
 	(*this is not an error.*)
 };
+
+class SELF_TYPE {
+
+};
+
+class Object {
+
+};
