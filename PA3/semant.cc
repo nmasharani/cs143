@@ -97,10 +97,41 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     int status = check_for_valid_inheritance(classes, defined_types);
     if (status != 0) return;
 
-    //status = check_for_inheritance_cycle(classes);
-    //if (status != 0) return;
+    status = check_for_inheritance_cycle(classes_in_program);
+    if (status != 0) return;
 
     //arrange the list of classes in order of inheritance. 
+}
+
+/**
+* *****************************************************
+* Find and report all cycles in inheritance. 
+* *****************************************************
+*/
+int ClassTable::check_for_inheritance_cycle(Classes classes_in_program) {
+    int status = 0;
+    SymbolTable<Symbol, Entry> parents;
+    parents.enterscope();
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        Class_ curr_class = classes_in_program->nth(i);
+        parents.addid(curr_class->get_name(), curr_class->get_parent());
+    }
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        Class_ curr_class = classes_in_program->nth(i);
+        Symbol base_class = curr_class->get_name();
+        Symbol curr_parent = curr_class->get_parent();
+        while (true) {
+            if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << "Class " << base_class->get_string() << ", or an ancestor of " << base_class->get_string();
+                err_stream << ", is involved in an inheritance cycle.\n";
+                status = 1;
+                break;
+             } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) break;
+             curr_parent = parents.lookup(curr_parent);
+        }
+    }
+    return status;
 }
 
 /**

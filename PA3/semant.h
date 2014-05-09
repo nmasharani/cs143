@@ -68,14 +68,15 @@ private:
   int check_for_valid_inheritance(Classes classes, SymbolTable<char*, int>* defined_types);
   bool parent_is_forbidden(char* name);
 
-
-
-
-
-
-
-
-
+  /**
+  * *****************************************************
+  * Description: checks the class hierarchy for an 
+  *     an inheritance cycle. 
+  * Returns 0 if the inheritance graph is cycle free
+  *     or 1 if the graph contains cycles. 
+  * *****************************************************
+  */
+  int check_for_inheritance_cycle(Classes classes_in_program);
 
 
 
