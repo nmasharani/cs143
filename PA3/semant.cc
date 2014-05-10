@@ -92,7 +92,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     Classes classes_in_program = install_basic_classes(classes);
 
     /* Init the defined_types pointer. Note, no need to worry about memory management. */
-    defined_types = collect_all_valid_types(classes);
+    inherit_graph = get_valid_types(classes);
 
     int status = check_for_valid_inheritance(classes, defined_types);
     if (status != 0) return;
@@ -175,28 +175,35 @@ bool ClassTable::parent_is_forbidden(char* name) {
 *   - checks for class names using SELF_TYPE
 * ***************************************************
 */
-SymbolTable<char*, int>* ClassTable::collect_all_valid_types(Classes classes) {
-    SymbolTable<char*, int>* defined_types = new SymbolTable<char*, int>;
-    defined_types->enterscope();
+/*
+Method added by Nisha cause turns out we can't do that
+*/
+SymbolTable<Symbol, Entry>* ClassTable::get_valid_types(Classes classes) {
+    SymbolTable<Symbol, Entry>* types = new SymbolTable<Symbol, Entry>;
+    
+    types->enterscope();
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
         Class_ curr_class = classes->nth(i);
-        char* curr_class_name = curr_class->get_name()->get_string();
-        if (name_is_reserved_classname(curr_class_name) == true) {
+        Symbol curr_name = curr_class->get_name();
+        // Case 1: error: default class has already been defined
+        if (name_is_reserved_classname(curr_name->get_string())) {
             ostream& err_stream = semant_error(curr_class);
-            err_stream << "Redefinition of basic class " << curr_class_name << ".\n";
-        } else if (defined_types->probe(curr_class_name) != NULL) {
+            err_stream << "Redefinition of basic class " << curr_name->get_string() << ".\n";
+        // Case 2: error: class has already been defined
+        } else if (types->probe(curr_name->get_string())) {
             ostream& err_stream = semant_error(curr_class);
-            err_stream << "Class " << curr_class_name << " was previously defined.\n";
+            err_stream << "Class " << curr_name->get_string() << " was previously defined.\n";
+        // Case 3: no error.
         } else {
-            defined_types->addid((curr_class_name), new int(42));
+            defined_types->addid(curr_class, curr_class->get_parent());
         }
     }
-    defined_types->addid(Object->get_string(), new int(42));
-    defined_types->addid(IO->get_string(), new int(42));
-    defined_types->addid(Int->get_string(), new int(42));
-    defined_types->addid(Bool->get_string(), new int(42));
-    defined_types->addid(Str->get_string(), new int(42));
-    return defined_types;
+    defined_types->addid(Object, No_class);
+    defined_types->addid(IO, Object);
+    defined_types->addid(Int, Object);
+    defined_types->addid(Bool, Object);
+    defined_types->addid(Str, Object);
+    return types;
 }
 
 bool ClassTable::name_is_reserved_classname(char* name) {
@@ -221,23 +228,6 @@ Class_ ClassTable::find_class_by_name(Classes classes, char* name) {
         if (strcmp(curr_class_name, name) == 0) return curr_class;
     }
     return NULL;
-}
-
-/**
-* ***************************************************
-* Return true if type1 is a parent of type2, fale othewise. 
-* check all of type2's parents and if one matches type1's name
-* return true. 
-* ***************************************************
-*/
-bool ClassTable::is_parent(Symbol type1, Symbol type2) {
-    Class_ curr_class = find_class_by_name(classes_in_program, type2->get_name()->get_string());
-    while (true) {
-        if (strcmp(curr_class->get_parent()->get_string() == type1->get_string()) == 0) return true;
-        if (strcmp(curr_class->get_parent()->get_string() == "_no_class") == 0) break;
-        curr_class = find_class_by_name(classes_in_program, curr_class->get_parent()->get_string());
-    }
-    return false;
 }
 
 
@@ -386,6 +376,15 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
+
+bool program_class::typecheck(ClassTable * classtable) {
+    int status = 0;
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        CLass_ c = classes->nth(i);
+        if (!c->typecheck(classtable)) status++;
+    }
+    return status == 0;
+}
 
 
 /*   This is the entry point to the semantic checker.

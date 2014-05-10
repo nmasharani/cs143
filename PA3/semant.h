@@ -33,7 +33,7 @@ private:
   *     table as a container.
   * *****************************************************
   */
-  SymbolTable<char*, int>* defined_types;
+  SymbolTable<Symbol, Entry>* inherit_graph;
 
   /**
   * *****************************************************

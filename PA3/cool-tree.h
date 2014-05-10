@@ -126,6 +126,18 @@ public:
 
    virtual char* get_type_name() = 0; // assign, static dispatch, 
    virtual Symbol typcheck() = 0; 
+
+   // Is t1 a parent of t2?
+   bool isparent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
+      if (!table->lookup(t2)) {/*error*/}
+
+      while (true) {
+         t2 = table->lookup(t2);
+         if (!t2) return false; // if t2 is null, we've gotten above No_class
+         if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
+      }
+      return false;
+   }
    /* ******** End LP added functions ******** */
 
 
