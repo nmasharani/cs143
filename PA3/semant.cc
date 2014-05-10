@@ -209,6 +209,37 @@ bool ClassTable::name_is_reserved_classname(char* name) {
     return false;
 }
 
+/**
+* ***************************************************
+* Returns a class object
+* ***************************************************
+*/
+Class_ ClassTable::find_class_by_name(Classes classes, char* name) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        Class_ curr_class = classes->nth(i);
+        char* curr_class_name = curr_class->get_name()->get_string();
+        if (strcmp(curr_class_name, name) == 0) return curr_class;
+    }
+    return NULL;
+}
+
+/**
+* ***************************************************
+* Return true if type1 is a parent of type2, fale othewise. 
+* check all of type2's parents and if one matches type1's name
+* return true. 
+* ***************************************************
+*/
+bool ClassTable::is_parent(Symbol type1, Symbol type2) {
+    Class_ curr_class = find_class_by_name(classes_in_program, type2->get_name()->get_string());
+    while (true) {
+        if (strcmp(curr_class->get_parent()->get_string() == type1->get_string()) == 0) return true;
+        if (strcmp(curr_class->get_parent()->get_string() == "_no_class") == 0) break;
+        curr_class = find_class_by_name(classes_in_program, curr_class->get_parent()->get_string());
+    }
+    return false;
+}
+
 
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 

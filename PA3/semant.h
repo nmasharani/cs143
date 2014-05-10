@@ -78,6 +78,27 @@ private:
   */
   int check_for_inheritance_cycle(Classes classes_in_program);
 
+  /**
+  * *****************************************************
+  * Description: helper function. Takes a list of classes
+  *     and returns pointer to Class_ object that has the name
+  *     passed in, or NULL if no match. 
+  * Return: class object mathching name, or NULL
+  *     if no match. 
+  * *****************************************************
+  */
+  Class_ find_class_by_name(Classes classes, char* name);
+
+  /**
+  * *****************************************************
+  * Description: helper function. checks if type1 is a 
+  *     parent of type2.
+  * Return: true if type 1 is a parent of type 2, false
+  *     otherwise. 
+  * *****************************************************
+  */
+  bool is_parent(Symbol type1, Symbol type2);
+
 
 
   /* ***** LP added Class Table Debug Helper methods ******** */
