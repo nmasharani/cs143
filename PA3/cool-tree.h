@@ -18,6 +18,12 @@
 // define simple phylum - Program
 typedef class Program_class *Program;
 
+//////////////////////////////////////////////////////////
+//
+// PROGRAM DEFINITION: Program_class 
+//
+//////////////////////////////////////////////////////////
+
 class Program_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Program(); }
@@ -36,6 +42,12 @@ public:
 // define simple phylum - Class_
 typedef class Class__class *Class_;
 
+//////////////////////////////////////////////////////////
+//
+// CLASS DEFINITION: Class__class
+//
+//////////////////////////////////////////////////////////
+
 class Class__class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Class_(); }
@@ -46,7 +58,7 @@ public:
    virtual Symbol get_parent() = 0;
    virtual Features get_features() = 0;
    virtual Symbol get_filename_1() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
    /* ******** End LP added functions ******** */
    
 
@@ -59,6 +71,12 @@ public:
 // define simple phylum - Feature
 typedef class Feature_class *Feature;
 
+//////////////////////////////////////////////////////////
+//
+// FEATURE DEFINITION: Feature_class 
+//
+//////////////////////////////////////////////////////////
+
 class Feature_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Feature(); }
@@ -69,7 +87,7 @@ public:
    virtual Symbol get_type() = 0;
    virtual Formals get_formals() = 0;
    virtual Expression get_expression() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_EXTRAS
@@ -81,6 +99,12 @@ public:
 // define simple phylum - Formal
 typedef class Formal_class *Formal;
 
+//////////////////////////////////////////////////////////
+//
+// FORMAL DEFINITION: Formal_class 
+//
+//////////////////////////////////////////////////////////
+
 class Formal_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Formal(); }
@@ -89,7 +113,7 @@ public:
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Formal_EXTRAS
@@ -100,6 +124,12 @@ public:
 
 // define simple phylum - Expression
 typedef class Expression_class *Expression;
+
+//////////////////////////////////////////////////////////
+//
+// EXPRESSION DEFINITION: Expression_class 
+//
+//////////////////////////////////////////////////////////
 
 class Expression_class : public tree_node {
 public:
@@ -125,18 +155,33 @@ public:
    virtual Boolean get_bool_val() = 0; // Bool, 
 
    virtual char* get_type_name() = 0; // assign, static dispatch, 
-   virtual Symbol typcheck() = 0; 
+   virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
 
    // Is t1 a parent of t2?
    bool isparent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
-      if (!table->lookup(t2)) {/*error*/}
+      if (!table->lookup(t2)) {/* TODO(nm): error */}
 
-      while (true) {
-         t2 = table->lookup(t2);
-         if (!t2) return false; // if t2 is null, we've gotten above No_class
+      while (t2) {
          if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
+         t2 = table->lookup(t2);
       }
       return false;
+   }
+
+   Symbol get_common_parent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
+      if (!table->lookup(t1)) {/* TODO(nm): error */}
+      if (!table->lookup(t2)) {/* TODO(nm): error */}
+
+      Symbol temp;
+      while (t1) {
+         temp = t2;
+         while (temp) {
+            if (strcmp(t1->get_string(), temp->get_string()) == 0) return t1;
+            temp = table->lookup(temp);
+         }
+         t1 = table->lookup(t1);
+      }
+      return NULL; // This is an error; object, at least, should be a common parent
    }
    /* ******** End LP added functions ******** */
 
@@ -149,6 +194,12 @@ public:
 
 // define simple phylum - Case
 typedef class Case_class *Case;
+
+//////////////////////////////////////////////////////////
+//
+// CASE DEFINITION: Case_class
+//
+//////////////////////////////////////////////////////////
 
 class Case_class : public tree_node {
 public:
@@ -196,6 +247,13 @@ typedef Cases_class *Cases;
 
 // define the class for constructors
 // define constructor - program
+
+//////////////////////////////////////////////////////////
+//
+// PROGRAM NODE DEFINITION: program_class
+//
+//////////////////////////////////////////////////////////
+
 class program_class : public Program_class {
 protected:
    Classes classes;
@@ -222,6 +280,13 @@ public:
 
 
 // define constructor - class_
+
+//////////////////////////////////////////////////////////
+//
+// CLASS NODE DEFINITION: class__class
+//
+//////////////////////////////////////////////////////////
+
 class class__class : public Class__class {
 protected:
    Symbol name;
@@ -255,6 +320,13 @@ public:
 };
 
 // define constructor - method
+
+//////////////////////////////////////////////////////////
+//
+// METHOD NODE DEFINITION: method_class
+//
+//////////////////////////////////////////////////////////
+
 class method_class : public Feature_class {
 protected:
    Symbol name;
@@ -289,6 +361,13 @@ public:
 
 
 // define constructor - attr
+
+//////////////////////////////////////////////////////////
+//
+// ATTRIBUTE NODE DEFINITION: attr_class
+//
+//////////////////////////////////////////////////////////
+
 class attr_class : public Feature_class {
 protected:
    Symbol name;
@@ -321,6 +400,13 @@ public:
 };
 
 // define constructor - formal
+
+//////////////////////////////////////////////////////////
+//
+// FORMAL NODE DEFINITION: formal_class
+//
+//////////////////////////////////////////////////////////
+
 class formal_class : public Formal_class {
 protected:
    Symbol name;
@@ -349,6 +435,13 @@ public:
 
 
 // define constructor - branch
+
+//////////////////////////////////////////////////////////
+//
+// CASE NODE DEFINITION: branch_class
+//
+//////////////////////////////////////////////////////////
+
 class branch_class : public Case_class {
 protected:
    Symbol name;
@@ -380,6 +473,13 @@ public:
 
 
 // define constructor - assign
+
+//////////////////////////////////////////////////////////
+//
+// ASSIGNMENT EXPRESSION NODE DEFINITION: assign_class
+//
+//////////////////////////////////////////////////////////
+
 class assign_class : public Expression_class {
 protected:
    Symbol name;
@@ -417,10 +517,18 @@ public:
     * return type: The type of this node is T' 
     * ********************************************************************* */
 
-   Symbol typcheck() {
-      Symbol name_t = cur_symbols->lookup(name);
-      Symbol expr_t = expr->typcheck();
-      if (!class_table->isparent(name_t, expr_t)) {
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      // TODO(nm): Symbols is an as of yet undefined symbol table storing
+      //           all of the valid ids -> types in the current scope.
+      //           Management of this data structure has not yet been 
+      //           figured out.
+      Symbol name_t = symbols->lookup(name);
+      if (!name_t) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
+      }
+      Symbol expr_t = expr->typcheck(class_graph);
+      if (!isparent(name_t, expr_t, class_graph)) {
          // TODO(nm): non-shitty error handling
          cerr << "Type conformation error" << endl;
       }
@@ -440,6 +548,13 @@ public:
 
 
 // define constructor - static_dispatch
+
+//////////////////////////////////////////////////////////
+//
+// STATIC DISPATCH EXPRESSION NODE DEFINITION: static_dispatch_class
+//
+//////////////////////////////////////////////////////////
+
 class static_dispatch_class : public Expression_class {
 protected:
    Expression expr;
@@ -485,7 +600,7 @@ public:
     * If T(n+1)' is SELF_TYPE, return T0, otherwise, return T(n+1)'
     * ********************************************************************* */
 
-   Symbol typcheck() {
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
       // TODO(nm)
    }
 
@@ -501,6 +616,13 @@ public:
 
 
 // define constructor - dispatch
+
+//////////////////////////////////////////////////////////
+//
+// DISPATCH EXPRESSION NODE DEFINITION: dispatch_class
+//
+//////////////////////////////////////////////////////////
+
 class dispatch_class : public Expression_class {
 protected:
    Expression expr;
@@ -543,7 +665,7 @@ public:
     * If T(n+1)' is SELF_TYPE, return T0, otherwise, return T(n+1)'
     * ********************************************************************* */
 
-   Symbol typcheck() {
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
       // TODO(nm)
    }
 
@@ -559,6 +681,13 @@ public:
 
 
 // define constructor - cond
+
+//////////////////////////////////////////////////////////
+//
+// CONDITIONAL EXPRESSION NODE DEFINITION: cond_class
+//
+//////////////////////////////////////////////////////////
+
 class cond_class : public Expression_class {
 protected:
    Expression pred;
@@ -595,15 +724,15 @@ public:
     * the return type is the common parent type of then_exp and else_exp
     * ********************************************************************* */
 
-      Symbol typcheck() {
-         Symbol pred_t = pred->typcheck();
+      Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+         Symbol pred_t = pred->typcheck(class_graph);
          if (strcmp(pred_t->get_string(), "Bool") != 0) {
             // TODO(nm): non-shitty error handling
             cerr << "Predicate type of if statement must be Bool." << endl;
          }
          Symbol then_t = then_exp->typcheck();
          Symbol else_t = else_exp->typcheck();
-         return class_table->get_common_parent(then_t, else_t);
+         return get_common_parent(then_t, else_t, class_graph);
       }
 
    /* ******** End LP added functions ******** */
@@ -618,6 +747,13 @@ public:
 
 
 // define constructor - loop
+
+//////////////////////////////////////////////////////////
+//
+// LOOP EXPRESSION NODE DEFINITION: loop_class
+//
+//////////////////////////////////////////////////////////
+
 class loop_class : public Expression_class {
 protected:
    Expression pred;
@@ -641,7 +777,30 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "loop"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for loop :
+    * predicate must be boolean
+    * body can have any type
+    * return type is Object
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol pred_t = pred->typcheck(class_graph);
+      if (strcmp(pred_t->get_string(), "Bool") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Predicate type of if statement must be Bool." << endl;
+      }
+      Symbol body_t = body->typcheck(class_graph);
+
+      // TODO(nm): is this the right way to do this?
+      return Object;
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -654,6 +813,13 @@ public:
 
 
 // define constructor - typcase
+
+//////////////////////////////////////////////////////////
+//
+// TYPCASE EXPRESSION NODE DEFINITION: typcase_class
+//
+//////////////////////////////////////////////////////////
+
 class typcase_class : public Expression_class {
 protected:
    Expression expr;
@@ -677,7 +843,20 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "typcase"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for case expression :
+    * 
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      // TODO(nm)
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -690,6 +869,13 @@ public:
 
 
 // define constructor - block
+
+//////////////////////////////////////////////////////////
+//
+// BLOCK EXPRESSION NODE DEFINITION: block_class
+//
+//////////////////////////////////////////////////////////
+
 class block_class : public Expression_class {
 protected:
    Expressions body;
@@ -711,7 +897,25 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "block"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for block class :
+    * expresions can be any type
+    * return type must be the type of the last expression
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol t;
+      for (int i = body->first(); body->more(i); i = body->next(i)) {
+         t = body->nth(i)->typcheck(class_graph);
+      }
+      return t;
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -724,6 +928,13 @@ public:
 
 
 // define constructor - let
+
+//////////////////////////////////////////////////////////
+//
+// LET EXPRESSION NODE DEFINITION: let_class
+//
+//////////////////////////////////////////////////////////
+
 class let_class : public Expression_class {
 protected:
    Symbol identifier;
@@ -751,7 +962,20 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "let"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for let expressions :
+    * 
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      // TODO(nm)
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -764,6 +988,13 @@ public:
 
 
 // define constructor - plus
+
+//////////////////////////////////////////////////////////
+//
+// ADDITION EXPRESSION NODE DEFINITION: plus_class
+//
+//////////////////////////////////////////////////////////
+
 class plus_class : public Expression_class {
 protected:
    Expression e1;
@@ -787,7 +1018,36 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "plus"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol e1_t = e1->typcheck(class_graph);
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typcheck(class_graph);
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -800,6 +1060,13 @@ public:
 
 
 // define constructor - sub
+
+//////////////////////////////////////////////////////////
+//
+// SUBTRACTION EXPRESSION NODE DEFINITION: sub_class
+//
+//////////////////////////////////////////////////////////
+
 class sub_class : public Expression_class {
 protected:
    Expression e1;
@@ -823,7 +1090,36 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "sub"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol e1_t = e1->typcheck(class_graph);
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typcheck(class_graph);
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -836,6 +1132,13 @@ public:
 
 
 // define constructor - mul
+
+//////////////////////////////////////////////////////////
+//
+// MULTIPLICATION EXPRESSION NODE DEFINITION: mul_class
+//
+//////////////////////////////////////////////////////////
+
 class mul_class : public Expression_class {
 protected:
    Expression e1;
@@ -858,8 +1161,37 @@ public:
    Cases get_cases()              { return NULL; }
    Boolean get_bool_val()         { return true; } 
 
-   char* get_type_name()               { return "mul"; } 
-   //virtual typcheck() = 0;
+   char* get_type_name()               { return "mul"; }  
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol e1_t = e1->typcheck(class_graph);
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typcheck(class_graph);
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -872,6 +1204,13 @@ public:
 
 
 // define constructor - divide
+
+//////////////////////////////////////////////////////////
+//
+// DIVISION EXPRESSION NODE DEFINITION: divide_class
+//
+//////////////////////////////////////////////////////////
+
 class divide_class : public Expression_class {
 protected:
    Expression e1;
@@ -895,7 +1234,36 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "divide"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+
+   Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) {
+      Symbol e1_t = e1->typcheck(class_graph);
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typcheck(class_graph);
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+
+   }
+
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -908,6 +1276,13 @@ public:
 
 
 // define constructor - neg
+
+//////////////////////////////////////////////////////////
+//
+// NEGATION EXPRESSION NODE DEFINITION: neg_class
+//
+//////////////////////////////////////////////////////////
+
 class neg_class : public Expression_class {
 protected:
    Expression e1;
@@ -942,6 +1317,13 @@ public:
 
 
 // define constructor - lt
+
+//////////////////////////////////////////////////////////
+//
+// LESS THAN (<) EXPRESSION NODE DEFINITION: lt_class
+//
+//////////////////////////////////////////////////////////
+
 class lt_class : public Expression_class {
 protected:
    Expression e1;
@@ -978,6 +1360,13 @@ public:
 
 
 // define constructor - eq
+
+//////////////////////////////////////////////////////////
+//
+// EQUALS (=) EXPRESSION NODE DEFINITION: eq_class
+//
+//////////////////////////////////////////////////////////
+
 class eq_class : public Expression_class {
 protected:
    Expression e1;
@@ -1014,6 +1403,13 @@ public:
 
 
 // define constructor - leq
+
+//////////////////////////////////////////////////////////
+//
+// LESS THAN OR EQUAL TO (<=) EXPRESSION NODE DEFINITION: leq_class
+//
+//////////////////////////////////////////////////////////
+
 class leq_class : public Expression_class {
 protected:
    Expression e1;
@@ -1050,6 +1446,13 @@ public:
 
 
 // define constructor - comp
+
+//////////////////////////////////////////////////////////
+//
+// INTEGER COMPLEMENT EXPRESSION NODE DEFINITION: comp_class
+//
+//////////////////////////////////////////////////////////
+
 class comp_class : public Expression_class {
 protected:
    Expression e1;
@@ -1084,6 +1487,13 @@ public:
 
 
 // define constructor - int_const
+
+//////////////////////////////////////////////////////////
+//
+// INTEGER CONSTANT EXPRESSION NODE DEFINITION: int_const_class
+//
+//////////////////////////////////////////////////////////
+
 class int_const_class : public Expression_class {
 protected:
    Symbol token;
@@ -1118,6 +1528,13 @@ public:
 
 
 // define constructor - bool_const
+
+//////////////////////////////////////////////////////////
+//
+// BOOLEAN CONSTANT EXPRESSION NODE DEFINITION: bool_const_class
+//
+//////////////////////////////////////////////////////////
+
 class bool_const_class : public Expression_class {
 protected:
    Boolean val;
@@ -1152,6 +1569,13 @@ public:
 
 
 // define constructor - string_const
+
+//////////////////////////////////////////////////////////
+//
+// STRING CONSTANT EXPRESSION NODE DEFINITION: string_const_class
+//
+//////////////////////////////////////////////////////////
+
 class string_const_class : public Expression_class {
 protected:
    Symbol token;
@@ -1186,6 +1610,13 @@ public:
 
 
 // define constructor - new_
+
+//////////////////////////////////////////////////////////
+//
+// NEW OBJECT EXPRESSION NODE DEFINITION: new_class
+//
+//////////////////////////////////////////////////////////
+
 class new__class : public Expression_class {
 protected:
    Symbol type_name;
@@ -1220,6 +1651,13 @@ public:
 
 
 // define constructor - isvoid
+
+//////////////////////////////////////////////////////////
+//
+// ISVOID EXPRESSION NODE DEFINITION: isvoid_class
+//
+//////////////////////////////////////////////////////////
+
 class isvoid_class : public Expression_class {
 protected:
    Expression e1;
@@ -1254,6 +1692,13 @@ public:
 
 
 // define constructor - no_expr
+
+//////////////////////////////////////////////////////////
+//
+// NO EXPRESSION NODE DEFINITION: no_expr_class
+//
+//////////////////////////////////////////////////////////
+
 class no_expr_class : public Expression_class {
 protected:
 public:
@@ -1286,6 +1731,13 @@ public:
 
 
 // define constructor - object
+
+//////////////////////////////////////////////////////////
+//
+// OBJECT EXPRESSION NODE DEFINITION: object_class
+//
+//////////////////////////////////////////////////////////
+
 class object_class : public Expression_class {
 protected:
    Symbol name;

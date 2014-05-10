@@ -376,12 +376,17 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
+SymbolTable<Symbol, Entry>* ClassTable::get_inherit_graph() {
+    return inherit_graph;
+}
+
 
 bool program_class::typecheck(ClassTable * classtable) {
     int status = 0;
+    SymbolTable<Symbol, Entry>* inherit_graph = classtable->get_inherit_graph();
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        CLass_ c = classes->nth(i);
-        if (!c->typecheck(classtable)) status++;
+        Class_ c = classes->nth(i);
+        if (!c->typcheck(inherit_graph)) status++;
     }
     return status == 0;
 }
@@ -419,6 +424,7 @@ void program_class::semant()
 
 
     //typecheck
+    typecheck(classtable);
 }
 
 
