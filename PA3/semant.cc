@@ -296,18 +296,38 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
                 ostream& err_stream = semant_error(curr_class);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
-            } else if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
-                ostream& err_stream = semant_error(curr_class);
-                err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
+            } else if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
+                if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
+                } else {
+                    class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
+                }
             } else {
                 class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
             }
         }
     }
+    Class_ curr_parent = curr_class;
     while (true) {
-        Class_ curr_class = find_class_by_name(program_classes_AST, curr_class->get_parent()->get_string());
-        if (curr_class == NULL) break;
-        //only add the valid types from parent classes. 
+        curr_parent = find_class_by_name(program_classes_AST, curr_parent->get_parent()->get_string());
+        if (curr_parent == NULL) break;
+        Features features = curr_parent->get_features();
+        for (int i = features->first(); features->more(i); i = features->next(i)) {
+            Feature curr_feature = features->nth(i);
+            if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
+                if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
+                } else {
+                    if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
+                        if (defined_types->lookup(curr_feature->get_type()->get_string()) != NULL) {
+                            class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
+                        }
+                    }
+                }
+            }
+        } 
     }
     curr_class->set_variables_in_scope(class_scope_variables);
 }
@@ -499,6 +519,11 @@ void program_class::semant()
     }
 
     classtable->settup_typecheck_enviornment();
+
+    if (classtable->errors()) {
+       cerr << "Compilation halted due to static semantic errors." << endl;
+       exit(1);
+    }
 
 
 
