@@ -37,9 +37,18 @@ public:
 typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
+protected:
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
-   tree_node *copy()		 { return copy_Class_(); }
+   tree_node *copy()		     { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
+
+   void set_root_class(Class_ _root_class) { root_class = _root_class; }
+   Class_ get_root_class() { return root_class; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry> _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   SymbolTable<Symbol, Entry> get_variables_in_scope() { return variables_in_scope; }
+   
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
@@ -60,9 +69,17 @@ public:
 typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
+protected:
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+
+   void set_root_class(Class_ _root_class) { root_class = _root_class; }
+   Class_ get_root_class() { return root_class; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry> _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   SymbolTable<Symbol, Entry> get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
@@ -83,9 +100,17 @@ public:
 typedef class Formal_class *Formal;
 
 class Formal_class : public tree_node {
+protected:
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
+
+   void set_root_class(Class_ _root_class) { root_class = _root_class; }
+   Class_ get_root_class() { return root_class; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry> _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   SymbolTable<Symbol, Entry> get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
@@ -103,9 +128,17 @@ public:
 typedef class Expression_class *Expression;
 
 class Expression_class : public tree_node {
+protected:
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Expression(); }
    virtual Expression copy_Expression() = 0;
+
+   void set_root_class(Class_ _root_class) { root_class = _root_class; }
+   Class_ get_root_class() { return root_class; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry> _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   SymbolTable<Symbol, Entry> get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
@@ -116,7 +149,6 @@ public:
    virtual Expressions get_expressions() = 0; // static dispatch, normal dispatch, block, 
    virtual Cases get_cases() = 0; // case, 
    virtual Boolean get_bool_val() = 0; // Bool, 
-
    virtual char* get_type_name() = 0; // assign, static dispatch, 
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
@@ -132,9 +164,17 @@ public:
 typedef class Case_class *Case;
 
 class Case_class : public tree_node {
+protected:
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Case(); }
    virtual Case copy_Case() = 0;
+
+   void set_root_class(Class_ _root_class) { root_class = _root_class; }
+   Class_ get_root_class() { return root_class; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry> _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   SymbolTable<Symbol, Entry> get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
@@ -209,8 +249,6 @@ protected:
    Symbol parent;
    Features features;
    Symbol filename;
-   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
-   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    class__class(Symbol a1, Symbol a2, Features a3, Symbol a4) {
       name = a1;

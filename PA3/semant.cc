@@ -426,6 +426,14 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
+/**
+* ***************************************************
+* ***************************************************
+*/
+void ClassTable::settup_typecheck_enviornment() {
+    
+}
+
 
 
 /*   This is the entry point to the semantic checker.
