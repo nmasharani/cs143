@@ -5,10 +5,8 @@ class Main {
 		self
 	};
 
-	a: Int;
-	a: Int;
+	a: Ytype;
 };
 
 class A inherits Main {
-	a: Int;
 };

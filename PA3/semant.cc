@@ -296,6 +296,9 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
                 ostream& err_stream = semant_error(curr_class);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
+            } else if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
             } else {
                 class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
             }
@@ -304,6 +307,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
     while (true) {
         Class_ curr_class = find_class_by_name(program_classes_AST, curr_class->get_parent()->get_string());
         if (curr_class == NULL) break;
+        //only add the valid types from parent classes. 
     }
     curr_class->set_variables_in_scope(class_scope_variables);
 }
