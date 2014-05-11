@@ -380,6 +380,181 @@ void ClassTable::initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>
 void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Expression expression_to_init) {
     expression_to_init->set_root_class(root_class);
     expression_to_init->set_variables_in_scope(variables_in_scope);
+
+    /* Base case 0: expr is an Object expression */
+    if (strcmp(expression_to_init->get_type_name(), "object") == 0) {
+        /* check if the object is in the symbol table. If it is, we are happy, otherwise, error */
+        if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
+            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
+        }
+        return; 
+    }
+
+    /* Base case 1: No expression */
+    if (strcmp(expression_to_init->get_type_name(), "no_expr") == 0) return; 
+
+    /* Base case 2: new */
+    if (strcmp(expression_to_init->get_type_name(), "new_") == 0) {
+        if (defined_types->lookup(expression_to_init->get_var_type()) == NULL) {
+            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            err_stream << "'New' used with undefined class " << expression_to_init->get_var_type()->get_string() << ".\n";
+        }
+        return;
+    } 
+
+    /* Base case 3: string_const */
+    if (strcmp(expression_to_init->get_type_name(), "string_const") == 0) return; 
+
+    /* Base case 4: Bool_const */
+    if (strcmp(expression_to_init->get_type_name(), "bool_const") == 0) return; 
+
+    /* Base case 5: Int const */
+    if (strcmp(expression_to_init->get_type_name(), "int_const") == 0) return; 
+
+    /* Recurse case 0: Is void */
+    if (strcmp(expression_to_init->get_type_name(), "isvoid") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        return;
+    } 
+
+    /* Recurse case 1: comp */
+    if (strcmp(expression_to_init->get_type_name(), "comp") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        return;
+    } 
+
+    /* Recurse case 2: leq */
+    if (strcmp(expression_to_init->get_type_name(), "leq") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 3: eq */
+    if (strcmp(expression_to_init->get_type_name(), "eq") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 4: lt */
+    if (strcmp(expression_to_init->get_type_name(), "lt") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 5: divide */
+    if (strcmp(expression_to_init->get_type_name(), "neg") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        return;
+    } 
+
+    /* Recurse case 5: divide */
+    if (strcmp(expression_to_init->get_type_name(), "divide") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 6: mul */
+if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 7: sub */
+    if (strcmp(expression_to_init->get_type_name(), "sub") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 8: plus */
+    if (strcmp(expression_to_init->get_type_name(), "plus") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 9: block */
+    if (strcmp(expression_to_init->get_type_name(), "block") == 0) {
+        Expressions expressions = expression_to_init->get_expressions();
+        for (int j = expressions->first(); expressions->more(j); j = expressions->next(j)) {
+            Expression curr_expr = expressions->nth(j);
+            initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), curr_expr);
+        }
+        return;
+    } 
+
+    /* Recurse case 10: loop */
+    if (strcmp(expression_to_init->get_type_name(), "loop") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recurse case 11: cond */
+    if (strcmp(expression_to_init->get_type_name(), "cond") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_3());
+        return;
+    } 
+
+     /* Recurse case 12: dispatch */
+    if (strcmp(expression_to_init->get_type_name(), "dispatch") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+     /* Recurse case 13: static dispatch */
+    if (strcmp(expression_to_init->get_type_name(), "static_dispatch") == 0) {
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+     /* Recurse case 14: assign */
+    if (strcmp(expression_to_init->get_type_name(), "assign") == 0) {
+        if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
+            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
+        }
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        return;
+    } 
+
+    /* Recursive case with new scope 0: let statement */
+    if (strcmp(expression_to_init->get_type_name(), "let") == 0) {
+        expression_to_init->get_variables_in_scope()->enterscope();
+        if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
+            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            err_stream << "Class " << expression_to_init->get_var_type()->get_string() << " of let-bound identifier " << expression_to_init->name()->get_string() << " is undefined.\n";
+        }
+        expression_to_init->get_variables_in_scope()->addid(expression_to_init->get_name(), expression_to_init->get_var_type());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
+        return;
+    } 
+
+    /* Recursive case with new scope 1: case statement */
+    if (strcmp(expr->get_type_name(), "typcase") == 0) {
+        evaluate_expressions(scopes, expr->get_expression_1());
+        Cases cases = expr->get_cases();
+        for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+            Case curr_case = cases->nth(i);
+            scopes.enterscope();
+            scopes.addid(curr_case->get_name(), curr_case->get_type_decl());
+            evaluate_expressions(scopes, curr_case->get_expr());
+            scopes.exitscope();
+        }
+        return;
+    }
+}
     
 }
 
