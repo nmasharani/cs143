@@ -16,6 +16,13 @@
 
 // define the class for phylum
 // define simple phylum - Program
+
+//////////////////////////////////////////////////////////
+//
+// Program_class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Program_class *Program;
 
 class Program_class : public tree_node {
@@ -34,11 +41,19 @@ public:
 
 
 // define simple phylum - Class_
+
+//////////////////////////////////////////////////////////
+//
+// Class__class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
+   SymbolTable<Symbol, Entry>* inheritance_graph;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		     { return copy_Class_(); }
@@ -48,6 +63,8 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
+   void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
+   SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
    
 
    /* ********** LP added functions ********** */
@@ -66,11 +83,19 @@ public:
 
 
 // define simple phylum - Feature
+
+//////////////////////////////////////////////////////////
+//
+// Feature_class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
+   SymbolTable<Symbol, Entry>* inheritance_graph;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Feature(); }
@@ -80,7 +105,8 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
-
+   void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
+   SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
@@ -97,6 +123,13 @@ public:
 
 
 // define simple phylum - Formal
+
+//////////////////////////////////////////////////////////
+//
+// Formal_class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Formal_class *Formal;
 
 class Formal_class : public tree_node {
@@ -125,11 +158,19 @@ public:
 
 
 // define simple phylum - Expression
+
+//////////////////////////////////////////////////////////
+//
+// Expression_class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Expression_class *Expression;
 
 class Expression_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
+   SymbolTable<Symbol, Entry>* inheritance_graph;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Expression(); }
@@ -139,6 +180,8 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
+   void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
+   SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
@@ -150,8 +193,36 @@ public:
    virtual Cases get_cases() = 0; // case, 
    virtual Boolean get_bool_val() = 0; // Bool, 
    virtual char* get_type_name() = 0; // assign, static dispatch, 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
+
+   // virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
+
+   // Is t1 a parent of t2?
+   bool isparent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
+      if (!table->lookup(t2)) {/* TODO(nm): error */}
+
+      while (t2) {
+         if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
+         t2 = table->lookup(t2);
+      }
+      return false;
+   }
+
+   Symbol get_common_parent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
+      if (!table->lookup(t1)) {/* TODO(nm): error */}
+      if (!table->lookup(t2)) {/* TODO(nm): error */}
+
+      Symbol temp;
+      while (t1) {
+         temp = t2;
+         while (temp) {
+            if (strcmp(t1->get_string(), temp->get_string()) == 0) return t1;
+            temp = table->lookup(temp);
+         }
+         t1 = table->lookup(t1);
+      }
+      return NULL; // This is an error; object, at least, should be a common parent
+   }
 
 
 #ifdef Expression_EXTRAS
@@ -161,11 +232,19 @@ public:
 
 
 // define simple phylum - Case
+
+//////////////////////////////////////////////////////////
+//
+// Case_class 
+//
+//////////////////////////////////////////////////////////
+
 typedef class Case_class *Case;
 
 class Case_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
+   SymbolTable<Symbol, Entry>* inheritance_graph;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Case(); }
@@ -175,7 +254,9 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
-
+   void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
+   SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
+   
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type_decl() = 0;
@@ -217,6 +298,13 @@ typedef Cases_class *Cases;
 
 // define the class for constructors
 // define constructor - program
+
+//////////////////////////////////////////////////////////
+//
+// program_class 
+//
+//////////////////////////////////////////////////////////
+
 class program_class : public Program_class {
 protected:
    Classes classes;
@@ -243,6 +331,13 @@ public:
 
 
 // define constructor - class_
+
+//////////////////////////////////////////////////////////
+//
+// class__class 
+//
+//////////////////////////////////////////////////////////
+
 class class__class : public Class__class {
 protected:
    Symbol name;
@@ -276,6 +371,13 @@ public:
 };
 
 // define constructor - method
+
+//////////////////////////////////////////////////////////
+//
+// method_class 
+//
+//////////////////////////////////////////////////////////
+
 class method_class : public Feature_class {
 protected:
    Symbol name;
@@ -311,6 +413,13 @@ public:
 
 
 // define constructor - attr
+
+//////////////////////////////////////////////////////////
+//
+// attr_class 
+//
+//////////////////////////////////////////////////////////
+
 class attr_class : public Feature_class {
 protected:
    Symbol name;
@@ -343,6 +452,13 @@ public:
 };
 
 // define constructor - formal
+
+//////////////////////////////////////////////////////////
+//
+// formal_class 
+//
+//////////////////////////////////////////////////////////
+
 class formal_class : public Formal_class {
 protected:
    Symbol name;
@@ -371,6 +487,13 @@ public:
 
 
 // define constructor - branch
+
+//////////////////////////////////////////////////////////
+//
+// branch_class 
+//
+//////////////////////////////////////////////////////////
+
 class branch_class : public Case_class {
 protected:
    Symbol name;
@@ -402,6 +525,13 @@ public:
 
 
 // define constructor - assign
+
+//////////////////////////////////////////////////////////
+//
+// assign_class 
+//
+//////////////////////////////////////////////////////////
+
 class assign_class : public Expression_class {
 protected:
    Symbol name;
@@ -438,6 +568,13 @@ public:
 
 
 // define constructor - static_dispatch
+
+//////////////////////////////////////////////////////////
+//
+// static_dispatch_class 
+//
+//////////////////////////////////////////////////////////
+
 class static_dispatch_class : public Expression_class {
 protected:
    Expression expr;
@@ -479,6 +616,13 @@ public:
 
 
 // define constructor - dispatch
+
+//////////////////////////////////////////////////////////
+//
+// dispatch_class 
+//
+//////////////////////////////////////////////////////////
+
 class dispatch_class : public Expression_class {
 protected:
    Expression expr;
@@ -517,6 +661,13 @@ public:
 
 
 // define constructor - cond
+
+//////////////////////////////////////////////////////////
+//
+// cond_class 
+//
+//////////////////////////////////////////////////////////
+
 class cond_class : public Expression_class {
 protected:
    Expression pred;
@@ -555,6 +706,13 @@ public:
 
 
 // define constructor - loop
+
+//////////////////////////////////////////////////////////
+//
+// loop_class 
+//
+//////////////////////////////////////////////////////////
+
 class loop_class : public Expression_class {
 protected:
    Expression pred;
@@ -591,6 +749,13 @@ public:
 
 
 // define constructor - typcase
+
+//////////////////////////////////////////////////////////
+//
+// typcase_class 
+//
+//////////////////////////////////////////////////////////
+
 class typcase_class : public Expression_class {
 protected:
    Expression expr;
@@ -627,6 +792,13 @@ public:
 
 
 // define constructor - block
+
+//////////////////////////////////////////////////////////
+//
+// block_class 
+//
+//////////////////////////////////////////////////////////
+
 class block_class : public Expression_class {
 protected:
    Expressions body;
@@ -661,6 +833,13 @@ public:
 
 
 // define constructor - let
+
+//////////////////////////////////////////////////////////
+//
+// let_class 
+//
+//////////////////////////////////////////////////////////
+
 class let_class : public Expression_class {
 protected:
    Symbol identifier;
@@ -701,6 +880,13 @@ public:
 
 
 // define constructor - plus
+
+//////////////////////////////////////////////////////////
+//
+// plus_class 
+//
+//////////////////////////////////////////////////////////
+
 class plus_class : public Expression_class {
 protected:
    Expression e1;
@@ -737,6 +923,13 @@ public:
 
 
 // define constructor - sub
+
+//////////////////////////////////////////////////////////
+//
+// sub_class 
+//
+//////////////////////////////////////////////////////////
+
 class sub_class : public Expression_class {
 protected:
    Expression e1;
@@ -773,6 +966,13 @@ public:
 
 
 // define constructor - mul
+
+//////////////////////////////////////////////////////////
+//
+// mul_class 
+//
+//////////////////////////////////////////////////////////
+
 class mul_class : public Expression_class {
 protected:
    Expression e1;
@@ -809,6 +1009,13 @@ public:
 
 
 // define constructor - divide
+
+//////////////////////////////////////////////////////////
+//
+// divide_class 
+//
+//////////////////////////////////////////////////////////
+
 class divide_class : public Expression_class {
 protected:
    Expression e1;
@@ -845,6 +1052,13 @@ public:
 
 
 // define constructor - neg
+
+//////////////////////////////////////////////////////////
+//
+// neg_class 
+//
+//////////////////////////////////////////////////////////
+
 class neg_class : public Expression_class {
 protected:
    Expression e1;
@@ -915,6 +1129,13 @@ public:
 
 
 // define constructor - eq
+
+//////////////////////////////////////////////////////////
+//
+// eq_class 
+//
+//////////////////////////////////////////////////////////
+
 class eq_class : public Expression_class {
 protected:
    Expression e1;
@@ -951,6 +1172,13 @@ public:
 
 
 // define constructor - leq
+
+//////////////////////////////////////////////////////////
+//
+// leq_class 
+//
+//////////////////////////////////////////////////////////
+
 class leq_class : public Expression_class {
 protected:
    Expression e1;
@@ -987,6 +1215,13 @@ public:
 
 
 // define constructor - comp
+
+//////////////////////////////////////////////////////////
+//
+// comp_class 
+//
+//////////////////////////////////////////////////////////
+
 class comp_class : public Expression_class {
 protected:
    Expression e1;
@@ -1021,6 +1256,13 @@ public:
 
 
 // define constructor - int_const
+
+//////////////////////////////////////////////////////////
+//
+// int_const_class 
+//
+//////////////////////////////////////////////////////////
+
 class int_const_class : public Expression_class {
 protected:
    Symbol token;
@@ -1055,6 +1297,13 @@ public:
 
 
 // define constructor - bool_const
+
+//////////////////////////////////////////////////////////
+//
+// bool_const_class 
+//
+//////////////////////////////////////////////////////////
+
 class bool_const_class : public Expression_class {
 protected:
    Boolean val;
@@ -1089,6 +1338,13 @@ public:
 
 
 // define constructor - string_const
+
+//////////////////////////////////////////////////////////
+//
+// string_const_class 
+//
+//////////////////////////////////////////////////////////
+
 class string_const_class : public Expression_class {
 protected:
    Symbol token;
@@ -1123,6 +1379,13 @@ public:
 
 
 // define constructor - new_
+
+//////////////////////////////////////////////////////////
+//
+// new__class 
+//
+//////////////////////////////////////////////////////////
+
 class new__class : public Expression_class {
 protected:
    Symbol type_name;
@@ -1157,6 +1420,13 @@ public:
 
 
 // define constructor - isvoid
+
+//////////////////////////////////////////////////////////
+//
+// isvoid_class 
+//
+//////////////////////////////////////////////////////////
+
 class isvoid_class : public Expression_class {
 protected:
    Expression e1;
@@ -1191,6 +1461,13 @@ public:
 
 
 // define constructor - no_expr
+
+//////////////////////////////////////////////////////////
+//
+// no_expr_class 
+//
+//////////////////////////////////////////////////////////
+
 class no_expr_class : public Expression_class {
 protected:
 public:
@@ -1223,6 +1500,13 @@ public:
 
 
 // define constructor - object
+
+//////////////////////////////////////////////////////////
+//
+// object_class 
+//
+//////////////////////////////////////////////////////////
+
 class object_class : public Expression_class {
 protected:
    Symbol name;

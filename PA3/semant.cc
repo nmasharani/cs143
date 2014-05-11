@@ -396,7 +396,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
 
     /* Base case 2: new */
     if (strcmp(expression_to_init->get_type_name(), "new_") == 0) {
-        if (defined_types->lookup(expression_to_init->get_var_type()) == NULL) {
+        if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(expression_to_init->get_root_class());
             err_stream << "'New' used with undefined class " << expression_to_init->get_var_type()->get_string() << ".\n";
         }
@@ -459,7 +459,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     } 
 
     /* Recurse case 6: mul */
-if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
+    if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
         return;
@@ -533,7 +533,7 @@ if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
         expression_to_init->get_variables_in_scope()->enterscope();
         if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(expression_to_init->get_root_class());
-            err_stream << "Class " << expression_to_init->get_var_type()->get_string() << " of let-bound identifier " << expression_to_init->name()->get_string() << " is undefined.\n";
+            err_stream << "Class " << expression_to_init->get_var_type()->get_string() << " of let-bound identifier " << expression_to_init->get_name()->get_string() << " is undefined.\n";
         }
         expression_to_init->get_variables_in_scope()->addid(expression_to_init->get_name(), expression_to_init->get_var_type());
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
@@ -543,7 +543,8 @@ if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
 
     /* Recursive case with new scope 1: case statement */
     /* STILL NEED TO FINSIH THIS ONE */
-    if (strcmp(expr->get_type_name(), "typcase") == 0) {
+
+    if (strcmp(expression_to_init->get_type_name(), "typcase") == 0) {
         evaluate_expressions(scopes, expr->get_expression_1());
         Cases cases = expr->get_cases();
         for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
@@ -557,8 +558,6 @@ if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
     }
 }
     
-}
-
 
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 
@@ -723,6 +722,60 @@ void ClassTable::settup_typecheck_enviornment() {
     }
 }
 
+void ClassTable::update_expression_with_inheritance(Expression e, SymbolTable<Symbol, Entry> * graph) {
+    e->set_inheritance_graph(graph);
+    if (e->get_expression_1()) {
+        update_expression_with_inheritance(e->get_expression_1(), graph);
+    }
+    if (e->get_expression_2()) {
+        update_expression_with_inheritance(e->get_expression_2(), graph);
+    }
+    if (e->get_expression_3()) {
+        update_expression_with_inheritance(e->get_expression_3(), graph);
+    }
+    if (e->get_expressions()) {
+        Expressions exprs = e->get_expressions();
+        for (int i = exprs->first(); exprs->more(i); i = exprs->next(i)) {
+            update_expression_with_inheritance(exprs->nth(i), graph);
+        }
+    }
+    if (e->get_cases()) {
+        Cases cases = e->get_cases();
+        for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+            Case cur_case = cases->nth(i);
+            cur_case->set_inheritance_graph(graph);
+            update_expression_with_inheritance(cur_case->get_expr(), graph);
+        }
+    }
+}
+
+void ClassTable::update_branch_with_inheritance(Class_ c, SymbolTable<Symbol, Entry> * graph) {
+    Features feats = c->get_features();
+    for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
+        Feature feat = feats->nth(i);
+        feat->set_inheritance_graph(graph);
+        update_expression_with_inheritance(feat->get_expression(), graph);
+    }
+}
+
+void ClassTable::setup_inheritance_trackers() {
+    SymbolTable<Symbol, Entry> * inheritance_graph = new SymbolTable<Symbol, Entry>();
+    inheritance_graph->enterscope();
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ curr_class = program_classes_AST->nth(i);
+        inheritance_graph->addid(curr_class->get_name(), curr_class->get_parent());
+    }
+
+    // recursively descend into the symboltable, update each node with the 
+    // inheritance graph
+
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ c = program_classes_AST->nth(i);
+        c->set_inheritance_graph(inheritance_graph);
+        update_branch_with_inheritance(c, inheritance_graph);
+    }
+}
+
 
 /*   This is the entry point to the semantic checker.
 
@@ -757,6 +810,8 @@ void program_class::semant()
        cerr << "Compilation halted due to static semantic errors." << endl;
        exit(1);
     }
+
+    classtable->setup_inheritance_trackers();
 
 
 
