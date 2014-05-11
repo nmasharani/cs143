@@ -488,8 +488,12 @@ void ClassTable::settup_typecheck_enviornment() {
         Class_ curr_class = program_classes_AST->nth(i);
         initialize_class_enviornment(curr_class);
         //now descend into the features and the attributes individually. 
+        //if in an attribute, 
         Features features = curr_class->get_features();
-
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            initialize_feature_enviornment(curr_class, curr_feature);
+        }
     }
 }
 
