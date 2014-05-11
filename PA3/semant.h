@@ -130,6 +130,10 @@ private:
 
   void initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Formal formal_to_init);
 
+  void initialize_expression(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Expression expression_to_init);
+
+  void initialize_case_enviornment(SymbolTable<Symbol, Entry>* variables_in_scope, SymbolTable<char*, int>* case_types_so_far, Class_ root_class, Case curr_case);
+
 
 
   /* ***** LP added Class Table Debug Helper methods ******** */
