@@ -330,6 +330,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
         } 
     }
     curr_class->set_variables_in_scope(class_scope_variables);
+    curr_class->set_root_class(curr_class);
 }
 
 
@@ -486,9 +487,11 @@ void ClassTable::settup_typecheck_enviornment() {
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
         initialize_class_enviornment(curr_class);
+        //now descend into the features and the attributes individually. 
+        Features features = curr_class->get_features();
+
     }
 }
-
 
 
 /*   This is the entry point to the semantic checker.
