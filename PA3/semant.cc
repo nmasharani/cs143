@@ -333,6 +333,56 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
     curr_class->set_root_class(curr_class);
 }
 
+/**
+* ***************************************************
+* Enter a new scope for a formal. 
+* ***************************************************
+*/
+void ClassTable::initialize_feature_enviornment(Class_ parent_class, Feature feature_to_init) {
+    feature_to_init->set_root_class(parent_class->get_root_class());
+    if (strcmp(feature_to_init->get_type_name(), "method") == 0) {
+        SymbolTable<Symbol, Entry>* variables_in_scope = (parent_class->get_variables_in_scope());
+        variables_in_scope->enterscope();
+        feature_to_init->set_variables_in_scope(variables_in_scope);
+        Formals formals = feature_to_init->get_formals();
+        for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
+            Formal curr_formal = formals->nth(i);
+            initialize_formal(feature_to_init->get_root_class(), feature_to_init->get_variables_in_scope(), curr_formal);
+        }
+        initialize_expression(feature_to_init->get_root_class(), feature_to_init->get_variables_in_scope(), feature_to_init->get_expression());
+    } else if (strcmp(feature_to_init->get_type_name(), "attribute") == 0) {
+        feature_to_init->set_variables_in_scope(parent_class->get_variables_in_scope());
+        initialize_expression(feature_to_init->get_root_class(), feature_to_init->get_variables_in_scope(), feature_to_init->get_expression());
+    }
+}
+
+/**
+* ***************************************************
+* just need to add the formal to the table and then set the fields for the formal
+* ***************************************************
+*/
+void ClassTable::initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Formal formal_to_init) {
+    formal_to_init->set_root_class(root_class);
+    formal_to_init->set_variables_in_scope(variables_in_scope);
+    bool can_add = true;
+    if (variables_in_scope->probe(formal_to_init->get_name()) != NULL) {
+        ostream& err_stream = semant_error(root_class);
+        err_stream << "Formal parameter " << formal_to_init->get_name()->get_string() << " is multiply defined.\n";
+        can_add = false;
+    } 
+    if (defined_types->lookup(formal_to_init->get_type()->get_string()) == NULL) {
+        ostream& err_stream = semant_error(root_class);
+        err_stream << "Class " << formal_to_init->get_type()->get_string() << " of formal parameter " << formal_to_init->get_name()->get_string() << " is undefined.\n";
+    } 
+    if (can_add == true) variables_in_scope->addid(formal_to_init->get_name(), formal_to_init->get_type());
+}
+
+void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Expression expression_to_init) {
+    expression_to_init->set_root_class(root_class);
+    expression_to_init->set_variables_in_scope(variables_in_scope);
+    
+}
+
 
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 

@@ -126,6 +126,10 @@ private:
   */
   void initialize_class_enviornment(Class_ curr_class);
 
+  void initialize_feature_enviornment(Class_ parent_class, Feature feature_to_init);
+
+  void initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Formal formal_to_init);
+
 
 
   /* ***** LP added Class Table Debug Helper methods ******** */
