@@ -100,7 +100,45 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_inheritance_cycle(classes_in_program);
     if (status != 0) return;
 
+    status = check_for_main(classes_in_program);
+    if (status != 0) return; 
+
     //arrange the list of classes in order of inheritance. 
+}
+
+/**
+* *****************************************************
+* Return 1 on error, 0 otherwise. 
+* *****************************************************
+*/
+int ClassTable::check_for_main(Classes classes_in_program) {
+    int status = 0;
+    bool main_class_present = false;
+    bool main_method_present = false;
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        Class_ curr_class = classes_in_program->nth(i);
+        if (strcmp(curr_class->get_name()->get_string(), "Main") == 0) {
+            main_class_present = true;
+            Features features = curr_class->get_features();
+            for (int i = features->first(); features->more(i); i = features->next(i)) {
+                Feature curr_feature = features->nth(i);
+                if (strcmp(curr_feature->get_type_name(), "method") == 0) {
+                    if (strcmp(curr_feature->get_name()->get_string(), "main") == 0) {
+                        main_method_present = true;
+                    }
+                }
+            }
+            if (main_method_present == false) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << "No 'main' method in class " << curr_class->get_name()->get_string() << ".\n";
+            }
+        }
+    }
+    if (main_class_present == false) {
+        ostream& err_stream = semant_error();
+        err_stream << "Class Main is not defined.\n";
+    }
+    return status;
 }
 
 /**
@@ -230,11 +268,11 @@ Class_ ClassTable::find_class_by_name(Classes classes, char* name) {
 * return true. 
 * ***************************************************
 */
-bool ClassTable::is_parent(Symbol type1, Symbol type2) {
-    Class_ curr_class = find_class_by_name(classes_in_program, type2->get_name()->get_string());
+bool ClassTable::is_parent(Classes classes_in_program, Symbol type1, Symbol type2) {
+    Class_ curr_class = find_class_by_name(classes_in_program, type2->get_string());
     while (true) {
-        if (strcmp(curr_class->get_parent()->get_string() == type1->get_string()) == 0) return true;
-        if (strcmp(curr_class->get_parent()->get_string() == "_no_class") == 0) break;
+        if (strcmp(curr_class->get_parent()->get_string(), type1->get_string()) == 0) return true;
+        if (strcmp(curr_class->get_parent()->get_string(), "_no_class") == 0) break;
         curr_class = find_class_by_name(classes_in_program, curr_class->get_parent()->get_string());
     }
     return false;

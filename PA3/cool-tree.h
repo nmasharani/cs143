@@ -69,6 +69,7 @@ public:
    virtual Symbol get_type() = 0;
    virtual Formals get_formals() = 0;
    virtual Expression get_expression() = 0;
+   virtual char* get_type_name() = 0;
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
@@ -256,6 +257,7 @@ public:
    Symbol get_type()             { return return_type; }
    Formals get_formals()         { return formals; }
    Expression get_expression()   { return expr; }
+   char* get_type_name()         { return "method"; }
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
@@ -288,6 +290,7 @@ public:
    Symbol get_type()             { return type_decl; }
    Formals get_formals()         { return NULL; }
    Expression get_expression()   { return init; }
+   char* get_type_name()         { return "attribute"; }
    //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
