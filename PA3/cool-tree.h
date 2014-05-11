@@ -209,6 +209,8 @@ protected:
    Symbol parent;
    Features features;
    Symbol filename;
+   SymbolTable<Symbol, Entry> variables_in_scope; //tracks the variables in scope. The O in the. 
+   Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    class__class(Symbol a1, Symbol a2, Features a3, Symbol a4) {
       name = a1;

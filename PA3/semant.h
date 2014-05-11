@@ -37,6 +37,15 @@ private:
 
   /**
   * *****************************************************
+  * Description: the AST of the program is essentialy
+  *     a list of classes, where each class is an AST
+  *     subtree. 
+  * *****************************************************
+  */
+  Classes program_classes_AST;
+
+  /**
+  * *****************************************************
   * Description: returns a list of all classes contained
   *     in the program, which consists of classes defined
   *     defined by program, and the basic classes. 
@@ -117,7 +126,23 @@ private:
   /* ***** End Class Table Debug Helper methods ************* */
 
 public:
+
+  /**
+  * *****************************************************
+  * Constructor
+  * *****************************************************
+  */
   ClassTable(Classes);
+
+  /**
+  * *****************************************************
+  * Description: Iterates through the class_list AST
+  *     and updates the scope and class for each node.
+  *     Also performs naming checks on variables. 
+  * *****************************************************
+  */
+  void settup_typecheck_enviornment();
+
   int errors() { return semant_errors; }
   ostream& semant_error();
   ostream& semant_error(Class_ c);

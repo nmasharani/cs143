@@ -103,7 +103,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_main(classes_in_program);
     if (status != 0) return; 
 
-    //arrange the list of classes in order of inheritance. 
+    program_classes_AST = classes_in_program; 
 }
 
 /**
@@ -131,12 +131,14 @@ int ClassTable::check_for_main(Classes classes_in_program) {
             if (main_method_present == false) {
                 ostream& err_stream = semant_error(curr_class);
                 err_stream << "No 'main' method in class " << curr_class->get_name()->get_string() << ".\n";
+                status = 1;
             }
         }
     }
     if (main_class_present == false) {
         ostream& err_stream = semant_error();
         err_stream << "Class Main is not defined.\n";
+        status = 1;
     }
     return status;
 }
@@ -453,7 +455,7 @@ void program_class::semant()
 	   exit(1);
     }
 
-    //check_naming_and_scope();
+    classtable->settup_typecheck_enviornment();
 
 
 
