@@ -287,19 +287,25 @@ bool ClassTable::is_parent(Classes classes_in_program, Symbol type1, Symbol type
 * ***************************************************
 */
 void ClassTable::initialize_class_enviornment(Class_ curr_class) {
-    SymbolTable<Symbol, Entry> class_scope_variables = new SymbolTable<Symbol, Entry>();
+    SymbolTable<Symbol, Entry>* class_scope_variables = new SymbolTable<Symbol, Entry>();
     class_scope_variables->enterscope();
     Features features = curr_class->get_features();
     for (int i = features->first(); features->more(i); i = features->next(i)) {
         Feature curr_feature = features->nth(i);
         if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
-            if (class_scope_variables->probe(curr_feature->get_name()) == NULL) {
-                //error message
+            if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
+                ostream& err_stream = semant_error(curr_class);
+                err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
             } else {
                 class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
             }
         }
     }
+    while (true) {
+        Class_ curr_class = find_class_by_name(program_classes_AST, curr_class->get_parent()->get_string());
+        if (curr_class == NULL) break;
+    }
+    curr_class->set_variables_in_scope(class_scope_variables);
 }
 
 

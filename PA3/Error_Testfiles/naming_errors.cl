@@ -8,3 +8,7 @@ class Main {
 	a: Int;
 	a: Int;
 };
+
+class A inherits Main {
+	a: Int;
+};
