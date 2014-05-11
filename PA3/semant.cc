@@ -280,6 +280,28 @@ bool ClassTable::is_parent(Classes classes_in_program, Symbol type1, Symbol type
     return false;
 }
 
+/**
+* ***************************************************
+* Allocate a new symbol table and give the node a copy.
+* Take care to add all attributes from parent classes. 
+* ***************************************************
+*/
+void ClassTable::initialize_class_enviornment(Class_ curr_class) {
+    SymbolTable<Symbol, Entry> class_scope_variables = new SymbolTable<Symbol, Entry>();
+    class_scope_variables->enterscope();
+    Features features = curr_class->get_features();
+    for (int i = features->first(); features->more(i); i = features->next(i)) {
+        Feature curr_feature = features->nth(i);
+        if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
+            if (class_scope_variables->probe(curr_feature->get_name()) == NULL) {
+                //error message
+            } else {
+                class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
+            }
+        }
+    }
+}
+
 
 Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 
@@ -431,7 +453,10 @@ ostream& ClassTable::semant_error()
 * ***************************************************
 */
 void ClassTable::settup_typecheck_enviornment() {
-    
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ curr_class = program_classes_AST->nth(i);
+        initialize_class_enviornment(curr_class);
+    }
 }
 
 

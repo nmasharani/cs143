@@ -118,6 +118,14 @@ private:
   */
   bool is_parent(Classes classes_in_program, Symbol type1, Symbol type2);
 
+  /**
+  * *****************************************************
+  * Description: initializes the enviornment for this
+  *     class. 
+  * *****************************************************
+  */
+  void initialize_class_enviornment(Class_ curr_class);
+
 
 
   /* ***** LP added Class Table Debug Helper methods ******** */
