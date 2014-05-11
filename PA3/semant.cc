@@ -542,6 +542,7 @@ if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
     } 
 
     /* Recursive case with new scope 1: case statement */
+    /* STILL NEED TO FINSIH THIS ONE */
     if (strcmp(expr->get_type_name(), "typcase") == 0) {
         evaluate_expressions(scopes, expr->get_expression_1());
         Cases cases = expr->get_cases();
