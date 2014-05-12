@@ -157,7 +157,6 @@ public:
   *     Also performs naming checks on variables. 
   * *****************************************************
   */
-  void initialize_expression(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Expression expression_to_init);
   void settup_typecheck_enviornment();
 
   void update_expression_with_inheritance(Expression e, SymbolTable<Symbol, Entry> * graph);
