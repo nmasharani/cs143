@@ -329,6 +329,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             }
         } 
     }
+    class_scope_variables->addid(self, self);
     curr_class->set_variables_in_scope(class_scope_variables);
     curr_class->set_root_class(curr_class);
 }
@@ -542,20 +543,32 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     } 
 
     /* Recursive case with new scope 1: case statement */
-    /* STILL NEED TO FINSIH THIS ONE */
-
     if (strcmp(expression_to_init->get_type_name(), "typcase") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        Cases cases = expr->get_cases();
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
+        Cases cases = expression_to_init->get_cases();
+        SymbolTable<char*, int>* case_types_so_far = new SymbolTable<char*, int>();
+        case_types_so_far->enterscope();
         for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+            SymbolTable<Symbol, Entry>* variables_in_scope = expression_to_init->get_variables_in_scope();
             Case curr_case = cases->nth(i);
-            scopes.enterscope();
-            scopes.addid(curr_case->get_name(), curr_case->get_type_decl());
-            evaluate_expressions(scopes, curr_case->get_expr());
-            scopes.exitscope();
+            initialize_case_enviornment(variables_in_scope, case_types_so_far, root_class, curr_case);
         }
         return;
     }
+}
+
+void ClassTable::initialize_case_enviornment(SymbolTable<Symbol, Entry>* variables_in_scope, SymbolTable<char*, int>* case_types_so_far, Class_ root_class, Case curr_case) {
+    curr_case->set_root_class(root_class);
+    if (case_types_so_far->lookup(curr_case->get_type_decl()->get_string()) != NULL) {
+        ostream& err_stream = semant_error(root_class);
+        err_stream << "Duplicate branch " << curr_case->get_type_decl()->get_string() << " in case statement.\n"; 
+    } else {
+        case_types_so_far->addid(curr_case->get_type_decl()->get_string(), new int(42));
+    }
+    variables_in_scope->enterscope();
+    variables_in_scope->addid(curr_case->get_name(), curr_case->get_type_decl());
+    curr_case->set_variables_in_scope(variables_in_scope);
+    initialize_expression(curr_case->get_root_class(), curr_case->get_variables_in_scope(), curr_case->get_expr());
 }
     
 
@@ -712,8 +725,6 @@ void ClassTable::settup_typecheck_enviornment() {
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
         initialize_class_enviornment(curr_class);
-        //now descend into the features and the attributes individually. 
-        //if in an attribute, 
         Features features = curr_class->get_features();
         for (int j = features->first(); features->more(j); j = features->next(j)) {
             Feature curr_feature = features->nth(j);
