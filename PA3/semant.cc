@@ -100,10 +100,153 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_inheritance_cycle(classes_in_program);
     if (status != 0) return;
 
+    status = validate_methods(classes_in_program);
+    if (status != 0) return; 
+
     status = check_for_main(classes_in_program);
     if (status != 0) return; 
 
     program_classes_AST = classes_in_program; 
+}
+
+/**
+* *****************************************************
+* - No method with same name in a class
+* - Override methods must have matching parameter types
+*   and matching return type. 
+* - Types must all be defined types in the program. 
+* 1st check that in each class, there are not multiple 
+*       methods of the same name. 
+* *****************************************************
+*/
+int ClassTable::validate_methods(Classes classes_in_program) {
+    int status = check_for_multiple_methods(classes_in_program);
+    status += check_method_types(classes_in_program);
+    status += check_overriden_methods(classes_in_program);
+    return status;
+}
+
+/**
+* *****************************************************
+* 
+* *****************************************************
+*/
+int ClassTable::check_overriden_methods(Classes classes_in_program) {
+    int status = 0;
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        Class_ curr_class = classes_in_program->nth(i);
+        Features features = curr_class->get_features();
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            if (strcmp(curr_feature->get_type_name(), "method") == 0) {
+                char* curr_method_name = curr_feature->get_name()->get_string();
+                Feature inherited_method_def = search_for_inherited_method_def(curr_class, curr_method_name);
+                if (inherited_method_def != NULL) {
+                    check_method_definitions(curr_class, curr_feature, inherited_method_def);
+                }
+            }
+        }
+    }
+    return status;
+}
+
+/**
+* *****************************************************
+* Checks that the types of the both features are the same
+*       and that their types match. 
+* Prints an appropriate error message if the types do 
+*       match. 
+* *****************************************************
+*/
+void ClassTable::check_method_definitions(Class containing_class, Feature curr_feature, Feature inherited_method_def) {
+    //use nth and more to iterate over both formals. 
+}
+
+/**
+* *****************************************************
+* Checks the parents of curr_class for a method 
+*       of the same name as curr_method_name. 
+* Returns the Feature with a matching method_name, or NULL
+*       otherwise. 
+* ***************************************************** 
+*/
+Feature ClassTable::search_for_inherited_method_def(Class curr_class, char* curr_method_name) {
+    
+    char* curr_parent_name = curr_class->get_parent()->get_string();
+    while (true) {
+        if (strcmp(curr_parent_name, "_no_class") == 0) break;
+        Class_ curr_parent = find_class_by_name(classes_in_program, curr_parent_name);
+        Feature parent_feature = find_method_by_name(curr_parent, curr_method_name);
+        if (parent_feature != NULL) return parent_feature;
+        curr_parent_name = curr_parent->get_parent()->get_string();
+    }
+    return NULL;
+}
+
+/**
+* *****************************************************
+* Ensures that no class contains two or more methods 
+* of the same name. 
+* *****************************************************
+*/
+int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
+    int status = 0;
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        SymbolTable<char*, int> method_names;
+        method_names.enterscope();
+        Class_ curr_class = classes_in_program->nth(i);
+        Features features = curr_class->get_features();
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            if (strcmp(curr_feature->get_type_name(), "method") == 0) {
+                char* curr_method_name = curr_feature->get_name()->get_string();
+                if (method_names.lookup(curr_method_name) != NULL) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Method " << curr_method_name << " is multiply defined.\n";
+                    status = 1;
+                } else {
+                    method_names.addid(curr_method_name, new int(42));
+                }
+            }
+        }
+    }
+    return status;
+}
+
+/**
+* *****************************************************
+* Make sure return types and formal parameter types
+*       of all methods are valid for the program. 
+* *****************************************************
+*/
+int ClassTable::check_method_types(Classes classes_in_program) {
+    int status = 0;
+    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
+        Class_ curr_class = classes_in_program->nth(i);
+        Features features = curr_class->get_features();
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            if (strcmp(curr_feature->get_type_name(), "method") == 0) {
+                Formals formals = curr_feature->get_formals();
+                for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
+                    Formal curr_formal = formals->nth(k);
+                    if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
+                        ostream& err_stream = semant_error(curr_class);
+                        err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
+                        status = 1;
+                    }
+                }
+                if (strcmp(curr_feature->get_type()->get_string(), "SELF_TYPE") != 0) {
+                    if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
+                        ostream& err_stream = semant_error(curr_class);
+                        err_stream << "Undefined return type " << curr_feature->get_type()->get_string() << " in method " << curr_feature->get_name()->get_string() << ".\n";
+                        status = 1;
+                    }
+                }
+            }
+        }
+    }
+    return status;
 }
 
 /**
@@ -259,6 +402,25 @@ Class_ ClassTable::find_class_by_name(Classes classes, char* name) {
         Class_ curr_class = classes->nth(i);
         char* curr_class_name = curr_class->get_name()->get_string();
         if (strcmp(curr_class_name, name) == 0) return curr_class;
+    }
+    return NULL;
+}
+
+/**
+* ***************************************************
+* Return Feature of containing_class if its method
+*       name matches method_name, or NULL otherwise. 
+* ***************************************************
+*/
+Feature ClassTable::find_method_by_name(Class_ containing_class, char* method_name) {
+    Features features = containing_class->get_features();
+    for (int i = features->first(); features->more(i); i = features->next(i)) {
+        Feature curr_feature = features->nth(i);
+        if (strcmp(curr_feature->get_type_name(), "method") == 0) {
+            if (strcmp(curr_feature->get_name()->get_string(), method_name) == 0) {
+                return curr_feature;
+            }
+        }
     }
     return NULL;
 }
@@ -460,7 +622,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     } 
 
     /* Recurse case 6: mul */
-if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
+    if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
         return;

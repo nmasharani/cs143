@@ -89,6 +89,27 @@ private:
 
   /**
   * *****************************************************
+  * Description: checks to ensure that the methods
+  *     defined in the program are valid according
+  *     to COOL Manual specification.
+  * Returns 1 on error, 0 otherwise.
+  * Methods below and before next comment are helper methods. 
+  * *****************************************************
+  */
+  int validate_methods(Classes classes_in_program);
+
+  int check_for_multiple_methods(Classes classes_in_program);
+
+  int check_method_types(Classes classes_in_program);
+
+  int check_overriden_methods(Classes classes_in_program);
+
+  Feature search_for_inherited_method_def(Class curr_class, char* curr_method_name);
+
+  void check_method_definitions(Feature curr_feature, Feature inherited_method_def, Class containing_class);
+
+  /**
+  * *****************************************************
   * Description: Checks that a class Main is contained
   *     in the program, and that it contains a method
   *     called main. 
@@ -107,6 +128,20 @@ private:
   * *****************************************************
   */
   Class_ find_class_by_name(Classes classes, char* name);
+
+  /**
+  * *****************************************************
+  * Description: Searches the methods of class containing_class
+  *     for a method who's name matches method_name. 
+  *     Searches only the methods defined in the containing_class
+  * NOTE!! Does not search for inherited methods!!
+  * To search inherited, get the parent of containing_class
+  *     and then invoke this method with the parent. 
+  * Returns the feature node that contains the method with
+  *     name method_name, or NULL if none are found. 
+  * *****************************************************
+  */
+  Feature find_method_by_name(Class_ containing_class, char* method_name);
 
   /**
   * *****************************************************
