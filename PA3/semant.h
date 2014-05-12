@@ -26,6 +26,40 @@ private:
 
   /**
   * *****************************************************
+<<<<<<< HEAD
+=======
+  * Description: keeps track of the types that are defined
+  *     for this program. Note, a type is simply a class
+  *     name, which can be both user defined, or basic
+  *     class. Use a single scope level of the symbol
+  *     table as a container.
+  * *****************************************************
+  */
+  SymbolTable<char*, int>* defined_types;
+
+  /**
+  * *****************************************************
+  * Description: keeps track of inheritance
+  *   the first term in the symbol table is a symbol 
+  *   containing the class name. the second is a symbol
+  *   containing a parent class name. makes lookup easy.
+  * *****************************************************
+  */
+
+  SymbolTable<Symbol, Entry> * inheritance_graph;
+
+  /**
+  * *****************************************************
+  * Description: the AST of the program is essentialy
+  *     a list of classes, where each class is an AST
+  *     subtree. 
+  * *****************************************************
+  */
+  Classes program_classes_AST;
+
+  /**
+  * *****************************************************
+>>>>>>> 541567a3629c73ffb22a4e982de78bf0cb6d71c4
   * Description: returns a list of all classes contained
   *     in the program, which consists of classes defined
   *     defined by program, and the basic classes. 
@@ -149,6 +183,12 @@ private:
   void print_class_names(Classes classes);
   void check_equality(Classes classes);
   /* ***** End Class Table Debug Helper methods ************* */
+
+
+  /* Inheritance methods */
+  void setup_inheritance_graph();
+  bool isparent(Symbol t1, Symbol t2);
+  Symbol get_common_parent(Symbol t1, Symbol t2);
 
 public:
 
