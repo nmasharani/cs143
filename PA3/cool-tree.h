@@ -12,6 +12,7 @@
 #include "tree.h"
 #include "cool-tree.handcode.h"
 #include "symtab.h"
+#include <cctype>
 
 
 // define the class for phylum
@@ -61,7 +62,9 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {
+      variables_in_scope = _variables_in_scope; 
+   }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
@@ -72,7 +75,7 @@ public:
    virtual Symbol get_parent() = 0;
    virtual Features get_features() = 0;
    virtual Symbol get_filename_1() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typecheck() = 0;
    /* ******** End LP added functions ******** */
    
 
@@ -103,7 +106,9 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {
+      variables_in_scope = _variables_in_scope; 
+   }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
@@ -113,7 +118,7 @@ public:
    virtual Formals get_formals() = 0;
    virtual Expression get_expression() = 0;
    virtual char* get_type_name() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typecheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_EXTRAS
@@ -142,13 +147,15 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
+   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {
+      variables_in_scope = _variables_in_scope; 
+   }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typecheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Formal_EXTRAS
@@ -185,7 +192,8 @@ public:
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
-   virtual Expression get_expression_1() = 0; // assign, static dispatch, normal dispatch, conditions, loop, case, let, plus, sub, mult, div, neg, lt, eq, leq, comp, isvoid, 
+   virtual Expression get_expression_1() = 0; // assign, static dispatch, normal 
+   //dispatch, conditions, loop, case, let, plus, sub, mult, div, neg, lt, eq, leq, comp, isvoid, 
    virtual Expression get_expression_2() = 0; // conditions, loop, let, plus, sub, mult, div, lt, eq, leq, 
    virtual Expression get_expression_3() = 0; // conditions, 
    virtual Symbol get_var_type() = 0; // static dispatch, let, new, 
@@ -195,31 +203,31 @@ public:
    virtual char* get_type_name() = 0; // assign, static dispatch, 
    /* ******** End LP added functions ******** */
 
-   // virtual Symbol typcheck(SymbolTable<Symbol, Entry>* class_graph) = 0;
+   virtual Symbol typecheck() = 0;
 
    // Is t1 a parent of t2?
-   bool isparent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
-      if (!table->lookup(t2)) {/* TODO(nm): error */}
+   bool isparent(Symbol t1, Symbol t2) {
+      if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
 
       while (t2) {
          if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
-         t2 = table->lookup(t2);
+         t2 = inheritance_graph->lookup(t2);
       }
       return false;
    }
 
-   Symbol get_common_parent(Symbol t1, Symbol t2, SymbolTable<Symbol, Entry> * table) {
-      if (!table->lookup(t1)) {/* TODO(nm): error */}
-      if (!table->lookup(t2)) {/* TODO(nm): error */}
+   Symbol get_common_parent(Symbol t1, Symbol t2) {
+      if (!inheritance_graph->lookup(t1)) {/* TODO(nm): error */}
+      if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
 
       Symbol temp;
       while (t1) {
          temp = t2;
          while (temp) {
             if (strcmp(t1->get_string(), temp->get_string()) == 0) return t1;
-            temp = table->lookup(temp);
+            temp = inheritance_graph->lookup(temp);
          }
-         t1 = table->lookup(t1);
+         t1 = inheritance_graph->lookup(t1);
       }
       return NULL; // This is an error; object, at least, should be a common parent
    }
@@ -261,7 +269,7 @@ public:
    virtual Symbol get_name() = 0;
    virtual Symbol get_type_decl() = 0;
    virtual Expression get_expr() = 0;
-   //virtual typcheck() = 0;
+   virtual Symbol typecheck() = 0;   
    /* ******** End LP added functions ******** */
 
 #ifdef Case_EXTRAS
@@ -400,7 +408,9 @@ public:
    Formals get_formals()         { return formals; }
    Expression get_expression()   { return expr; }
    char* get_type_name()         { return "method"; }
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -440,7 +450,9 @@ public:
    Formals get_formals()         { return NULL; }
    Expression get_expression()   { return init; }
    char* get_type_name()         { return "attribute"; }
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -474,7 +486,9 @@ public:
    /* ********** LP added functions ********** */
    Symbol get_name()  { return name; }
    Symbol get_type()  { return type_decl; }
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Formal_SHARED_EXTRAS
@@ -512,7 +526,9 @@ public:
    Symbol get_name()       { return name; }
    Symbol get_type_decl()  { return type_decl; }
    Expression get_expr()   { return expr; }
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Case_SHARED_EXTRAS
@@ -555,7 +571,36 @@ public:
    Boolean get_bool_val()         { return true; }
 
    char* get_type_name()               { return "assign"; }
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for assignment:
+    * name must have type T
+    * expr must have type T'
+    * T' must be a subtype of T
+    * return type: The type of this node is T' 
+    * ********************************************************************* */
+   Symbol typecheck() {
+      // TODO(nm): Symbols is an as of yet undefined symbol table storing
+      //           all of the valid ids -> types in the current scope.
+      //           Management of this data structure has not yet been 
+      //           figured out.
+      Symbol name_t = variables_in_scope->lookup(name);
+      if (!name_t) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
+      }
+      Symbol expr_t = expr->typecheck();
+      if (!isparent(name_t, expr_t)) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Type conformation error" << endl;
+      }
+      return expr_t;
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -603,7 +648,33 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "static_dispatch"; } 
-   //virtual typcheck() = 0;
+
+    /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for static dispatch :
+    * type of expr = T0
+    * T0 is a subclass of type_name
+    * type of expressions in actual = T1,...,Tn
+    * Let the types in the formal in the method def be (T1',...,Tn')
+    * For all 1 <= i <= n, Ti is a subclass of Ti'
+    * Let T(n+1)' be the return type of the method
+    * If T(n+1)' is SELF_TYPE, return T0, otherwise, return T(n+1)'
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol expr_t = expr->typecheck();
+      if (!isparent(type_name, expr_t)) {
+         // TODO(nm): error
+      }
+
+      // TODO(nm): so just knowing the parent class is not enough. so, idea:
+      // symbol table that maps methods to formal lists.
+      // not hard to build; can be passed around same way as inheritance graph
+      // yayyyyy
+      return NULL;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -648,7 +719,24 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "dispatch"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for static dispatch :
+    * type of expr = T0
+    * type of expressions in actual = T1,...,Tn
+    * T0' is the current class if T0 is SELF_TYPE and T0 otherwise
+    * Let the types in the formal in the method def be (T1',...,Tn')
+    * For all 1 <= i <= n, Ti is a subclass of Ti'
+    * Let T(n+1)' be the return type of the method
+    * If T(n+1)' is SELF_TYPE, return T0, otherwise, return T(n+1)'
+    * ********************************************************************* */
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -693,7 +781,26 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "cond"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for conditional :
+    * pred is of type Bool
+    * the return type is the common parent type of then_exp and else_exp
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol pred_t = pred->typecheck();
+      if (strcmp(pred_t->get_string(), "Bool") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Predicate type of if statement must be Bool." << endl;
+      }
+      Symbol then_t = then_exp->typecheck();
+      Symbol else_t = else_exp->typecheck();
+      return get_common_parent(then_t, else_t);
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -736,7 +843,28 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "loop"; } 
-   //virtual typcheck() = 0;
+
+    /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for loop :
+    * predicate must be boolean
+    * body can have any type
+    * return type is Object
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol pred_t = pred->typecheck();
+      if (strcmp(pred_t->get_string(), "Bool") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Predicate type of if statement must be Bool." << endl;
+      }
+      Symbol body_t = body->typecheck();
+
+      // TODO(nm): is this the right way to do this?
+      return Object;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -779,7 +907,18 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "typcase"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for case expression :
+    * 
+    * ********************************************************************* */
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -820,7 +959,24 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "block"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for block class :
+    * expresions can be any type
+    * return type must be the type of the last expression
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol t;
+      for (int i = body->first(); body->more(i); i = body->next(i)) {
+         t = body->nth(i)->typecheck();
+      }
+      return t;
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -867,7 +1023,17 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "let"; } 
-   //virtual typcheck() = 0;
+    /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for let expressions :
+    * 
+    * ********************************************************************* */
+   Symbol typecheck() {
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -910,7 +1076,32 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "plus"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -953,7 +1144,32 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "sub"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -996,7 +1212,32 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "mul"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1039,7 +1280,32 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "divide"; } 
-   //virtual typcheck() = 0;
+   
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for arithmatic:
+    * e1 must evaluate to type int
+    * e2 must evaluate to type int
+    * return type is int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): non-shitty error handling
+         cerr << "Both sides of an arithmatic expr must be ints." << endl;
+      }
+
+      // TODO(nm): is this the right way to do this?
+      return Int;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1080,7 +1346,25 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "neg"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for neg expressions :
+    * The expression must be a bool
+    * The return type must be a bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Bool") != 0) {
+         // TODO(nm): error
+      }
+
+      // TODO(nm): correct?
+      return Bool;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1116,7 +1400,30 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "lt"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for lt expressions :
+    * e1 and e2 are Ints
+    * returns Bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): error
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): error
+      }
+
+      return Bool;
+      // TODO(nm): right?
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1159,7 +1466,38 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "eq"; } 
-   //virtual typcheck() = 0;
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for eq expressions :
+    * e1 and e2 are Ints, Bools, or Strings
+    * type of e1 and type of e2 are the same
+    * returns Bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0 && 
+          strcmp(e1_t->get_string(), "Bool") != 0 &&
+          strcmp(e1_t->get_string(), "String") != 0) {
+         // TODO(nm): error
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0
+          strcmp(e2_t->get_string(), "Bool") != 0
+          strcmp(e2_t->get_string(), "String") != 0) {
+         // TODO(nm): error
+      }
+
+      if (strcmp(e1_t->get_string(), e2_t->get_string()) != 0) {
+         // TODO(nm): error
+      }
+
+      return Bool;
+      // TODO(nm): right?
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1202,7 +1540,29 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "leq"; } 
-   //virtual typcheck() = 0;
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for leq expressions :
+    * e1 and e2 are Ints
+    * returns Bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): error
+      }
+      Symbol e2_t = e2->typecheck();
+      if (strcmp(e2_t->get_string(), "Int") != 0) {
+         // TODO(nm): error
+      }
+
+      return Bool;
+      // TODO(nm): right?
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1243,7 +1603,25 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "comp"; } 
-   //virtual typcheck() = 0;
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for ~ expressions :
+    * e1 is an Int
+    * returns Int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      if (strcmp(e1_t->get_string(), "Int") != 0) {
+         // TODO(nm): error
+      }
+
+      return Int;
+      // TODO(nm): right?
+
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1284,7 +1662,28 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "int_const"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for int_const expressions :
+    * the string of token must be an integer
+    * returns Int
+    * ********************************************************************* */
+   Symbol typecheck() {
+      char * str = token->get_string();
+      int len = strlen(str);
+      for (int i = 0; i < len; i++) {
+         if (isdigit(str[i]) == 0) {
+            // TODO(nm): error
+         }
+      }
+
+      return Int;
+      // TODO(nm): right?
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1325,7 +1724,19 @@ public:
    Boolean get_bool_val()         { return val; } 
 
    char* get_type_name()               { return "bool_const"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for bool_const expressions :
+    * return bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      return Bool;
+      // TODO(nm): right?
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1366,7 +1777,19 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "string_const"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for string_const expressions :
+    * return string
+    * ********************************************************************* */
+   Symbol typecheck() {
+      return String;
+      // TODO(nm): right?
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1407,7 +1830,28 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "new_"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for new_ expressions :
+    * if type_name == SELF_TYPE, return the current class
+    * otherwise, return type_name
+    * PS make sure type_name is a valid type
+    * ********************************************************************* */
+   Symbol typecheck() {
+      if (!inheritance_graph.lookup(type_name)) {
+         // TODO(nm): error
+      }
+
+      if (strcmp(type_name->get_string(), "SELF_TYPE") == 0) {
+         return root_class->get_name();
+      }
+
+      return type_name;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1448,7 +1892,19 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "isvoid"; } 
-   //virtual typcheck() = 0;
+
+   /* ******** Type checker function *****************************************
+    * This function recursively calculates the type of the current expression
+    * using the type checker rules as described in the Cool Manual section 12.
+    * The return value of this function is the type of the current node.
+    *
+    * Type checking rules for isvoid expressions :
+    * return bool
+    * ********************************************************************* */
+   Symbol typecheck() {
+      Symbol e1_t = e1->typecheck();
+      return Bool;
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1487,7 +1943,10 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "no_expr"; } 
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+      return No_class;
+      //TODO(nm): correct?
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1528,7 +1987,12 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "object"; } 
-   //virtual typcheck() = 0;
+   Symbol typecheck() {
+      if (!variables_in_scope->lookup(name)) {
+         //TODO(nm): error
+      }
+      return variables_in_scope->lookup(name);
+   }
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
