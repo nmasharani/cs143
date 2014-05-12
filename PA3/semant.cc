@@ -787,6 +787,30 @@ void ClassTable::setup_inheritance_trackers() {
     }
 }
 
+/* *****************************************
+ * This method sets up a data structure such that the order of the formal
+ * parameters to methods can be easily check
+ * 
+ * Sets up a symbol table to map method name to a formal list
+ *
+ * TODO(nm): make it also check that methods in subclasses have same formal
+ * parameters.
+ * *************************************** */
+
+void ClassTable::setup_method_formals() {
+    SymbolTable<Symbol, Formals> * method_checker = new SymbolTable<Symbol, Formals>();
+    method_checker->enterscope();
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Features feats = program_classes_AST->nth(i)->get_features();
+        for (int j = feats->first(); feats->more(j); j = feats->next(j)) {
+            Feature f = feats->nth(j);
+            if (!f->get_formals()) continue;
+            method_checker->addid(f->get_name(), f->get_formals());
+        }
+    }
+
+    // TODO(nm): Now, recursively update every node in the AST
+}
 
 /*   This is the entry point to the semantic checker.
 
