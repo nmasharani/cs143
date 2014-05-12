@@ -55,6 +55,7 @@ class Class__class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    SymbolTable<Symbol, Entry>* inheritance_graph;
+   SymbolTable<Symbol, Formals>* method_formals;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		     { return copy_Class_(); }
@@ -68,6 +69,8 @@ public:
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
+   void set_method_formals(SymbolTable<Symbol, Formals>* formals) { method_formals = formals; }
+   SymbolTable<Symbol, Formals>* get_method_formals() { return method_formals; }
    
 
    /* ********** LP added functions ********** */
@@ -99,6 +102,7 @@ class Feature_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    SymbolTable<Symbol, Entry>* inheritance_graph;
+   SymbolTable<Symbol, Formals>* method_formals;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Feature(); }
@@ -112,6 +116,8 @@ public:
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
+   void set_method_formals(SymbolTable<Symbol, Formals>* formals) { method_formals = formals; }
+   SymbolTable<Symbol, Formals>* get_method_formals() { return method_formals; }
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
@@ -178,6 +184,7 @@ class Expression_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    SymbolTable<Symbol, Entry>* inheritance_graph;
+   SymbolTable<Symbol, Formals>* method_formals;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Expression(); }
@@ -189,6 +196,8 @@ public:
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
+   void set_method_formals(SymbolTable<Symbol, Formals>* formals) { method_formals = formals; }
+   SymbolTable<Symbol, Formals>* get_method_formals() { return method_formals; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
@@ -253,6 +262,7 @@ class Case_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    SymbolTable<Symbol, Entry>* inheritance_graph;
+   SymbolTable<Symbol, Formals>* method_formals;
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Case(); }
@@ -264,6 +274,8 @@ public:
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void set_inheritance_graph(SymbolTable<Symbol, Entry>* graph) { inheritance_graph = graph; }
    SymbolTable<Symbol, Entry>* get_inheritance_graph() { return inheritance_graph; }
+   void set_method_formals(SymbolTable<Symbol, Formals>* formals) { method_formals = formals; }
+   SymbolTable<Symbol, Formals>* get_method_formals() { return method_formals; }
    
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;

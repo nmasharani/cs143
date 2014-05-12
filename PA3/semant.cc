@@ -769,12 +769,15 @@ void ClassTable::update_branch_with_inheritance(Class_ c, SymbolTable<Symbol, En
     }
 }
 
-void ClassTable::setup_inheritance_trackers() {
+SymbolTable<Symbol, Class_> * ClassTable::setup_inheritance_trackers() {
     SymbolTable<Symbol, Entry> * inheritance_graph = new SymbolTable<Symbol, Entry>();
+    SymbolTable<Symbol, Class_> * class_inheritance_graph = new SymbolTable<Symbol, Class_>();
     inheritance_graph->enterscope();
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
         inheritance_graph->addid(curr_class->get_name(), curr_class->get_parent());
+        class_inheritance_graph->addid(curr_class->get_name(), 
+            find_class_by_name(program_classes_AST, curr_class->get_parent()->get_string()));
     }
 
     // recursively descend into the symboltable, update each node with the 
@@ -785,10 +788,12 @@ void ClassTable::setup_inheritance_trackers() {
         c->set_inheritance_graph(inheritance_graph);
         update_branch_with_inheritance(c, inheritance_graph);
     }
+
+    return class_inheritance_graph;
 }
 
 /* *****************************************
- * This method sets up a data structure such that the order of the formal
+ * These methods set up a data structure such that the order of the formal
  * parameters to methods can be easily check
  * 
  * Sets up a symbol table to map method name to a formal list
@@ -797,19 +802,82 @@ void ClassTable::setup_inheritance_trackers() {
  * parameters.
  * *************************************** */
 
-void ClassTable::setup_method_formals() {
+ void ClassTable::update_expression_with_method_formals(Expression e, SymbolTable<Symbol, Formals> * formals) {
+    e->set_method_formals(formals);
+    if (e->get_expression_1()) {
+        update_expression_with_method_formals(e->get_expression_1(), formals);
+    }
+    if (e->get_expression_2()) {
+        update_expression_with_method_formals(e->get_expression_2(), formals);
+    }
+    if (e->get_expression_3()) {
+        update_expression_with_method_formals(e->get_expression_3(), formals);
+    }
+    if (e->get_expressions()) {
+        Expressions exprs = e->get_expressions();
+        for (int i = exprs->first(); exprs->more(i); i = exprs->next(i)) {
+            update_expression_with_method_formals(exprs->nth(i), formals);
+        }
+    }
+    if (e->get_cases()) {
+        Cases cases = e->get_cases();
+        for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+            Case cur_case = cases->nth(i);
+            cur_case->set_method_formals(formals);
+            update_expression_with_method_formals(cur_case->get_expr(), formals);
+        }
+    }
+}
+
+void ClassTable::setup_method_formals(SymbolTable<Symbol, Class_> * inheritance_graph) {
     SymbolTable<Symbol, Formals> * method_checker = new SymbolTable<Symbol, Formals>();
     method_checker->enterscope();
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ c = program_classes_AST->nth(i);
         Features feats = program_classes_AST->nth(i)->get_features();
+
         for (int j = feats->first(); feats->more(j); j = feats->next(j)) {
             Feature f = feats->nth(j);
-            if (!f->get_formals()) continue;
-            method_checker->addid(f->get_name(), f->get_formals());
+            Formals forms = f->get_formals();
+            if (!forms) continue;
+            if (!method_checker->lookup(f->get_name())) {
+                method_checker->addid(f->get_name(), forms);
+            } else {
+                Class_ parent = inheritance_graph->lookup(c->get_name());
+                while (parent) {
+                    Features parent_feats = parent->get_features();
+                    for (int k = parent_feats->first(); parent_feats->more(k); k = parent_feats->next(k)) {
+                        Feature cur_parent_feat = parent_feats->nth(k);
+                        if (strcmp(cur_parent_feat->get_name(), f->get_name()) == 0) {
+                            Formals cur_parent_formals = cur_parent_feat->get_formals();
+                            if (!cur_parent_formals) continue;
+                            for (int m = forms->first(); forms->more(m); m = forms->next(m)) {
+                                Formal cur_form = forms->nth(m);
+                                Formal parent_form = cur_parent_formals->nth(m);
+                                if (strcmp(cur_form->get_type()->get_string(), parent_form->get_type()->get_string() != 0) {
+                                    // TODO(nm): error
+                                }
+                            }
+                        }
+                    }
+                    parent = inheritance_graph->lookup(parent->get_name());
+                }
+            }
         }
     }
 
-    // TODO(nm): Now, recursively update every node in the AST
+    // Check to make sure subclasses have correct formals
+
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ c = program_classes_AST->nth(i);
+        c->set_method_formals(method_checker);
+        Features feats = c->get_features();
+        for (int j = feats->first(); feats->more(j); j = feats->next(j)) {
+            Feature feat = feats->nth(j);
+            feat->set_method_formals(method_checker);
+            update_expression_with_method_formals(feat->get_expression(), method_checker);
+        }
+    }
 }
 
 /*   This is the entry point to the semantic checker.
@@ -846,7 +914,7 @@ void program_class::semant()
        exit(1);
     }
 
-    classtable->setup_inheritance_trackers();
+    SymbolTable<Symbol, Entry> * inheritance_graph = classtable->setup_inheritance_trackers();
 
 
 

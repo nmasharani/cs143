@@ -165,7 +165,10 @@ public:
 
   void update_expression_with_inheritance(Expression e, SymbolTable<Symbol, Entry> * graph);
   void update_branch_with_inheritance(Class_ c, SymbolTable<Symbol, Entry> * graph);
-  void setup_inheritance_trackers();
+  SymbolTable<Symbol, Class_> * setup_inheritance_trackers();
+
+  void update_expression_with_method_formals(Expression e, SymbolTable<Symbol, Formals> * formals);
+  void setup_method_formals(SymbolTable<Symbol, Class_> * inheritance_graph);
 
 
   int errors() { return semant_errors; }
