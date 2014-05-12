@@ -543,7 +543,6 @@ if (strcmp(expression_to_init->get_type_name(), "mul") == 0) {
     } 
 
     /* Recursive case with new scope 1: case statement */
-    /* STILL NEED TO FINSIH THIS ONE */
     if (strcmp(expression_to_init->get_type_name(), "typcase") == 0) {
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         Cases cases = expression_to_init->get_cases();
@@ -727,8 +726,6 @@ void ClassTable::settup_typecheck_enviornment() {
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
         initialize_class_enviornment(curr_class);
-        //now descend into the features and the attributes individually. 
-        //if in an attribute, 
         Features features = curr_class->get_features();
         for (int j = features->first(); features->more(j); j = features->next(j)) {
             Feature curr_feature = features->nth(j);
