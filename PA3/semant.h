@@ -37,6 +37,17 @@ private:
 
   /**
   * *****************************************************
+  * Description: keeps track of inheritance
+  *   the first term in the symbol table is a symbol 
+  *   containing the class name. the second is a symbol
+  *   containing a parent class name. makes lookup easy.
+  * *****************************************************
+  */
+
+  SymbolTable<Symbol, Entry> * inheritance_graph;
+
+  /**
+  * *****************************************************
   * Description: the AST of the program is essentialy
   *     a list of classes, where each class is an AST
   *     subtree. 
@@ -140,6 +151,12 @@ private:
   void print_class_names(Classes classes);
   void check_equality(Classes classes);
   /* ***** End Class Table Debug Helper methods ************* */
+
+
+  /* Inheritance methods */
+  void setup_inheritance_graph();
+  bool isparent(Symbol t1, Symbol t2);
+  Symbol get_common_parent(Symbol t1, Symbol t2);
 
 public:
 

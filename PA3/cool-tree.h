@@ -55,7 +55,6 @@ public:
    virtual Symbol get_parent() = 0;
    virtual Features get_features() = 0;
    virtual Symbol get_filename_1() = 0;
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
    
 
@@ -87,7 +86,6 @@ public:
    virtual Formals get_formals() = 0;
    virtual Expression get_expression() = 0;
    virtual char* get_type_name() = 0;
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_EXTRAS
@@ -115,7 +113,6 @@ public:
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Formal_EXTRAS
@@ -150,7 +147,6 @@ public:
    virtual Cases get_cases() = 0; // case, 
    virtual Boolean get_bool_val() = 0; // Bool, 
    virtual char* get_type_name() = 0; // assign, static dispatch, 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 
@@ -180,7 +176,6 @@ public:
    virtual Symbol get_name() = 0;
    virtual Symbol get_type_decl() = 0;
    virtual Expression get_expr() = 0;
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Case_EXTRAS
@@ -298,7 +293,6 @@ public:
    Formals get_formals()         { return formals; }
    Expression get_expression()   { return expr; }
    char* get_type_name()         { return "method"; }
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -331,7 +325,6 @@ public:
    Formals get_formals()         { return NULL; }
    Expression get_expression()   { return init; }
    char* get_type_name()         { return "attribute"; }
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Feature_SHARED_EXTRAS
@@ -358,7 +351,6 @@ public:
    /* ********** LP added functions ********** */
    Symbol get_name()  { return name; }
    Symbol get_type()  { return type_decl; }
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Formal_SHARED_EXTRAS
@@ -389,7 +381,6 @@ public:
    Symbol get_name()       { return name; }
    Symbol get_type_decl()  { return type_decl; }
    Expression get_expr()   { return expr; }
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Case_SHARED_EXTRAS
@@ -425,7 +416,6 @@ public:
    Boolean get_bool_val()         { return true; }
 
    char* get_type_name()               { return "assign"; }
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -466,7 +456,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "static_dispatch"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -504,7 +493,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "dispatch"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -542,7 +530,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "cond"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -578,7 +565,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "loop"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -614,7 +600,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "typcase"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -648,7 +633,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "block"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -688,7 +672,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "let"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -724,7 +707,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "plus"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -760,7 +742,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "sub"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -796,7 +777,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "mul"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -832,7 +812,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "divide"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -866,7 +845,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "neg"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -902,7 +880,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "lt"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -938,7 +915,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "eq"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -974,7 +950,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "leq"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1008,7 +983,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "comp"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1042,7 +1016,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "int_const"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1076,7 +1049,6 @@ public:
    Boolean get_bool_val()         { return val; } 
 
    char* get_type_name()               { return "bool_const"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1110,7 +1082,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "string_const"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1144,7 +1115,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "new_"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1178,7 +1148,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "isvoid"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1210,7 +1179,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "no_expr"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS
@@ -1244,7 +1212,6 @@ public:
    Boolean get_bool_val()         { return true; } 
 
    char* get_type_name()               { return "object"; } 
-   //virtual typcheck() = 0;
    /* ******** End LP added functions ******** */
 
 #ifdef Expression_SHARED_EXTRAS

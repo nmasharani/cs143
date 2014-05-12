@@ -103,7 +103,9 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_main(classes_in_program);
     if (status != 0) return; 
 
-    program_classes_AST = classes_in_program; 
+    program_classes_AST = classes_in_program;
+
+    setup_inheritance_graph(); 
 }
 
 /**
@@ -732,6 +734,39 @@ void ClassTable::settup_typecheck_enviornment() {
             initialize_feature_enviornment(curr_class, curr_feature);
         }
     }
+}
+
+void ClassTable::setup_inheritance_graph() {
+    inheritance_graph = new SymbolTable<Symbol, Entry>();
+    inheritance_graph->enterscope();
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        inheritance_graph->addid(curr_class->get_name(), curr_class->get_parent());
+    }
+}
+
+bool ClassTable::isparent(Symbol t1, Symbol t2) {
+    if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
+    while (t2) {
+        if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
+        t2 = inheritance_graph->lookup(t2);
+    }
+    return false;
+}
+
+Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
+    if (!inheritance_graph->lookup(t1)) {/* TODO(nm): error */}
+    if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
+
+    Symbol temp;
+    while (t1) {
+     temp = t2;
+     while (temp) {
+        if (strcmp(t1->get_string(), temp->get_string()) == 0) return t1;
+        temp = inheritance_graph->lookup(temp);
+     }
+     t1 = inheritance_graph->lookup(t1);
+    }
+    return NULL; // This is an error; object, at least, should be a common parent
 }
 
 
