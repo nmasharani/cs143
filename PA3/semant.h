@@ -26,26 +26,6 @@ private:
 
   /**
   * *****************************************************
-  * Description: keeps track of the types that are defined
-  *     for this program. Note, a type is simply a class
-  *     name, which can be both user defined, or basic
-  *     class. Use a single scope level of the symbol
-  *     table as a container.
-  * *****************************************************
-  */
-  SymbolTable<char*, int>* defined_types;
-
-  /**
-  * *****************************************************
-  * Description: the AST of the program is essentialy
-  *     a list of classes, where each class is an AST
-  *     subtree. 
-  * *****************************************************
-  */
-  Classes program_classes_AST;
-
-  /**
-  * *****************************************************
   * Description: returns a list of all classes contained
   *     in the program, which consists of classes defined
   *     defined by program, and the basic classes. 
@@ -89,24 +69,18 @@ private:
 
   /**
   * *****************************************************
-  * Description: checks to ensure that the methods
-  *     defined in the program are valid according
-  *     to COOL Manual specification.
-  * Returns 1 on error, 0 otherwise.
-  * Methods below and before next comment are helper methods. 
+  * Description: validat_methods helper functions. 
   * *****************************************************
   */
-  int validate_methods(Classes classes_in_program);
-
   int check_for_multiple_methods(Classes classes_in_program);
 
   int check_method_types(Classes classes_in_program);
 
   int check_overriden_methods(Classes classes_in_program);
 
-  Feature search_for_inherited_method_def(Class curr_class, char* curr_method_name);
+  Feature search_for_inherited_method_def(Class_ curr_class, char* curr_method_name, Classes classes_in_program);
 
-  void check_method_definitions(Feature curr_feature, Feature inherited_method_def, Class containing_class);
+  int check_method_definitions(Class_ containing_class, Feature curr_feature, Feature inherited_method_def);
 
   /**
   * *****************************************************
@@ -187,12 +161,43 @@ public:
 
   /**
   * *****************************************************
+  * Description: keeps track of the types that are defined
+  *     for this program. Note, a type is simply a class
+  *     name, which can be both user defined, or basic
+  *     class. Use a single scope level of the symbol
+  *     table as a container.
+  * *****************************************************
+  */
+  SymbolTable<char*, int>* defined_types;
+
+  /**
+  * *****************************************************
+  * Description: the AST of the program is essentialy
+  *     a list of classes, where each class is an AST
+  *     subtree. 
+  * *****************************************************
+  */
+  Classes program_classes_AST;
+
+  /**
+  * *****************************************************
   * Description: Iterates through the class_list AST
   *     and updates the scope and class for each node.
   *     Also performs naming checks on variables. 
   * *****************************************************
   */
   void settup_typecheck_enviornment();
+
+  /**
+  * *****************************************************
+  * Description: checks to ensure that the methods
+  *     defined in the program are valid according
+  *     to COOL Manual specification.
+  * Returns 1 on error, 0 otherwise.
+  * Methods below and before next comment are helper methods. 
+  * *****************************************************
+  */
+  int validate_methods(Classes classes_in_program);
 
   int errors() { return semant_errors; }
   ostream& semant_error();

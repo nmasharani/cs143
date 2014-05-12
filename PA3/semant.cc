@@ -100,8 +100,9 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_inheritance_cycle(classes_in_program);
     if (status != 0) return;
 
-    status = validate_methods(classes_in_program);
+   /* status = validate_methods(classes_in_program);
     if (status != 0) return; 
+    */
 
     status = check_for_main(classes_in_program);
     if (status != 0) return; 
@@ -140,9 +141,9 @@ int ClassTable::check_overriden_methods(Classes classes_in_program) {
             Feature curr_feature = features->nth(j);
             if (strcmp(curr_feature->get_type_name(), "method") == 0) {
                 char* curr_method_name = curr_feature->get_name()->get_string();
-                Feature inherited_method_def = search_for_inherited_method_def(curr_class, curr_method_name);
+                Feature inherited_method_def = search_for_inherited_method_def(curr_class, curr_method_name, classes_in_program);
                 if (inherited_method_def != NULL) {
-                    check_method_definitions(curr_class, curr_feature, inherited_method_def);
+                    status += check_method_definitions(curr_class, curr_feature, inherited_method_def);
                 }
             }
         }
@@ -158,8 +159,32 @@ int ClassTable::check_overriden_methods(Classes classes_in_program) {
 *       match. 
 * *****************************************************
 */
-void ClassTable::check_method_definitions(Class containing_class, Feature curr_feature, Feature inherited_method_def) {
-    //use nth and more to iterate over both formals. 
+int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_feature, Feature inherited_method_def) {
+    int status = 0;
+    Formals curr_formals = curr_feature->get_formals();
+    Formals inherited_formals = inherited_method_def->get_formals();
+    if (curr_formals->len() != inherited_formals->len()) {
+        ostream& err_stream = semant_error(containing_class);
+        err_stream << "Incompatible number of formal parameters in redefined method " << curr_feature->get_name()->get_string() << ".\n";
+        status = 1;
+    }
+    if (status == 0) {
+        for (int i = curr_formals->first(); curr_formals->more(i); i = curr_formals->next(i)) {
+            Formal curr_formal = curr_formals->nth(i);
+            Formal inherited_formal = inherited_formals->nth(i);
+            if (strcmp(curr_formal->get_type()->get_string(), inherited_formal->get_type()->get_string()) != 0) {
+                ostream& err_stream = semant_error(containing_class);
+                err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " parameter '" << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
+                status = 1;
+            }
+        }
+    }
+    if (strcmp(curr_feature->get_type()->get_string(), inherited_method_def->get_type()->get_string()) != 0) {
+        ostream& err_stream = semant_error(containing_class);
+        err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " return type " << curr_feature->get_type()->get_string() << " is different from original return type " << inherited_method_def->get_type()->get_string() << ".\n";
+        status = 1;
+    }
+    return status;
 }
 
 /**
@@ -170,7 +195,7 @@ void ClassTable::check_method_definitions(Class containing_class, Feature curr_f
 *       otherwise. 
 * ***************************************************** 
 */
-Feature ClassTable::search_for_inherited_method_def(Class curr_class, char* curr_method_name) {
+Feature ClassTable::search_for_inherited_method_def(Class_ curr_class, char* curr_method_name, Classes classes_in_program) {
     
     char* curr_parent_name = curr_class->get_parent()->get_string();
     while (true) {
@@ -924,6 +949,7 @@ void program_class::semant()
 	   exit(1);
     }
 
+    classtable->validate_methods(classtable->program_classes_AST);
     classtable->settup_typecheck_enviornment();
 
     if (classtable->errors()) {
@@ -931,9 +957,7 @@ void program_class::semant()
        exit(1);
     }
 
-
-
-    //typecheck
+    classtable->update_type_information();
 }
 
 

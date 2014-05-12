@@ -7,14 +7,14 @@ class Main {
 };
 
 class A_plus {
-	a(z: Int, y: String) : Int {
-		"hello"
+	a(z: String, y: Bool) : Int {
+			self
 	};
 };
 
 class Inter inherits A_plus {
-	a(x: Int, some: Int) : Int {
-		z + 5
+	a(x: Int, some: String) : Int {
+		self
 	};
 };
 
@@ -24,7 +24,7 @@ class Inter inherits A_plus {
 
 (*class A inherits Inter {
 	a(two : Some, one : Other) : Int {
-		z + 5
+		self
 	};
 
 	checkwa(a: Int, a: String) : Int {
