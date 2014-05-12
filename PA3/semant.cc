@@ -1128,3 +1128,51 @@ void program_class::check_naming_and_scope() {
 
 
 
+
+
+
+
+
+
+
+
+// Symbol typecheck_expression(Expression e) {
+
+//     if (strcmp(e->get_type_name(), "assign") {
+//         return typecheck_assign(e);
+//     }
+
+//     if (...) {
+//         ...
+//     }
+// }
+
+
+
+
+//  ******** Type checker function *****************************************
+// * This function recursively calculates the type of the current expression
+// * using the type checker rules as described in the Cool Manual section 12.
+// * The return value of this function is the type of the current node.
+// *
+// * Type checking rules for assignment:
+// * name must have type T
+// * expr must have type T'
+// * T' must be a subtype of T
+// * return type: The type of this node is T' 
+// * ********************************************************************* 
+// Symbol typecheck_assign(Expression e) {
+    
+//   Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
+//   if (!name_t) {
+//      // TODO(nm): non-shitty error handling
+//      cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
+//   }
+//   Symbol expr_t = typecheck_expression(e->get_expr());
+//   if (!isparent(name_t, expr_t)) {
+//      // TODO(nm): non-shitty error handling
+//      cerr << "Type conformation error" << endl;
+//   }
+//   return expr_t;
+// }
+
