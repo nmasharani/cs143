@@ -1197,10 +1197,6 @@ void program_class::semant()
 
 
 
-
-
-
-
 Symbol ClassTable::typecheck_assign(Expression e) {
     Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
     if (!name_t) {
@@ -1278,12 +1274,6 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
     return return_type;
 }
 
-
-
-
-
-
-
 Symbol ClassTable::typecheck_dispatch(Expression e) {
     Symbol t0 = typecheck_expression(e->get_expression_1());
     Expressions params = e->get_expressions();
@@ -1343,62 +1333,168 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
 
 Symbol ClassTable::typecheck_cond(Expression e) {
     Symbol pred_t = typecheck_expression(e->get_expression_1());
+    bool error = false;
     if (strcmp(pred_t->get_string(), "Bool") != 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         cerr << "Predicate type of if statement must be Bool. Is currently " << pred_t->get_string() << endl;
-        return Object;
+        error = true;
     }
     Symbol then_t = typecheck_expression(e->get_expression_2());
     Symbol else_t = typecheck_expression(e->get_expression_3());
-    return get_common_parent(then_t, else_t);
+    if (error == true) {
+        e->set_type(Object);
+        return Object;
+    }
+    Symbol common_parent = get_common_parent(then_t, else_t);
+    e->set_type(common_parent);
+    return common_parent;
 }
 
 Symbol ClassTable::typecheck_loop(Expression e) {
+    Symbol predicate_type = typecheck_expression(e->get_expression_1());
+    Symbol body_type = typecheck_expression(e->get_expression_2());
+    if (strcmp(predicate_type->get_string(), "Bool") != 0 ) {
+        PRINT ERROR;
+    }
+    e->set_type(Object);
     return Object;
 }
 
 Symbol ClassTable::typecheck_typcase(Expression e) {
-    return Object;
+    Symbol case_predicate_type = typecheck_expression(e->get_expression_1());
+    Cases cases = e->get_cases();
+    Symbol case_types [cases->len()];
+    for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+        Case curr_case = cases->nth(i);
+        if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
+            print error message;
+        }
+        case_types[i] = typecheck_expression(curr_case->get_expr());
+    }
+    Symbol highest_parent = case_types[0];
+    for (int i = 1; i < cases->len(); i++) {
+        highest_parent = get_common_parent(highest_parent, case_types[i]);
+    }
+    e->set_type(highest_parent);
+    return highest_parent;
 }
 
 Symbol ClassTable::typecheck_block(Expression e) {
-    return Object;
+    Expressions expressions = e->get_expressions();
+    Symbol return_symbol; 
+    for (int i = expressions->first(); expressions->more(i); i = expressions->next(i)) {
+        return_symbol = typecheck_expression(expressions->nth(i));
+    }
+    e->set_type(return_symbol);
+    return return_symbol;
 }
 
 Symbol ClassTable::typecheck_let(Expression e) {
-    return Object;
+    Symbol t0 = e->get_var_type();
+    if (strcmp(t0->get_string(), "SELF_TYPE") == 0) {
+        t0 = e->get_root_class()->get_name();
+    }
+    Symbol init_type = typecheck_expression(e->get_expression_1());
+    if (strcmp(init_type->get_string(), "_no_class") != 0) {
+        if (isparent(t0, init_type) == false) {
+            print error;
+        }
+    }
+    Symbol return_type = typecheck_expression(e->get_expression_2());
+    e->set_type(return_type);
+    return return_type;
 }
 
 Symbol ClassTable::typecheck_plus(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_sub(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_mul(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_divide(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_neg(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    if (strcmp(t1->get_string(), Bool->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Bool);
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_lt(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_eq(Expression e) {
+    
     return Object;
 }
 
 Symbol ClassTable::typecheck_leq(Expression e) {
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t2->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t1->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_comp(Expression e) {
