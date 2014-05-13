@@ -332,15 +332,18 @@ int ClassTable::check_for_inheritance_cycle(Classes classes_in_program) {
         Class_ curr_class = classes_in_program->nth(i);
         Symbol base_class = curr_class->get_name();
         Symbol curr_parent = curr_class->get_parent();
-        while (true) {
-            if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
-                ostream& err_stream = semant_error(curr_class);
-                err_stream << "Class " << base_class->get_string() << ", or an ancestor of " << base_class->get_string();
-                err_stream << ", is involved in an inheritance cycle.\n";
-                status = 1;
-                break;
-             } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) break;
-             curr_parent = parents.lookup(curr_parent);
+        //only check the non-rserved class names to avoid double reporting errors. 
+        if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
+            while (true) {
+                if (strcmp(curr_parent->get_string(), base_class->get_string()) == 0) {
+                    ostream& err_stream = semant_error(curr_class);
+                    err_stream << "Class " << base_class->get_string() << ", or an ancestor of " << base_class->get_string();
+                    err_stream << ", is involved in an inheritance cycle.\n";
+                    status = 1;
+                    break;
+                 } else if (strcmp(curr_parent->get_string(), "_no_class") == 0) break;
+                 curr_parent = parents.lookup(curr_parent);
+            }
         }
     }
     return status;
@@ -609,7 +612,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     if (strcmp(expression_to_init->get_type_name(), "new_") == 0) {
         if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(expression_to_init->get_root_class()->get_filename_1(), expression_to_init);
-            err_stream << "'New' used with undefined class " << expression_to_init->get_var_type()->get_string() << ".\n";
+            err_stream << "'new' used with undefined class " << expression_to_init->get_var_type()->get_string() << ".\n";
         }
         return;
     } 
@@ -1301,7 +1304,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         Symbol curr_type = method_def_formals->nth(i)->get_type();
         if (isparent(curr_type, symbols_array[i], e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-            err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
+            err_stream << "In call of method " << e->get_name()->get_string() << ", type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
             error = true;
         }
     }
@@ -1469,7 +1472,7 @@ Symbol ClassTable::typecheck_plus(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " + " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " + " << t2->get_string() << "\n";
     }
     e->set_type(Int);
     return Int;
@@ -1487,7 +1490,7 @@ Symbol ClassTable::typecheck_sub(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " - " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " - " << t2->get_string() << "\n";
     }
     e->set_type(Int);
     return Int;
@@ -1505,7 +1508,7 @@ Symbol ClassTable::typecheck_mul(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " * " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " * " << t2->get_string() << "\n";
     }
     e->set_type(Int);
     return Int;
@@ -1523,7 +1526,7 @@ Symbol ClassTable::typecheck_divide(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " / " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " / " << t2->get_string() << "\n";
     }
     e->set_type(Int);
     return Int;
@@ -1551,7 +1554,7 @@ Symbol ClassTable::typecheck_lt(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " < " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " < " << t2->get_string() << "\n";
     }
     e->set_type(Bool);
     return Bool;
@@ -1591,7 +1594,7 @@ Symbol ClassTable::typecheck_leq(Expression e) {
     }
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "non-Int arguments " << t1->get_string() << " <= " << t2->get_string() << ".\n";
+        err_stream << "non-Int arguments: " << t1->get_string() << " <= " << t2->get_string() << "\n";
     }
     e->set_type(Bool);
     return Bool;
