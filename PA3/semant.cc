@@ -472,6 +472,19 @@ bool ClassTable::is_parent(Classes classes_in_program, Symbol type1, Symbol type
 }
 
 /**
+*/
+Feature ClassTable::find_attribute_by_name(Class_ containing_class, char* name) {
+    Features features = containing_class->get_features();
+    for (int i = features->first(); features->more(i); i = features->next(i)) {
+        Feature curr_feature = features->nth(i);
+        if (strcmp(curr_feature->get_name()->get_string(), name) == 0) {
+            return curr_feature;
+        }
+    }
+    return NULL;
+}
+
+/**
 * ***************************************************
 * Allocate a new symbol table and give the node a copy.
 * Take care to add all attributes from parent classes. 
@@ -509,7 +522,8 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             Feature curr_feature = features->nth(i);
             if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
                 if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
-                    ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
+                    Feature duplicate_attr = find_attribute_by_name(curr_class, curr_feature->get_name()->get_string());
+                    ostream& err_stream = semant_error(curr_class->get_filename_1(), duplicate_attr);
                     err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
                 } else {
                     if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
@@ -1591,6 +1605,11 @@ Symbol ClassTable::typecheck_object(Expression e) {
     if (type == NULL) {
         e->set_type(Object);
         return Object;
+    }
+    if (strcmp(e->get_name()->get_string(), "self") == 0)
+    {
+        e->set_type(SELF_TYPE);
+        return type;
     }
     e->set_type(type);
     return type;

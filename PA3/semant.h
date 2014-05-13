@@ -134,6 +134,13 @@ private:
 
   /**
   * *****************************************************
+  * Find an attribute by its name in containing_class.
+  * *****************************************************
+  */
+  Feature find_attribute_by_name(Class_ containing_class, char* name);
+
+  /**
+  * *****************************************************
   * Description: helper function. checks if type1 is a 
   *     parent of type2.
   * Return: true if type 1 is a parent of type 2, false
