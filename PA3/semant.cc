@@ -184,7 +184,7 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
     }
     if (strcmp(curr_feature->get_type()->get_string(), inherited_method_def->get_type()->get_string()) != 0) {
         ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_feature);
-        err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " return type " << curr_feature->get_type()->get_string() << " is different from original return type " << inherited_method_def->get_type()->get_string() << ".\n";
+        err_stream << "In redefined method " << curr_feature->get_name()->get_string() << ", return type " << curr_feature->get_type()->get_string() << " is different from original return type " << inherited_method_def->get_type()->get_string() << ".\n";
         status = 1;
     }
     return status;
@@ -505,6 +505,10 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
                 ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
             } 
+            if (strcmp(curr_feature->get_name()->get_string(), "self") == 0) {
+                ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
+                err_stream << "'self' cannot be the name of an attribute"  << ".\n";
+            }
             if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
                 if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
                     ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
@@ -1144,6 +1148,10 @@ Symbol ClassTable::check_method_types(Feature feature) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "Formal parameter " << curr_formal->get_name()->get_string() << " cannot have type SELF_TYPE" << ".\n";
         }
+        if (strcmp(curr_formal->get_name()->get_string(), "self") == 0) {
+            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
+            err_stream << "'self' cannot be the name of a formal parameter." << ".\n";
+        }
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
@@ -1255,6 +1263,12 @@ Symbol ClassTable::typecheck_assign(Expression e) {
         err_stream << "Assignment to undeclared variable " << e->get_name()->get_string() << endl;
         e->set_type(Object);
         return Object;
+    }
+    if (strcmp(e->get_name()->get_string(), "self") == 0) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Cannot assign to 'self'." << endl;
+        //e->set_type(Object);
+        //return Object;
     }
     if (!isparent(name_t, expr_t, e->get_root_class())) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1436,6 +1450,10 @@ Symbol ClassTable::typecheck_typcase(Expression e) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
         }
+        if (strcmp(curr_case->get_name()->get_string(), "self") == 0) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
+            err_stream << "'self' bound in 'case'." << endl;
+        }
         if (strcmp(curr_case->get_type_decl()->get_string(), SELF_TYPE->get_string()) == 0) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Identifier " << curr_case->get_name()->get_string() << " declared with type SELF_TYPE in case branch." << endl;
@@ -1468,6 +1486,10 @@ Symbol ClassTable::typecheck_let(Expression e) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Inferred type " << init_type->get_string() << " of initialization " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
         }
+    }
+    if (strcmp(e->get_name()->get_string(), "self") == 0) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "'self' cannot be bound in a 'let' expression." << ".\n";
     }
     Symbol return_type = typecheck_expression(e->get_expression_2());
     e->set_type(return_type);
