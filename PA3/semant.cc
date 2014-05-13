@@ -545,7 +545,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             }
         } 
     }
-    class_scope_variables->addid(self, curr_class->get_name());
+    class_scope_variables->addid(self, SELF_TYPE);
     curr_class->set_variables_in_scope(class_scope_variables);
     curr_class->set_root_class(curr_class);
 }
@@ -1484,7 +1484,7 @@ Symbol ClassTable::typecheck_let(Expression e) {
     if (strcmp(init_type->get_string(), "_no_class") != 0) {
         if (isparent(t0, init_type, e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-            err_stream << "Inferred type " << init_type->get_string() << " of initialization " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
+            err_stream << "Inferred type " << init_type->get_string() << " of initialization of " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
         }
     }
     if (strcmp(e->get_name()->get_string(), "self") == 0) {

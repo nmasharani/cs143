@@ -3,6 +3,8 @@
 class A {
 	-- self cannot be an attribute.
 	self: Int <- 42;
+	self: Bool;
+	self: SELF_TYPE;
 };
 
 class A2 { 
