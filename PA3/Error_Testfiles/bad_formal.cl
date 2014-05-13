@@ -7,7 +7,7 @@ class Main {
 
 	a: Int;
 
-	omar(a: XYz, a: Int) : SELF_TYPE {
+	omar(a: XYz, a: Int) : Zac {
 		self
 	};
 };

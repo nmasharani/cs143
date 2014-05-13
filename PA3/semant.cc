@@ -1117,9 +1117,8 @@ Symbol ClassTable::check_method_types(Feature feature) {
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
-            //ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
-            //err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
-            //printed in typechecking. 
+            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
+            err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n"; 
             return NULL;
         }
         return feature->get_type();
@@ -1277,8 +1276,9 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
     }
     Symbol return_type = method_def->get_type();
     if (defined_types->lookup(return_type->get_string()) == NULL) {
-        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        //err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        //printed in type checking of method defs. 
         error = true;
     }
     if (error == true) {
@@ -1334,8 +1334,9 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
     }
     Symbol return_type = method_def->get_type();
     if (defined_types->lookup(return_type->get_string()) == NULL) {
-        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        //err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        //printed in typechecking of method defs. 
         error = true;
     }
     if (error == true) {
