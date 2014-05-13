@@ -1528,7 +1528,7 @@ Symbol ClassTable::typecheck_divide(Expression e) {
     return Int;
 }
 
-Symbol ClassTable::typecheck_neg(Expression e) {
+Symbol ClassTable::typecheck_comp(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     if (strcmp(t1->get_string(), Bool->get_string()) != 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1596,11 +1596,11 @@ Symbol ClassTable::typecheck_leq(Expression e) {
     return Int;
 }
 
-Symbol ClassTable::typecheck_comp(Expression e) {
+Symbol ClassTable::typecheck_neg(Expression e) {
     Symbol t = typecheck_expression(e->get_expression_1());
     if (strcmp(t->get_string(), Int->get_string()) != 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Argument of '~' has type" << t->get_string() << " instead of Int" << ".\n";
+        err_stream << "Argument of '~' has type " << t->get_string() << " instead of Int" << ".\n";
     }
     e->set_type(Int);
     return Int;
