@@ -1281,6 +1281,12 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         e->set_type(Object);
         return Object;
     }
+    if (strcmp(e->get_var_type()->get_string(), SELF_TYPE->get_string()) == 0) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Static dispatch to SELF_TYPE" << ".\n";
+        e->set_type(Object);
+        return Object;
+    }
     if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";

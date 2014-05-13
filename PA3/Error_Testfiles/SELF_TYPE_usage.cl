@@ -45,6 +45,13 @@ class A6 {
 	};
 };
 
+class A7 {
+	a6 : A6;
+	a() : Int {
+		a6@SELF_TYPE.a()
+	};
+};
+
 
 
 
