@@ -1117,8 +1117,9 @@ Symbol ClassTable::check_method_types(Feature feature) {
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
-            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
-            err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
+            //ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
+            //err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
+            //printed in typechecking. 
             return NULL;
         }
         return feature->get_type();
@@ -1618,6 +1619,10 @@ Symbol ClassTable::typecheck_no_expr(Expression e) {
 Symbol ClassTable::typecheck_object(Expression e) {
     Symbol type = e->get_variables_in_scope()->lookup(e->get_name());
     if (type == NULL) {
+        e->set_type(Object);
+        return Object;
+    }
+    if (defined_types->lookup(type->get_string()) == NULL) {
         e->set_type(Object);
         return Object;
     }
