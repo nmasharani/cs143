@@ -1258,7 +1258,7 @@ Symbol ClassTable::typecheck_assign(Expression e) {
     }
     if (!isparent(name_t, expr_t, e->get_root_class())) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Type " << expr_t->get_string() << " does not conform to declared type "<< name_t->get_string() << " of identifier" << e->get_name()->get_string() << ".\n";
+        err_stream << "Type " << expr_t->get_string() << " of assigned expression does not conform to declared type "<< name_t->get_string() << " of identifier " << e->get_name()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
     }
