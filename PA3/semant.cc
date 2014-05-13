@@ -408,6 +408,7 @@ SymbolTable<char*, int>* ClassTable::collect_all_valid_types(Classes classes) {
     defined_types->addid(Int->get_string(), new int(42));
     defined_types->addid(Bool->get_string(), new int(42));
     defined_types->addid(Str->get_string(), new int(42));
+    defined_types->addid(SELF_TYPE->get_string(), new int(42));
     return defined_types;
 }
 
