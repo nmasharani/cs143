@@ -79,7 +79,7 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
-
+   
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;

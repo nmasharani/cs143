@@ -960,21 +960,116 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
 
 /**
 */
-Symbol ClassTable::typecheck_expression(Expression expr) {
+Symbol ClassTable::typecheck_expression(Expression e) {
+    // TODO(nm): self handling
+
+    if (strcmp(e->get_type_name(), "assign") == 0) {
+        return typecheck_assign(e);
+    }
+
+    if (strcmp(e->get_type_name(), "static_dispatch") == 0) {
+        return typecheck_static_dispatch(e);
+    }
+
+    if (strcmp(e->get_type_name(), "dispatch") == 0) {
+        return typecheck_dispatch(e);
+    }
+
+    if (strcmp(e->get_type_name(), "cond") == 0) {
+        return typecheck_cond(e);
+    }
+
+    if (strcmp(e->get_type_name(), "loop") == 0) {
+        return typecheck_loop(e);
+    }
+
+    if (strcmp(e->get_type_name(), "typcase") == 0) {
+        return typecheck_typcase(e);
+    }
+
+    if (strcmp(e->get_type_name(), "block") == 0) {
+        return typecheck_block(e);
+    }
+
+    if (strcmp(e->get_type_name(), "let") == 0) {
+        return typecheck_let(e);
+    }
+
+    if (strcmp(e->get_type_name(), "plus") == 0) {
+        return typecheck_plus(e);
+    }
+
+    if (strcmp(e->get_type_name(), "sub") == 0) {
+        return typecheck_sub(e);
+    }
+
+    if (strcmp(e->get_type_name(), "mul") == 0) {
+        return typecheck_mul(e);
+    }
+
+    if (strcmp(e->get_type_name(), "divide") == 0) {
+        return typecheck_divide(e);
+    }
+
+    if (strcmp(e->get_type_name(), "neg") == 0) {
+        return typecheck_neg(e);
+    }
+
+    if (strcmp(e->get_type_name(), "lt") == 0) {
+        return typecheck_lt(e);
+    }
+
+    if (strcmp(e->get_type_name(), "eq") == 0) {
+        return typecheck_eq(e);
+    }
+
+    if (strcmp(e->get_type_name(), "leq") == 0) {
+        return typecheck_leq(e);
+    }
+
+    if (strcmp(e->get_type_name(), "comp") == 0) {
+        return typecheck_comp(e);
+    }
+
+    if (strcmp(e->get_type_name(), "int_const") == 0) {
+        return typecheck_int_const(e);
+    }
+
+    if (strcmp(e->get_type_name(), "bool_const") == 0) {
+        return typecheck_bool_const(e);
+    }
+
+    if (strcmp(e->get_type_name(), "string_const") == 0) {
+        return typecheck_string_const(e);
+    }
+
+    if (strcmp(e->get_type_name(), "new_") == 0) {
+        return typecheck_new_(e);
+    }
+
+    if (strcmp(e->get_type_name(), "isvoid") == 0) {
+        return typecheck_isvoid(e);
+    }
+
+    if (strcmp(e->get_type_name(), "no_expr") == 0) {
+        return typecheck_no_expr(e);
+    }
+
     return Object;
 }
 
 /**
 */
 void ClassTable::typecheck_method(Feature method) {
-    cout << method->get_name()->get_string() << "\n.";
     Symbol method_return_type = check_method_types(method);
     if (method_return_type == NULL) return;
     Symbol method_body_type = typecheck_expression(method->get_expression());
-    cout << "method return type " << method_return_type->get_name()->get_string();
     if (isparent(method_return_type, method_body_type) == false) {
-        ostream& err_stream = semant_error(method->get_root_class());
-        err_stream << "Inferred return type " << method_body_type->get_string() << " of method " << method->get_name()->get_string() << " does not conform to declared return type " << method_return_type->get_string() <<".\n"; 
+        ostream& err_stream = semant_error(method->get_root_class()->get_filename_1(), method);
+        err_stream << "Inferred return type " << method_body_type->get_string() 
+            << " of method " << method->get_name()->get_string() 
+            << " does not conform to declared return type " 
+            << method_return_type->get_string() <<".\n"; 
     }
 }
 
@@ -985,26 +1080,24 @@ void ClassTable::typecheck_method(Feature method) {
 * ***************************************************
 */
 Symbol ClassTable::check_method_types(Feature feature) {
-    if (strcmp(feature->get_type_name(), "method") == 0) {
-        Formals formals = feature->get_formals();
-        for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
-            Formal curr_formal = formals->nth(k);
-            if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
-                ostream& err_stream = semant_error(feature->get_root_class());
-                err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
-            }
-        }
-        if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
-            if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
-                ostream& err_stream = semant_error(feature->get_root_class());
-                err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
-                return NULL;
-            }
-        } else {
-            return feature->get_root_class()->get_name();
+    Formals formals = feature->get_formals();
+    for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
+        Formal curr_formal = formals->nth(k);
+        if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
+            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
+            err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
         }
     }
-    return NULL;
+    if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
+        if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
+            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
+            err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
+            return NULL;
+        }
+        return feature->get_type();
+    }
+    return feature->get_root_class()->get_name();
+    
 }
 
 /**
@@ -1449,49 +1542,105 @@ void program_class::check_naming_and_scope() {
 
 
 
-
-
-
-
-
-
-// Symbol typecheck_expression(Expression e) {
-
-//     if (strcmp(e->get_type_name(), "assign") {
-//         return typecheck_assign(e);
-//     }
-
-//     if (...) {
-//         ...
-//     }
-// }
-
-
-
-
-//  ******** Type checker function *****************************************
-// * This function recursively calculates the type of the current expression
-// * using the type checker rules as described in the Cool Manual section 12.
-// * The return value of this function is the type of the current node.
-// *
-// * Type checking rules for assignment:
-// * name must have type T
-// * expr must have type T'
-// * T' must be a subtype of T
-// * return type: The type of this node is T' 
-// * ********************************************************************* 
-// Symbol typecheck_assign(Expression e) {
+Symbol ClassTable::typecheck_assign(Expression e) {
     
-//   Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
-//   if (!name_t) {
-//      // TODO(nm): non-shitty error handling
-//      cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
-//   }
-//   Symbol expr_t = typecheck_expression(e->get_expr());
-//   if (!isparent(name_t, expr_t)) {
-//      // TODO(nm): non-shitty error handling
-//      cerr << "Type conformation error" << endl;
-//   }
-//   return expr_t;
-// }
+  Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
+  if (!name_t) {
+     // TODO(nm): non-shitty error handling
+     cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
+  }
+  Symbol expr_t = typecheck_expression(e->get_expression_1());
+  if (!isparent(name_t, expr_t)) {
+     // TODO(nm): non-shitty error handling
+     cerr << "Type conformation error" << endl;
+  }
+  return expr_t;
+}
 
+Symbol ClassTable::typecheck_static_dispatch(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_dispatch(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_cond(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_loop(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_typcase(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_block(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_let(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_plus(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_sub(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_mul(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_divide(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_neg(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_lt(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_eq(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_leq(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_comp(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_int_const(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_bool_const(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_string_const(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_new_(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_isvoid(Expression e) {
+    return Object;
+}
+
+Symbol ClassTable::typecheck_no_expr(Expression e) {
+    return Object;
+}

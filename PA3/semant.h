@@ -181,6 +181,54 @@ private:
   bool isparent(Symbol t1, Symbol t2);
   Symbol get_common_parent(Symbol t1, Symbol t2);
 
+
+  Symbol typecheck_assign(Expression e);
+
+  Symbol typecheck_static_dispatch(Expression e);
+
+  Symbol typecheck_dispatch(Expression e);
+
+  Symbol typecheck_cond(Expression e);
+
+  Symbol typecheck_loop(Expression e);
+
+  Symbol typecheck_typcase(Expression e);
+
+  Symbol typecheck_block(Expression e);
+
+  Symbol typecheck_let(Expression e);
+
+  Symbol typecheck_plus(Expression e);
+
+  Symbol typecheck_sub(Expression e);
+
+  Symbol typecheck_mul(Expression e);
+
+  Symbol typecheck_divide(Expression e);
+
+  Symbol typecheck_neg(Expression e);
+
+  Symbol typecheck_lt(Expression e);
+
+  Symbol typecheck_eq(Expression e);
+
+  Symbol typecheck_leq(Expression e);
+
+  Symbol typecheck_comp(Expression e);
+
+  Symbol typecheck_int_const(Expression e);
+
+  Symbol typecheck_bool_const(Expression e);
+
+  Symbol typecheck_string_const(Expression e);
+
+  Symbol typecheck_new_(Expression e);
+
+  Symbol typecheck_isvoid(Expression e);
+
+  Symbol typecheck_no_expr(Expression e);
+
+
 public:
 
   /**
