@@ -1055,6 +1055,10 @@ Symbol ClassTable::typecheck_expression(Expression e) {
         return typecheck_no_expr(e);
     }
 
+    if (strcmp(e->get_type_name(), "object") == 0) {
+        return typecheck_object(e);
+    }
+
     return Object;
 }
 
