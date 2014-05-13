@@ -1596,6 +1596,10 @@ Symbol ClassTable::typecheck_new_(Expression e) {
     if (strcmp(type->get_string(), "SELF_TYPE") == 0) {
         type = e->get_root_class()->get_name();
     }
+    if (defined_types->lookup(type->get_string()) == NULL) {
+        e->set_type(Object);
+        return Object;
+    }
     e->set_type(type);
     return type;
 }
