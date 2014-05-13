@@ -1199,16 +1199,16 @@ void program_class::semant()
 
 Symbol ClassTable::typecheck_assign(Expression e) {
     Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
+    Symbol expr_t = typecheck_expression(e->get_expression_1());
     if (!name_t) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        cerr << "Symbol not defined" << endl;
+        err_stream << "Assignment to undeclared variable " << e->get_name()->get_string() << endl;
         e->set_type(Object);
         return Object;
     }
-    Symbol expr_t = typecheck_expression(e->get_expression_1());
     if (!isparent(name_t, expr_t)) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        cerr << "Type conformation error" << endl;
+        err_stream << "Type " << expr_t->get_string() << " does not conform to declared type "<< name_t->get_string() << " of identifier" << e->get_name()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
     }
@@ -1336,7 +1336,7 @@ Symbol ClassTable::typecheck_cond(Expression e) {
     bool error = false;
     if (strcmp(pred_t->get_string(), "Bool") != 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        cerr << "Predicate type of if statement must be Bool. Is currently " << pred_t->get_string() << endl;
+        err_stream << "Predicate of 'if' does not have type Bool." << endl;
         error = true;
     }
     Symbol then_t = typecheck_expression(e->get_expression_2());
@@ -1354,7 +1354,8 @@ Symbol ClassTable::typecheck_loop(Expression e) {
     Symbol predicate_type = typecheck_expression(e->get_expression_1());
     Symbol body_type = typecheck_expression(e->get_expression_2());
     if (strcmp(predicate_type->get_string(), "Bool") != 0 ) {
-        PRINT ERROR;
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Loop condition does not have type Bool." << endl;
     }
     e->set_type(Object);
     return Object;
@@ -1367,7 +1368,8 @@ Symbol ClassTable::typecheck_typcase(Expression e) {
     for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
         Case curr_case = cases->nth(i);
         if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
-            print error message;
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
         }
         case_types[i] = typecheck_expression(curr_case->get_expr());
     }
@@ -1397,7 +1399,8 @@ Symbol ClassTable::typecheck_let(Expression e) {
     Symbol init_type = typecheck_expression(e->get_expression_1());
     if (strcmp(init_type->get_string(), "_no_class") != 0) {
         if (isparent(t0, init_type) == false) {
-            print error;
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "Inferred type " << init_type->get_string() << " of initialization " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
         }
     }
     Symbol return_type = typecheck_expression(e->get_expression_2());
@@ -1408,11 +1411,16 @@ Symbol ClassTable::typecheck_let(Expression e) {
 Symbol ClassTable::typecheck_plus(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " + " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1421,11 +1429,16 @@ Symbol ClassTable::typecheck_plus(Expression e) {
 Symbol ClassTable::typecheck_sub(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " - " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1434,11 +1447,16 @@ Symbol ClassTable::typecheck_sub(Expression e) {
 Symbol ClassTable::typecheck_mul(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " * " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1447,11 +1465,16 @@ Symbol ClassTable::typecheck_mul(Expression e) {
 Symbol ClassTable::typecheck_divide(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " / " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1460,7 +1483,8 @@ Symbol ClassTable::typecheck_divide(Expression e) {
 Symbol ClassTable::typecheck_neg(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     if (strcmp(t1->get_string(), Bool->get_string()) != 0) {
-        print error;
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Argument of 'not' has type " << t1->get_string() << " instead of Bool.\n";
     }
     e->set_type(Bool);
     return Bool;
@@ -1469,11 +1493,16 @@ Symbol ClassTable::typecheck_neg(Expression e) {
 Symbol ClassTable::typecheck_lt(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " < " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1482,19 +1511,20 @@ Symbol ClassTable::typecheck_lt(Expression e) {
 Symbol ClassTable::typecheck_eq(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
-    if (strcmp(t1->get_string(), Int->get_string()) != 0 &&
-        strcmp(t1->get_string(), Bool->get_string()) != 0 &&
-        strcmp(t1->get_string(), String->get_string()) != 0) {
-        print error;
+    bool error = false;
+    if (strcmp(t1->get_string(), Int->get_string()) != 0 || strcmp(t1->get_string(), Bool->get_string()) != 0 || strcmp(t1->get_string(), Str->get_string()) != 0) {
+        if (strcmp(t1->get_string(), t2->get_string()) != 0) {
+            error = true;
+        }
     }
-    if (strcmp(t2->get_string(), Int->get_string()) != 0 &&
-        strcmp(t2->get_string(), Bool->get_string()) != 0 &&
-        strcmp(t2->get_string(), String->get_string()) != 0) {
-        print error;
+    if (strcmp(t2->get_string(), Int->get_string()) != 0 || strcmp(t2->get_string(), Bool->get_string()) != 0 || strcmp(t2->get_string(), Str->get_string()) != 0) {
+        if (strcmp(t1->get_string(), t2->get_string()) != 0) {
+            error = true;
+        }
     }
-
-    if (strcmp(t1->get_string(), t2->get_string()) != 0) {
-        print error;
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Illegal comparison with a basic type" << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1503,11 +1533,16 @@ Symbol ClassTable::typecheck_eq(Expression e) {
 Symbol ClassTable::typecheck_leq(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
+    bool error = false;
     if (strcmp(t2->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
     }
     if (strcmp(t1->get_string(), Int->get_string()) != 0) {
-        print error;
+        error = true;
+    }
+    if (error == true) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "non-Int arguments " << t1->get_string() << " <= " << t2->get_string() << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1516,7 +1551,8 @@ Symbol ClassTable::typecheck_leq(Expression e) {
 Symbol ClassTable::typecheck_comp(Expression e) {
     Symbol t = typecheck_expression(e->get_expression_1());
     if (strcmp(t->get_string(), Int->get_string()) != 0) {
-        print error;
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Argument of '~' has type" << t->get_string() << " instead of Int" << ".\n";
     }
     e->set_type(Int);
     return Int;
@@ -1538,7 +1574,7 @@ Symbol ClassTable::typecheck_string_const(Expression e) {
 }
 
 Symbol ClassTable::typecheck_new_(Expression e) {
-    Symbol type = e->get_type_name();
+    Symbol type = e->get_var_type();
     if (strcmp(type->get_string(), "SELF_TYPE")) {
         type = e->get_root_class()->get_name();
     }
