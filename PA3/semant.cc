@@ -166,7 +166,7 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
     Formals curr_formals = curr_feature->get_formals();
     Formals inherited_formals = inherited_method_def->get_formals();
     if (curr_formals->len() != inherited_formals->len()) {
-        ostream& err_stream = semant_error(containing_class);
+        ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_formals);
         err_stream << "Incompatible number of formal parameters in redefined method " << curr_feature->get_name()->get_string() << ".\n";
         status = 1;
     }
@@ -175,14 +175,14 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
             Formal curr_formal = curr_formals->nth(i);
             Formal inherited_formal = inherited_formals->nth(i);
             if (strcmp(curr_formal->get_type()->get_string(), inherited_formal->get_type()->get_string()) != 0) {
-                ostream& err_stream = semant_error(containing_class);
+                ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_formal);
                 err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " parameter '" << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
                 status = 1;
             }
         }
     }
     if (strcmp(curr_feature->get_type()->get_string(), inherited_method_def->get_type()->get_string()) != 0) {
-        ostream& err_stream = semant_error(containing_class);
+        ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_feature);
         err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " return type " << curr_feature->get_type()->get_string() << " is different from original return type " << inherited_method_def->get_type()->get_string() << ".\n";
         status = 1;
     }
@@ -228,7 +228,7 @@ int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
             if (strcmp(curr_feature->get_type_name(), "method") == 0) {
                 char* curr_method_name = curr_feature->get_name()->get_string();
                 if (method_names.lookup(curr_method_name) != NULL) {
-                    ostream& err_stream = semant_error(curr_class);
+                    ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Method " << curr_method_name << " is multiply defined.\n";
                     status = 1;
                 } else {
@@ -259,14 +259,14 @@ int ClassTable::check_methods_types(Classes classes_in_program) {
                 for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
                     Formal curr_formal = formals->nth(k);
                     if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
-                        ostream& err_stream = semant_error(curr_class);
+                        ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_formal);
                         err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
                         status = 1;
                     }
                 }
                 if (strcmp(curr_feature->get_type()->get_string(), "SELF_TYPE") != 0) {
                     if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
-                        ostream& err_stream = semant_error(curr_class);
+                        ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                         err_stream << "Undefined return type " << curr_feature->get_type()->get_string() << " in method " << curr_feature->get_name()->get_string() << ".\n";
                         status = 1;
                     }
@@ -484,11 +484,11 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
         Feature curr_feature = features->nth(i);
         if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
             if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
-                ostream& err_stream = semant_error(curr_class);
+                ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
             } else if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
                 if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
-                    ostream& err_stream = semant_error(curr_class);
+                    ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
                     class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                 } else {
@@ -508,7 +508,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             Feature curr_feature = features->nth(i);
             if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
                 if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
-                    ostream& err_stream = semant_error(curr_class);
+                    ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
                 } else {
                     if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
@@ -559,12 +559,12 @@ void ClassTable::initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>
     formal_to_init->set_variables_in_scope(variables_in_scope);
     bool can_add = true;
     if (variables_in_scope->probe(formal_to_init->get_name()) != NULL) {
-        ostream& err_stream = semant_error(root_class);
+        ostream& err_stream = semant_error(root_class->get_filename_1(), formal_to_init);
         err_stream << "Formal parameter " << formal_to_init->get_name()->get_string() << " is multiply defined.\n";
         can_add = false;
     } 
     if (defined_types->lookup(formal_to_init->get_type()->get_string()) == NULL) {
-        //ostream& err_stream = semant_error(root_class);
+        //ostream& err_stream = semant_error(root_class->get_filename_1(), formal_to_init);
         //err_stream << "Class " << formal_to_init->get_type()->get_string() << " of formal parameter " << formal_to_init->get_name()->get_string() << " is undefined.\n";
         //type checking in check_types
     } 
@@ -579,7 +579,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     if (strcmp(expression_to_init->get_type_name(), "object") == 0) {
         /* check if the object is in the symbol table. If it is, we are happy, otherwise, error */
         if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
-            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            ostream& err_stream = semant_error(expression_to_init->get_root_class()->get_filename_1(), expression_to_init);
             err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
         }
         return; 
@@ -591,7 +591,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     /* Base case 2: new */
     if (strcmp(expression_to_init->get_type_name(), "new_") == 0) {
         if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
-            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            ostream& err_stream = semant_error(expression_to_init->get_root_class()->get_filename_1(), expression_to_init);
             err_stream << "'New' used with undefined class " << expression_to_init->get_var_type()->get_string() << ".\n";
         }
         return;
@@ -711,7 +711,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
      /* Recurse case 14: assign */
     if (strcmp(expression_to_init->get_type_name(), "assign") == 0) {
         if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
-            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            ostream& err_stream = semant_error(expression_to_init->get_root_class()->get_filename_1(), expression_to_init);
             err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
         }
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
@@ -722,7 +722,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
     if (strcmp(expression_to_init->get_type_name(), "let") == 0) {
         expression_to_init->get_variables_in_scope()->enterscope();
         if (defined_types->lookup(expression_to_init->get_var_type()->get_string()) == NULL) {
-            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            ostream& err_stream = semant_error(expression_to_init->get_root_class()->get_filename_1(), expression_to_init);
             err_stream << "Class " << expression_to_init->get_var_type()->get_string() << " of let-bound identifier " << expression_to_init->get_name()->get_string() << " is undefined.\n";
         }
         expression_to_init->get_variables_in_scope()->addid(expression_to_init->get_name(), expression_to_init->get_var_type());
@@ -749,7 +749,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
 void ClassTable::initialize_case_enviornment(SymbolTable<Symbol, Entry>* variables_in_scope, SymbolTable<char*, int>* case_types_so_far, Class_ root_class, Case curr_case) {
     curr_case->set_root_class(root_class);
     if (case_types_so_far->lookup(curr_case->get_type_decl()->get_string()) != NULL) {
-        ostream& err_stream = semant_error(root_class);
+        ostream& err_stream = semant_error(root_class->get_filename_1(), curr_case);
         err_stream << "Duplicate branch " << curr_case->get_type_decl()->get_string() << " in case statement.\n"; 
     } else {
         case_types_so_far->addid(curr_case->get_type_decl()->get_string(), new int(42));
@@ -1111,7 +1111,7 @@ void ClassTable::typecheck_attribute(Feature attribute) {
     Symbol expression_type = typecheck_expression(attribute->get_expression());
     Symbol attribute_type = attribute->get_type();
     if (isparent(attribute_type, expression_type) == false) {
-        ostream& err_stream = semant_error(attribute->get_root_class());
+        ostream& err_stream = semant_error(attribute->get_root_class()->get_filename_1(), attribute);
         err_stream << "Inferred type " << expression_type->get_string() << " of initialization of attribute " << attribute->get_name()->get_string() << " does not conform to declared type " << attribute_type->get_string() <<".\n"; 
     }
 }
