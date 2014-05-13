@@ -1,8 +1,8 @@
-class Main {
+(*class Main {
 	main() : SELF_TYPE {
 		self
 	};
-};
+};*)
 
 class Echo {
 	x: Semi;

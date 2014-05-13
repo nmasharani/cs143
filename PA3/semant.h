@@ -109,16 +109,6 @@ private:
 
   /**
   * *****************************************************
-  * Description: Checks that a class Main is contained
-  *     in the program, and that it contains a method
-  *     called main. 
-  * Return 1 on error, 0 otherwise. 
-  * *****************************************************
-  */
-  int check_for_main(Classes classes_in_program);
-
-  /**
-  * *****************************************************
   * Description: helper function. Takes a list of classes
   *     and returns pointer to Class_ object that has the name
   *     passed in, or NULL if no match. 
@@ -286,6 +276,16 @@ public:
   * *****************************************************
   */
   void typecheck_program();
+
+  /**
+  * *****************************************************
+  * Description: Checks that a class Main is contained
+  *     in the program, and that it contains a method
+  *     called main. 
+  * Return 1 on error, 0 otherwise. 
+  * *****************************************************
+  */
+  int check_for_main(Classes classes_in_program);
 
   int errors() { return semant_errors; }
   ostream& semant_error();

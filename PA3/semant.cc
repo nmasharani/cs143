@@ -100,12 +100,13 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_inheritance_cycle(classes_in_program);
     if (status != 0) return;
 
+    //methods made public and moved to program::semant()
    /* status = validate_methods(classes_in_program);
     if (status != 0) return; 
     */
 
-    status = check_for_main(classes_in_program);
-    if (status != 0) return; 
+    /*status = check_for_main(classes_in_program);
+    if (status != 0) return; */
 
     program_classes_AST = classes_in_program;
 
@@ -1174,6 +1175,7 @@ void program_class::semant()
 	   exit(1);
     }
 
+    int status = classtable->check_for_main(classtable->program_classes_AST); //status is currently unused.
     classtable->validate_methods(classtable->program_classes_AST);
     classtable->settup_typecheck_enviornment();
     classtable->typecheck_program();
