@@ -1480,8 +1480,24 @@ Symbol ClassTable::typecheck_lt(Expression e) {
 }
 
 Symbol ClassTable::typecheck_eq(Expression e) {
-    
-    return Object;
+    Symbol t1 = typecheck_expression(e->get_expression_1());
+    Symbol t2 = typecheck_expression(e->get_expression_2());
+    if (strcmp(t1->get_string(), Int->get_string()) != 0 &&
+        strcmp(t1->get_string(), Bool->get_string()) != 0 &&
+        strcmp(t1->get_string(), String->get_string()) != 0) {
+        print error;
+    }
+    if (strcmp(t2->get_string(), Int->get_string()) != 0 &&
+        strcmp(t2->get_string(), Bool->get_string()) != 0 &&
+        strcmp(t2->get_string(), String->get_string()) != 0) {
+        print error;
+    }
+
+    if (strcmp(t1->get_string(), t2->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_leq(Expression e) {
@@ -1498,35 +1514,52 @@ Symbol ClassTable::typecheck_leq(Expression e) {
 }
 
 Symbol ClassTable::typecheck_comp(Expression e) {
-    return Object;
+    Symbol t = typecheck_expression(e->get_expression_1());
+    if (strcmp(t->get_string(), Int->get_string()) != 0) {
+        print error;
+    }
+    e->set_type(Int);
+    return Int;
 }
 
 Symbol ClassTable::typecheck_int_const(Expression e) {
+    e->set_type(Int);
     return Int;
 }
 
 Symbol ClassTable::typecheck_bool_const(Expression e) {
+    e->set_type(Bool);
     return Bool;
 }
 
 Symbol ClassTable::typecheck_string_const(Expression e) {
+    e->set_type(Str);
     return Str;
 }
 
 Symbol ClassTable::typecheck_new_(Expression e) {
-    return Object;
+    Symbol type = e->get_type_name();
+    if (strcmp(type->get_string(), "SELF_TYPE")) {
+        type = e->get_root_class()->get_name();
+    }
+    e->set_type(type);
+    return type;
 }
 
 Symbol ClassTable::typecheck_isvoid(Expression e) {
-    return Object;
+    Symbol type = typecheck_expression(e->get_expression_1());
+    e->set_type(Bool);
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_no_expr(Expression e) {
+    e->set_type(No_class);
     return No_class;
 }
 
 Symbol ClassTable::typecheck_object(Expression e) {
     Symbol type = e->get_variables_in_scope()->lookup(e->get_name());
+    e->set_type(type);
     return type;
 }
 
