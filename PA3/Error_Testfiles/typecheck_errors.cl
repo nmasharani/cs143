@@ -26,3 +26,10 @@ class C {
 		y <- 5
 	};
 };
+
+class D {
+	y : Bool <- true;
+	d() : Object {
+		if y then 1 else "hello" fi
+	};
+};

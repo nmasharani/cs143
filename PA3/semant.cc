@@ -1568,7 +1568,15 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
 }
 
 Symbol ClassTable::typecheck_cond(Expression e) {
-    return Object;
+    Symbol pred_t = typecheck_expression(e->get_expression_1());
+    if (strcmp(pred_t->get_string(), "Bool") != 0) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        cerr << "Predicate type of if statement must be Bool. Is currently " << pred_t->get_string() << endl;
+        return Object;
+    }
+    Symbol then_t = typecheck_expression(e->get_expression_2());
+    Symbol else_t = typecheck_expression(e->get_expression_3());
+    return get_common_parent(then_t, else_t);
 }
 
 Symbol ClassTable::typecheck_loop(Expression e) {
@@ -1624,15 +1632,15 @@ Symbol ClassTable::typecheck_comp(Expression e) {
 }
 
 Symbol ClassTable::typecheck_int_const(Expression e) {
-    return Object;
+    return Int;
 }
 
 Symbol ClassTable::typecheck_bool_const(Expression e) {
-    return Object;
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_string_const(Expression e) {
-    return Object;
+    return Str;
 }
 
 Symbol ClassTable::typecheck_new_(Expression e) {
@@ -1644,5 +1652,10 @@ Symbol ClassTable::typecheck_isvoid(Expression e) {
 }
 
 Symbol ClassTable::typecheck_no_expr(Expression e) {
-    return Object;
+    return No_class;
+}
+
+Symbol ClassTable::typecheck_object(Expression e) {
+    Symbol type = e->get_variables_in_scope()->lookup(e->get_name());
+    return type;
 }

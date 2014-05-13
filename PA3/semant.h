@@ -228,6 +228,8 @@ private:
 
   Symbol typecheck_no_expr(Expression e);
 
+  Symbol typecheck_object(Expression e);
+
 
 public:
 
