@@ -518,7 +518,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             }
         } 
     }
-    class_scope_variables->addid(self, self);
+    class_scope_variables->addid(self, curr_class->get_name());
     curr_class->set_variables_in_scope(class_scope_variables);
     curr_class->set_root_class(curr_class);
 }
@@ -909,6 +909,7 @@ ostream& ClassTable::semant_error()
 
 /**
 * ***************************************************
+* Notes: 
 * ***************************************************
 */
 void ClassTable::settup_typecheck_enviornment() {
@@ -927,6 +928,7 @@ void ClassTable::setup_inheritance_graph() {
     inheritance_graph = new SymbolTable<Symbol, Entry>();
     inheritance_graph->enterscope();
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ curr_class = program_classes_AST->nth(i);
         inheritance_graph->addid(curr_class->get_name(), curr_class->get_parent());
     }
 }
@@ -954,6 +956,63 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
      t1 = inheritance_graph->lookup(t1);
     }
     return NULL; // This is an error; object, at least, should be a common parent
+}
+
+/**
+*/
+Symbol ClassTable::typecheck_expression(Expression expr) {
+    return Object;
+}
+
+/**
+*/
+void ClassTable::typecheck_method(Feature method) {
+    
+}
+
+/**
+* ***************************************************
+* Rule on page 22 of manual. 
+* ***************************************************
+*/
+void ClassTable::typecheck_attribute(Feature attribute) {
+    if (strcmp(attribute->get_expression()->get_type_name(), "no_expr") == 0) return;
+    Symbol expression_type = typecheck_expression(attribute->get_expression());
+    Symbol attribute_type = attribute->get_type();
+    if (isparent(attribute_type, expression_type) == false) {
+        ostream& err_stream = semant_error(attribute->get_root_class());
+        err_stream << "Inferred type " << expression_type->get_string() << " of initialization of attribute " << attribute->get_name()->get_string() << " does not conform to declared type " << attribute_type->get_string() <<".\n"; 
+    }
+}
+
+/**
+* ***************************************************
+* ***************************************************
+*/
+void ClassTable::typecheck_feature(Feature feature) {
+    if (strcmp(feature->get_type_name(), "attribute") == 0) {
+        typecheck_attribute(feature);
+    } else {
+        typecheck_method(feature);
+    }
+}
+
+
+/**
+* ***************************************************
+* Tree roots are the classes. Start there and 
+*       work up the tree, moving next to the features. 
+* ***************************************************
+*/
+void ClassTable::typecheck_program() {
+    for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
+        Class_ curr_class = program_classes_AST->nth(i);
+        Features features = curr_class->get_features();
+        for (int j = features->first(); features->more(j); j = features->next(j)) {
+            Feature curr_feature = features->nth(j);
+            typecheck_feature(curr_feature);
+        }
+    }
 }
 
 
@@ -986,13 +1045,12 @@ void program_class::semant()
 
     classtable->validate_methods(classtable->program_classes_AST);
     classtable->settup_typecheck_enviornment();
+    classtable->typecheck_program();
 
     if (classtable->errors()) {
        cerr << "Compilation halted due to static semantic errors." << endl;
        exit(1);
     }
-
-    classtable->update_type_information();
 }
 
 

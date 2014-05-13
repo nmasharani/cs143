@@ -26,19 +26,6 @@ private:
 
   /**
   * *****************************************************
-<<<<<<< HEAD
-=======
-  * Description: keeps track of the types that are defined
-  *     for this program. Note, a type is simply a class
-  *     name, which can be both user defined, or basic
-  *     class. Use a single scope level of the symbol
-  *     table as a container.
-  * *****************************************************
-  */
-  SymbolTable<char*, int>* defined_types;
-
-  /**
-  * *****************************************************
   * Description: keeps track of inheritance
   *   the first term in the symbol table is a symbol 
   *   containing the class name. the second is a symbol
@@ -50,16 +37,6 @@ private:
 
   /**
   * *****************************************************
-  * Description: the AST of the program is essentialy
-  *     a list of classes, where each class is an AST
-  *     subtree. 
-  * *****************************************************
-  */
-  Classes program_classes_AST;
-
-  /**
-  * *****************************************************
->>>>>>> 541567a3629c73ffb22a4e982de78bf0cb6d71c4
   * Description: returns a list of all classes contained
   *     in the program, which consists of classes defined
   *     defined by program, and the basic classes. 
@@ -115,6 +92,19 @@ private:
   Feature search_for_inherited_method_def(Class_ curr_class, char* curr_method_name, Classes classes_in_program);
 
   int check_method_definitions(Class_ containing_class, Feature curr_feature, Feature inherited_method_def);
+
+  /**
+  * *****************************************************
+  * Description: typecheck helper methods. 
+  * *****************************************************
+  */
+  void typecheck_feature(Feature feature);
+
+  void typecheck_method(Feature method);
+
+  void typecheck_attribute(Feature attribute);
+
+  Symbol typecheck_expression(Expression expr);
 
   /**
   * *****************************************************
@@ -238,6 +228,13 @@ public:
   * *****************************************************
   */
   int validate_methods(Classes classes_in_program);
+
+  /**
+  * *****************************************************
+  * Description: Entry point to the typchecker. 
+  * *****************************************************
+  */
+  void typecheck_program();
 
   int errors() { return semant_errors; }
   ostream& semant_error();
