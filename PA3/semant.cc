@@ -500,7 +500,8 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
             if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
                 ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
-            } else if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
+            } 
+            if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
                 if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
                     ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
@@ -710,6 +711,16 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_3());
+        return;
+    } 
+
+     /* Recurse case 12:  dispatch */
+    if (strcmp(expression_to_init->get_type_name(), "dispatch") == 0) {
+        Expressions expressions = expression_to_init->get_expressions();
+        for (int i = expressions->first(); expressions->more(i); i = expressions->next(i)) {
+            initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expressions->nth(i));
+        }
+        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         return;
     } 
 
