@@ -959,8 +959,22 @@ void ClassTable::setup_inheritance_graph() {
     }
 }
 
-bool ClassTable::isparent(Symbol t1, Symbol t2) {
-    if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
+bool ClassTable::isparent(Symbol t1, Symbol t2, Class_ root_class) {
+    if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0) {
+        t1 = root_class->get_name();
+    }
+
+    if (strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+        t2 = root_class->get_name();
+    }
+
+    if (!inheritance_graph->lookup(t1)) {
+        return false;
+    }
+    if (!inheritance_graph->lookup(t2)) {
+        return false;
+    }    
+
     while (t2) {
         if (strcmp(t1->get_string(), t2->get_string()) == 0) return true;
         t2 = inheritance_graph->lookup(t2);
@@ -968,9 +982,17 @@ bool ClassTable::isparent(Symbol t1, Symbol t2) {
     return false;
 }
 
-Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
-    if (!inheritance_graph->lookup(t1)) {/* TODO(nm): error */}
-    if (!inheritance_graph->lookup(t2)) {/* TODO(nm): error */}
+Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
+    if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0) {
+        t1 = root_class->get_name();
+    }
+
+    if (strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+        t2 = root_class->get_name();
+    }
+
+    if (!inheritance_graph->lookup(t1)) { return NULL; }
+    if (!inheritance_graph->lookup(t2)) { return NULL; }
 
     Symbol temp;
     while (t1) {
@@ -1094,7 +1116,7 @@ void ClassTable::typecheck_method(Feature method) {
     if (method_return_type == NULL) return;
     Symbol method_body_type = typecheck_expression(method->get_expression());
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) return;
-    if (isparent(method_return_type, method_body_type) == false) {
+    if (isparent(method_return_type, method_body_type, method->get_root_class()) == false) {
         ostream& err_stream = semant_error(method->get_root_class()->get_filename_1(), method);
         err_stream << "Inferred return type " << method_body_type->get_string() << " of method " << method->get_name()->get_string() << " does not conform to declared return type " << method_return_type->get_string() <<".\n"; 
     }
@@ -1115,7 +1137,7 @@ Symbol ClassTable::check_method_types(Feature feature) {
             err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
         }
     }
-    if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
+    if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n"; 
@@ -1123,7 +1145,9 @@ Symbol ClassTable::check_method_types(Feature feature) {
         }
         return feature->get_type();
     }
-    return feature->get_root_class()->get_name();
+
+    // self type
+    return SELF_TYPE;
     
 }
 
@@ -1136,7 +1160,7 @@ void ClassTable::typecheck_attribute(Feature attribute) {
     if (strcmp(attribute->get_expression()->get_type_name(), "no_expr") == 0) return;
     Symbol expression_type = typecheck_expression(attribute->get_expression());
     Symbol attribute_type = attribute->get_type();
-    if (isparent(attribute_type, expression_type) == false) {
+    if (isparent(attribute_type, expression_type, attribute->get_root_class()) == false) {
         ostream& err_stream = semant_error(attribute->get_root_class()->get_filename_1(), attribute);
         err_stream << "Inferred type " << expression_type->get_string() << " of initialization of attribute " << attribute->get_name()->get_string() << " does not conform to declared type " << attribute_type->get_string() <<".\n"; 
     }
@@ -1224,7 +1248,7 @@ Symbol ClassTable::typecheck_assign(Expression e) {
         e->set_type(Object);
         return Object;
     }
-    if (!isparent(name_t, expr_t)) {
+    if (!isparent(name_t, expr_t, e->get_root_class())) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Type " << expr_t->get_string() << " does not conform to declared type "<< name_t->get_string() << " of identifier" << e->get_name()->get_string() << ".\n";
         e->set_type(Object);
@@ -1243,7 +1267,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         Expression curr_param = params->nth(i);
         symbols_array[i] = typecheck_expression(curr_param);
     }
-    if (isparent(e->get_var_type(), t0) == false) {
+    if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
     }
@@ -1274,7 +1298,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
     bool error = false;
     for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
         Symbol curr_type = method_def_formals->nth(i)->get_type();
-        if (isparent(curr_type, symbols_array[i]) == false) {
+        if (isparent(curr_type, symbols_array[i], e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
             error = true;
@@ -1332,7 +1356,7 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
     bool error = false;
     for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
         Symbol curr_type = method_def_formals->nth(i)->get_type();
-        if (isparent(curr_type, symbols_array[i]) == false) {
+        if (isparent(curr_type, symbols_array[i], e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
             //error = true;
@@ -1372,7 +1396,7 @@ Symbol ClassTable::typecheck_cond(Expression e) {
         e->set_type(Object);
         return Object;
     }
-    Symbol common_parent = get_common_parent(then_t, else_t);
+    Symbol common_parent = get_common_parent(then_t, else_t, e->get_root_class());
     e->set_type(common_parent);
     return common_parent;
 }
@@ -1402,7 +1426,7 @@ Symbol ClassTable::typecheck_typcase(Expression e) {
     }
     Symbol highest_parent = case_types[0];
     for (int i = 1; i < cases->len(); i++) {
-        highest_parent = get_common_parent(highest_parent, case_types[i]);
+        highest_parent = get_common_parent(highest_parent, case_types[i], e->get_root_class());
     }
     e->set_type(highest_parent);
     return highest_parent;
@@ -1420,12 +1444,9 @@ Symbol ClassTable::typecheck_block(Expression e) {
 
 Symbol ClassTable::typecheck_let(Expression e) {
     Symbol t0 = e->get_var_type();
-    if (strcmp(t0->get_string(), "SELF_TYPE") == 0) {
-        t0 = e->get_root_class()->get_name();
-    }
     Symbol init_type = typecheck_expression(e->get_expression_1());
     if (strcmp(init_type->get_string(), "_no_class") != 0) {
-        if (isparent(t0, init_type) == false) {
+        if (isparent(t0, init_type, e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Inferred type " << init_type->get_string() << " of initialization " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
         }
@@ -1602,9 +1623,6 @@ Symbol ClassTable::typecheck_string_const(Expression e) {
 
 Symbol ClassTable::typecheck_new_(Expression e) {
     Symbol type = e->get_var_type();
-    if (strcmp(type->get_string(), "SELF_TYPE") == 0) {
-        type = e->get_root_class()->get_name();
-    }
     if (defined_types->lookup(type->get_string()) == NULL) {
         e->set_type(Object);
         return Object;
@@ -1637,7 +1655,7 @@ Symbol ClassTable::typecheck_object(Expression e) {
     if (strcmp(e->get_name()->get_string(), "self") == 0)
     {
         e->set_type(SELF_TYPE);
-        return type;
+        return SELF_TYPE;
     }
     e->set_type(type);
     return type;

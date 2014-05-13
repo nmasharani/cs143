@@ -29,9 +29,8 @@ class C {
 			a@A.c();
 			a@A.y();
 			a@A.y("hi");
-			-- this produces 2 identical errors
 			a@A.b(1);
-			-- we are missing an error msg to handle following err
+			-- this produces 2 errs
 			a@E.b();
 			true;
 

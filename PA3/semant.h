@@ -175,8 +175,8 @@ private:
 
   /* Inheritance methods */
   void setup_inheritance_graph();
-  bool isparent(Symbol t1, Symbol t2);
-  Symbol get_common_parent(Symbol t1, Symbol t2);
+  bool isparent(Symbol t1, Symbol t2, Class_ root_class);
+  Symbol get_common_parent(Symbol t1, Symbol t2, Class_ root_class);
 
 
   Symbol typecheck_assign(Expression e);
