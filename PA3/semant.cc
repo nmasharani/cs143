@@ -1092,10 +1092,6 @@ Symbol ClassTable::typecheck_expression(Expression e) {
 void ClassTable::typecheck_method(Feature method) {
     Symbol method_return_type = check_method_types(method);
     if (method_return_type == NULL) return;
-    if (strcmp(method->get_name()->get_string(), "bravo") == 0)
-    {
-        cout << method->get_expression()->get_type_name() << endl;
-    }
     Symbol method_body_type = typecheck_expression(method->get_expression());
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) return;
     if (isparent(method_return_type, method_body_type) == false) {
@@ -1251,6 +1247,12 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
     }
+    if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Static dispatch to undefined class " << e->get_var_type()->get_string() << ".\n";
+        e->set_type(Object);
+        return Object;
+    }
     Class_ t_class = find_class_by_name(program_classes_AST, e->get_var_type()->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
     if (method_def == NULL) {
@@ -1299,7 +1301,6 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
 
 Symbol ClassTable::typecheck_dispatch(Expression e) {
     Symbol t0 = typecheck_expression(e->get_expression_1());
-    cout << t0->get_string() << endl;
     Expressions params = e->get_expressions();
     int len = params->len();
     Symbol symbols_array [len];
