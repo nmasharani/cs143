@@ -177,7 +177,7 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
             Formal inherited_formal = inherited_formals->nth(i);
             if (strcmp(curr_formal->get_type()->get_string(), inherited_formal->get_type()->get_string()) != 0) {
                 ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_formal);
-                err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " parameter '" << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
+                err_stream << "In redefined method " << curr_feature->get_name()->get_string() << ", parameter '" << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
                 status = 1;
             }
         }

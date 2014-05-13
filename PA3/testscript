@@ -1,0 +1,51 @@
+for file in Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		echo ""
+		echo "***********************************************************************************************************"
+		echo ""
+	done
+
+	echo ""
+	echo ""
+	echo ""
+	echo ""
+
+for file in Error_Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		echo ""
+		echo "***********************************************************************************************************"
+		echo ""
+	done
+
+	echo ""
+	echo ""
+	echo ""
+	echo ""
+
+for file in Valid_Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		echo ""
+		echo "***********************************************************************************************************"
+		echo ""
+	done
