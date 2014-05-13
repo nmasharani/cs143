@@ -967,10 +967,6 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
 /**
 */
 Symbol ClassTable::typecheck_expression(Expression e) {
-    // TODO(nm): self handling
-    cout << endl;
-    cout << "in typecheck_expression with " << e->get_type_name() << endl;
-    cout << endl;
 
     if (strcmp(e->get_type_name(), "assign") == 0) {
         return typecheck_assign(e);
@@ -1077,6 +1073,7 @@ void ClassTable::typecheck_method(Feature method) {
     Symbol method_return_type = check_method_types(method);
     if (method_return_type == NULL) return;
     Symbol method_body_type = typecheck_expression(method->get_expression());
+    if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) return;
     if (isparent(method_return_type, method_body_type) == false) {
         ostream& err_stream = semant_error(method->get_root_class()->get_filename_1(), method);
         err_stream << "Inferred return type " << method_body_type->get_string() << " of method " << method->get_name()->get_string() << " does not conform to declared return type " << method_return_type->get_string() <<".\n"; 
