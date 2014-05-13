@@ -1140,6 +1140,10 @@ Symbol ClassTable::check_method_types(Feature feature) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
         }
+        if (strcmp(curr_formal->get_type()->get_string(), SELF_TYPE->get_string()) == 0) {
+            ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
+            err_stream << "Formal parameter " << curr_formal->get_name()->get_string() << " cannot have type SELF_TYPE" << ".\n";
+        }
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
@@ -1425,6 +1429,10 @@ Symbol ClassTable::typecheck_typcase(Expression e) {
         if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
+        }
+        if (strcmp(curr_case->get_type_decl()->get_string(), SELF_TYPE->get_string()) == 0) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
+            err_stream << "Identifier " << curr_case->get_name()->get_string() << " declared with type SELF_TYPE in case branch." << endl;
         }
         case_types[i] = typecheck_expression(curr_case->get_expr());
     }
