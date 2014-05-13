@@ -167,7 +167,7 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
     Formals curr_formals = curr_feature->get_formals();
     Formals inherited_formals = inherited_method_def->get_formals();
     if (curr_formals->len() != inherited_formals->len()) {
-        ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_formals);
+        ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_feature);
         err_stream << "Incompatible number of formal parameters in redefined method " << curr_feature->get_name()->get_string() << ".\n";
         status = 1;
     }
