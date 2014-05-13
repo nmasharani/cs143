@@ -968,12 +968,16 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2) {
 */
 Symbol ClassTable::typecheck_expression(Expression e) {
     // TODO(nm): self handling
+    cout << endl;
+    cout << "in typecheck_expression with " << e->get_type_name() << endl;
+    cout << endl;
 
     if (strcmp(e->get_type_name(), "assign") == 0) {
         return typecheck_assign(e);
     }
 
     if (strcmp(e->get_type_name(), "static_dispatch") == 0) {
+
         return typecheck_static_dispatch(e);
     }
 
@@ -1064,7 +1068,6 @@ Symbol ClassTable::typecheck_expression(Expression e) {
     if (strcmp(e->get_type_name(), "object") == 0) {
         return typecheck_object(e);
     }
-
     return Object;
 }
 
@@ -1076,10 +1079,7 @@ void ClassTable::typecheck_method(Feature method) {
     Symbol method_body_type = typecheck_expression(method->get_expression());
     if (isparent(method_return_type, method_body_type) == false) {
         ostream& err_stream = semant_error(method->get_root_class()->get_filename_1(), method);
-        err_stream << "Inferred return type " << method_body_type->get_string() 
-            << " of method " << method->get_name()->get_string() 
-            << " does not conform to declared return type " 
-            << method_return_type->get_string() <<".\n"; 
+        err_stream << "Inferred return type " << method_body_type->get_string() << " of method " << method->get_name()->get_string() << " does not conform to declared return type " << method_return_type->get_string() <<".\n"; 
     }
 }
 
@@ -1285,7 +1285,60 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
 
 
 Symbol ClassTable::typecheck_dispatch(Expression e) {
-    return Object;
+    Symbol t0 = typecheck_expression(e->get_expression_1());
+    Expressions params = e->get_expressions();
+    int len = params->len();
+    Symbol symbols_array [len];
+    for (int i = params->first(); params->more(i); i = params->next(i)) {
+        Expression curr_param = params->nth(i);
+        symbols_array[i] = typecheck_expression(curr_param);
+    }
+    if (strcmp(t0->get_string(), "SELF_TYPE") == 0) {
+        t0 = e->get_root_class()->get_name();
+    }
+    Class_ t_class = find_class_by_name(program_classes_AST, t0->get_string());
+    Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
+    if (method_def == NULL) {
+        method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
+        if (method_def == NULL) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "Static dispatch to undefined method " << e->get_name()->get_string() << ".\n";
+            e->set_type(Object);
+            return Object;
+        }
+    }
+    Formals method_def_formals = method_def->get_formals();
+    if (len != method_def_formals->len()) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Method " << e->get_name()->get_string() << " invoked with wrong number of arguments.\n";
+        e->set_type(Object);
+        return Object;
+    } 
+    bool error = false;
+    for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
+        Symbol curr_type = method_def_formals->nth(i)->get_type();
+        if (isparent(curr_type, symbols_array[i]) == false) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
+            error = true;
+        }
+    }
+    Symbol return_type = method_def->get_type();
+    if (defined_types->lookup(return_type->get_string()) == NULL) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        error = true;
+    }
+    if (error == true) {
+        e->set_type(Object);
+        return Object;
+    }
+    if (strcmp(return_type->get_string(), "SELF_TYPE") == 0) {
+        e->set_type(t0);
+        return t0;
+    }
+    e->set_type(return_type);
+    return return_type;
 }
 
 Symbol ClassTable::typecheck_cond(Expression e) {
