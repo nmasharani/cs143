@@ -1268,15 +1268,15 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         Expression curr_param = params->nth(i);
         symbols_array[i] = typecheck_expression(curr_param);
     }
-    if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
-        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
-    }
     if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Static dispatch to undefined class " << e->get_var_type()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
+    }
+    if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
     }
     Class_ t_class = find_class_by_name(program_classes_AST, e->get_var_type()->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
