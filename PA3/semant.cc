@@ -1092,6 +1092,10 @@ Symbol ClassTable::typecheck_expression(Expression e) {
 void ClassTable::typecheck_method(Feature method) {
     Symbol method_return_type = check_method_types(method);
     if (method_return_type == NULL) return;
+    if (strcmp(method->get_name()->get_string(), "bravo") == 0)
+    {
+        cout << method->get_expression()->get_type_name() << endl;
+    }
     Symbol method_body_type = typecheck_expression(method->get_expression());
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) return;
     if (isparent(method_return_type, method_body_type) == false) {
@@ -1295,6 +1299,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
 
 Symbol ClassTable::typecheck_dispatch(Expression e) {
     Symbol t0 = typecheck_expression(e->get_expression_1());
+    cout << t0->get_string() << endl;
     Expressions params = e->get_expressions();
     int len = params->len();
     Symbol symbols_array [len];
@@ -1329,7 +1334,8 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
         if (isparent(curr_type, symbols_array[i]) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
-            error = true;
+            //error = true;
+            //note if formal types are different, the reference compiler does not return Object, but the return type of the method.
         }
     }
     Symbol return_type = method_def->get_type();
