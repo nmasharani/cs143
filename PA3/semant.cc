@@ -1544,17 +1544,19 @@ void program_class::check_naming_and_scope() {
 
 Symbol ClassTable::typecheck_assign(Expression e) {
     
-  Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
-  if (!name_t) {
-     // TODO(nm): non-shitty error handling
-     cerr << "Symbol " << name_t->get_string() << " not defined" << endl;
-  }
-  Symbol expr_t = typecheck_expression(e->get_expression_1());
-  if (!isparent(name_t, expr_t)) {
-     // TODO(nm): non-shitty error handling
-     cerr << "Type conformation error" << endl;
-  }
-  return expr_t;
+    Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
+    if (!name_t) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        cerr << "Symbol not defined" << endl;
+        return Object;
+    }
+    Symbol expr_t = typecheck_expression(e->get_expression_1());
+    if (!isparent(name_t, expr_t)) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        cerr << "Type conformation error" << endl;
+        return Object;
+    }
+    return expr_t;
 }
 
 Symbol ClassTable::typecheck_static_dispatch(Expression e) {

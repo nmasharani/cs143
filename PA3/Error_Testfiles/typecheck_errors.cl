@@ -12,3 +12,17 @@ class A {
 		y
 	};
 };
+
+class B {
+	y : Bool;
+	b() : Object {
+		z <- 5
+	};
+};
+
+class C {
+	y : Bool;
+	b() : Object {
+		y <- 5
+	};
+};
