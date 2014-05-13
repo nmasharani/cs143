@@ -124,7 +124,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
 */
 int ClassTable::validate_methods(Classes classes_in_program) {
     int status = check_for_multiple_methods(classes_in_program);
-    status += check_method_types(classes_in_program);
+    status += check_methods_types(classes_in_program);
     status += check_overriden_methods(classes_in_program);
     return status;
 }
@@ -246,7 +246,7 @@ int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
 *       of all methods are valid for the program. 
 * *****************************************************
 */
-int ClassTable::check_method_types(Classes classes_in_program) {
+int ClassTable::check_methods_types(Classes classes_in_program) {
     int status = 0;
     for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
         Class_ curr_class = classes_in_program->nth(i);
@@ -967,7 +967,44 @@ Symbol ClassTable::typecheck_expression(Expression expr) {
 /**
 */
 void ClassTable::typecheck_method(Feature method) {
-    
+    cout << method->get_name()->get_string() << "\n.";
+    Symbol method_return_type = check_method_types(method);
+    if (method_return_type == NULL) return;
+    Symbol method_body_type = typecheck_expression(method->get_expression());
+    cout << "method return type " << method_return_type->get_name()->get_string();
+    if (isparent(method_return_type, method_body_type) == false) {
+        ostream& err_stream = semant_error(method->get_root_class());
+        err_stream << "Inferred return type " << method_body_type->get_string() << " of method " << method->get_name()->get_string() << " does not conform to declared return type " << method_return_type->get_string() <<".\n"; 
+    }
+}
+
+/**
+* ***************************************************
+* Return the return type of the method, or 
+*       Null if error.
+* ***************************************************
+*/
+Symbol ClassTable::check_method_types(Feature feature) {
+    if (strcmp(feature->get_type_name(), "method") == 0) {
+        Formals formals = feature->get_formals();
+        for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
+            Formal curr_formal = formals->nth(k);
+            if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
+                ostream& err_stream = semant_error(feature->get_root_class());
+                err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
+            }
+        }
+        if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {
+            if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
+                ostream& err_stream = semant_error(feature->get_root_class());
+                err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n";
+                return NULL;
+            }
+        } else {
+            return feature->get_root_class()->get_name();
+        }
+    }
+    return NULL;
 }
 
 /**
@@ -1052,6 +1089,44 @@ void program_class::semant()
        exit(1);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

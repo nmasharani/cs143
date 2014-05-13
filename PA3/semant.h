@@ -85,7 +85,7 @@ private:
   */
   int check_for_multiple_methods(Classes classes_in_program);
 
-  int check_method_types(Classes classes_in_program);
+  int check_methods_types(Classes classes_in_program);
 
   int check_overriden_methods(Classes classes_in_program);
 
@@ -101,6 +101,7 @@ private:
   void typecheck_feature(Feature feature);
 
   void typecheck_method(Feature method);
+  Symbol check_method_types(Feature feature);
 
   void typecheck_attribute(Feature attribute);
 

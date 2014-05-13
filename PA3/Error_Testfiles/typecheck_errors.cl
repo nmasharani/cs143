@@ -7,6 +7,8 @@ class Main {
 };
 
 class A {
-	b : Object;
-	a : Int <- b;
+	y : Object;
+	a() : Int {
+		y
+	};
 };
