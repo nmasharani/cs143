@@ -694,17 +694,23 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
         return;
     } 
 
-     /* Recurse case 12: dispatch */
-    if (strcmp(expression_to_init->get_type_name(), "dispatch") == 0) {
+     /* Recurse case 13: static dispatch */
+    if (strcmp(expression_to_init->get_type_name(), "static_dispatch") == 0) {
+        Expressions expressions = expression_to_init->get_expressions();
+        for (int i = expressions->first(); expressions->more(i); i = expressions->next(i)) {
+            initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expressions->nth(i));
+        }
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
-        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
         return;
     } 
 
-     /* Recurse case 13: static dispatch */
-    if (strcmp(expression_to_init->get_type_name(), "static_dispatch") == 0) {
+     /* Recurse case 14: assign */
+    if (strcmp(expression_to_init->get_type_name(), "assign") == 0) {
+        if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
+            ostream& err_stream = semant_error(expression_to_init->get_root_class());
+            err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
+        }
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
-        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_2());
         return;
     } 
 
