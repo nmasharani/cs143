@@ -1195,377 +1195,88 @@ void program_class::semant()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ***************************************************/
-/*       Class Table Debug Helper methods            */
-/*   *************************************************/
-
-void ClassTable::print_class_names(Classes classes) {
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        dump_Symbol(cout, 0, classes->nth(i)->get_name());
-        cout << "and now dump parent" << "\n";
-        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
-    }
-}
-
-void ClassTable::check_equality(Classes classes) {
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        for (int j = classes->first(); classes->more(j); j = classes->next(j)) {
-            if (j != i) {
-                if (strcmp(classes->nth(i)->get_name()->get_string(), classes->nth(j)->get_name()->get_string()) == 0) {
-                    //cout << classes->nth(i)get_name()->get_string() + "==" + classes->nth(j);
-                }
-            }
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* Recursively evaluate the expressions */
-/* Base cases are the leaves of the tree. These are: */
-/*      - int literal, string literal, no_expr(), Bool_const, Object ... (MORE ?) */
-void program_class::evaluate_expressions(SymbolTable<Symbol, Entry>& scopes, Expression expr) {
-
-    /* Base case 0: expr is an Object expression */
-    if (strcmp(expr->get_type_name(), "object") == 0) {
-        /* check if the object is in the symbol table. If it is, we are happy, otherwise, error */
-        if (scopes.lookup(expr->get_name()) == NULL){
-            cerr << "TO DO: Add filename" << ":" << expr->get_line_number() << ": ";
-            cerr << "Undeclared identifier " << expr->get_name()->get_string() << endl;
-        }
-        return; 
-    }
-
-    /* Base case 1: No expression */
-    if (strcmp(expr->get_type_name(), "no_expr") == 0) return; 
-
-    /* Base case 2: new */
-    if (strcmp(expr->get_type_name(), "new_") == 0) return; 
-
-    /* Base case 3: string_const */
-    if (strcmp(expr->get_type_name(), "string_const") == 0) return; 
-
-    /* Base case 4: Bool_const */
-    if (strcmp(expr->get_type_name(), "bool_const") == 0) return; 
-
-    /* Base case 5: Int const */
-    if (strcmp(expr->get_type_name(), "int_const") == 0) return; 
-
-    /* Recurse case 0: Is void */
-    if (strcmp(expr->get_type_name(), "isvoid") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        return;
-    } 
-
-    /* Recurse case 1: comp */
-    if (strcmp(expr->get_type_name(), "comp") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        return;
-    } 
-
-    /* Recurse case 2: leq */
-    if (strcmp(expr->get_type_name(), "leq") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 3: eq */
-    if (strcmp(expr->get_type_name(), "eq") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 4: lt */
-    if (strcmp(expr->get_type_name(), "lt") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 5: divide */
-    if (strcmp(expr->get_type_name(), "divide") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 6: mul */
-    if (strcmp(expr->get_type_name(), "mul") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 7: sub */
-    if (strcmp(expr->get_type_name(), "sub") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 8: plus */
-    if (strcmp(expr->get_type_name(), "plus") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 9: block */
-    if (strcmp(expr->get_type_name(), "block") == 0) {
-        Expressions expressions = expr->get_expressions();
-        for (int j = expressions->first(); expressions->more(j); j = expressions->next(j)) {
-            Expression curr_expr = expressions->nth(j);
-            evaluate_expressions(scopes, curr_expr);
-        }
-        return;
-    } 
-
-    /* Recurse case 10: loop */
-    if (strcmp(expr->get_type_name(), "loop") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-    /* Recurse case 11: cond */
-    if (strcmp(expr->get_type_name(), "cond") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        evaluate_expressions(scopes, expr->get_expression_3());
-        return;
-    } 
-
-     /* Recurse case 12: dispatch */
-    if (strcmp(expr->get_type_name(), "dispatch") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-     /* Recurse case 13: static dispatch */
-    if (strcmp(expr->get_type_name(), "static_dispatch") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        return;
-    } 
-
-     /* Recurse case 14: assign */
-    if (strcmp(expr->get_type_name(), "assign") == 0) {
-        if (scopes.lookup(expr->get_name()) == NULL) {
-            cerr << "TO DO: Add filename" << ":" << expr->get_line_number() << ": ";
-            cerr << "Undeclared identifier " << expr->get_name()->get_string() << endl;
-        }
-        evaluate_expressions(scopes, expr->get_expression_1());
-        return;
-    } 
-
-    /* Recursive case with new scope 0: let statement */
-    if (strcmp(expr->get_type_name(), "let") == 0) {
-        scopes.enterscope();
-        scopes.addid(expr->get_name(), expr->get_var_type());
-        evaluate_expressions(scopes, expr->get_expression_1());
-        evaluate_expressions(scopes, expr->get_expression_2());
-        scopes.exitscope();
-        return;
-    } 
-
-    /* Recursive case with new scope 1: case statement */
-    if (strcmp(expr->get_type_name(), "typcase") == 0) {
-        evaluate_expressions(scopes, expr->get_expression_1());
-        Cases cases = expr->get_cases();
-        for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
-            Case curr_case = cases->nth(i);
-            scopes.enterscope();
-            scopes.addid(curr_case->get_name(), curr_case->get_type_decl());
-            evaluate_expressions(scopes, curr_case->get_expr());
-            scopes.exitscope();
-        }
-        return;
-    }
-}
-
-void program_class::check_naming_and_scope() {
-    SymbolTable<Symbol, Entry> scopes;
-    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
-        Class_ curr_class = classes->nth(i);
-        scopes.enterscope();
-        
-        Features features = curr_class->get_features();
-
-        /* Add all attributes to the current class scope */
-        for (int j = features->first(); features->more(j); j = features->next(j)) {
-            Feature curr_feature = features->nth(j);
-            if (curr_feature->get_formals() == NULL) {
-                if (scopes.lookup(curr_feature->get_name()) == NULL) {
-                    scopes.addid(curr_feature->get_name(), curr_feature->get_type());
-                } else {
-                    cerr << "TO DO: Add filename " << ":" << curr_feature->get_line_number() << ": ";
-                    cerr << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class."<< endl;
-                }
-            }
-        }
-
-        /* Descend into each method of the class and evaluate it */
-        for (int j = features->first(); features->more(j); j = features->next(j)) {
-            Feature curr_feature = features->nth(j);
-            if (curr_feature->get_formals() != NULL) {
-                scopes.enterscope();
-
-                /* Now evaluate the formal paramenters of a method */
-                Formals formals = curr_feature->get_formals();
-                for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
-                    Formal curr_formal = formals->nth(k);
-                    if (scopes.probe(curr_formal->get_name()) == NULL)
-                    {
-                        scopes.addid(curr_formal->get_name(), curr_formal->get_type());
-                    } else {
-                        cerr << "TO DO: Add filename" << ":" << curr_formal->get_line_number() << ": ";
-                        cerr << "Formal parameter " << curr_formal->get_name()->get_string() << " is multiply defined."<< endl;
-                    }
-                }
-
-                /* recursively evaluate the expression in a method */
-                evaluate_expressions(scopes, curr_feature->get_expression());
-
-                scopes.exitscope();
-            }
-        }
-
-
-        scopes.exitscope();
-    }
-}
-
-
-
-
-
 Symbol ClassTable::typecheck_assign(Expression e) {
-    
     Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
     if (!name_t) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         cerr << "Symbol not defined" << endl;
+        e->set_type(Object);
         return Object;
     }
     Symbol expr_t = typecheck_expression(e->get_expression_1());
     if (!isparent(name_t, expr_t)) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         cerr << "Type conformation error" << endl;
+        e->set_type(Object);
         return Object;
     }
+    e->set_type(expr_t);
     return expr_t;
 }
 
 Symbol ClassTable::typecheck_static_dispatch(Expression e) {
-    return Object;
+    Symbol t0 = typecheck_expression(e->get_expression_1());
+    Expressions params = e->get_expressions();
+    int len = params->len();
+    Symbol symbols_array [len];
+    for (int i = params->first(); params->more(i); i = params->next(i)) {
+        Expression curr_param = params->nth(i);
+        symbols_array[i] = typecheck_expression(curr_param);
+    }
+    if (isparent(e->get_var_type(), t0) == false) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
+    }
+    Class_ t_class = find_class_by_name(program_classes_AST, e->get_var_type()->get_string());
+    Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
+    if (method_def == NULL) {
+        method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
+        if (method_def == NULL) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "Static dispatch to undefined method " << e->get_name()->get_string() << ".\n";
+            e->set_type(Object);
+            return Object;
+        }
+    }
+    Formals method_def_formals = method_def->get_formals();
+    if (len != method_def_formals->len()) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Method " << e->get_name()->get_string() << " invoked with wrong number of arguments.\n";
+        e->set_type(Object);
+        return Object;
+    } 
+    bool error = false;
+    for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
+        Symbol curr_type = method_def_formals->nth(i)->get_type();
+        if (isparent(curr_type, symbols_array[i]) == false) {
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
+            error = true;
+        }
+    }
+    Symbol return_type = method_def->get_type();
+    if (defined_types->lookup(return_type->get_string()) == NULL) {
+        ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+        err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
+        error = true;
+    }
+    if (error == true) {
+        e->set_type(Object);
+        return Object;
+    }
+    if (strcmp(return_type->get_string(), "SELF_TYPE") == 0) {
+        e->set_type(t0);
+        return t0;
+    }
+    e->set_type(return_type);
+    return return_type;
 }
+
+
+
+
+
+
 
 Symbol ClassTable::typecheck_dispatch(Expression e) {
     return Object;
@@ -1662,4 +1373,33 @@ Symbol ClassTable::typecheck_no_expr(Expression e) {
 Symbol ClassTable::typecheck_object(Expression e) {
     Symbol type = e->get_variables_in_scope()->lookup(e->get_name());
     return type;
+}
+
+
+
+
+
+
+/* ***************************************************/
+/*       Class Table Debug Helper methods            */
+/*   *************************************************/
+
+void ClassTable::print_class_names(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        dump_Symbol(cout, 0, classes->nth(i)->get_name());
+        cout << "and now dump parent" << "\n";
+        dump_Symbol(cout, 6, classes->nth(i)->get_parent());
+    }
+}
+
+void ClassTable::check_equality(Classes classes) {
+    for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
+        for (int j = classes->first(); classes->more(j); j = classes->next(j)) {
+            if (j != i) {
+                if (strcmp(classes->nth(i)->get_name()->get_string(), classes->nth(j)->get_name()->get_string()) == 0) {
+                    //cout << classes->nth(i)get_name()->get_string() + "==" + classes->nth(j);
+                }
+            }
+        }
+    }
 }

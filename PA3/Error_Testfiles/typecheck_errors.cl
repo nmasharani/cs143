@@ -7,29 +7,28 @@ class Main {
 };
 
 class A {
-	y : Object;
-	a() : Int {
-		y
+	y(z : Int) : E {
+		z
 	};
 };
-
-class B {
-	y : Bool;
-	b() : Object {
-		z <- 5
+ 
+class B inherits A{
+	y() : Int {
+		2
 	};
 };
-
+ 
 class C {
-	y : Bool;
-	b() : Object {
-		y <- 5
+	a : B;
+	i : Bool;
+	x() : Bool {
+		if a@A.y(i) = 1 then true else false fi
 	};
 };
-
+ 
 class D {
 	y : Bool <- true;
 	d() : Object {
-		if y then 1 else "hello" fi
+		1
 	};
 };
