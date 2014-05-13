@@ -1552,8 +1552,8 @@ Symbol ClassTable::typecheck_lt(Expression e) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "non-Int arguments " << t1->get_string() << " < " << t2->get_string() << ".\n";
     }
-    e->set_type(Int);
-    return Int;
+    e->set_type(Bool);
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_eq(Expression e) {
@@ -1574,8 +1574,8 @@ Symbol ClassTable::typecheck_eq(Expression e) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Illegal comparison with a basic type" << ".\n";
     }
-    e->set_type(Int);
-    return Int;
+    e->set_type(Bool);
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_leq(Expression e) {
@@ -1592,8 +1592,8 @@ Symbol ClassTable::typecheck_leq(Expression e) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "non-Int arguments " << t1->get_string() << " <= " << t2->get_string() << ".\n";
     }
-    e->set_type(Int);
-    return Int;
+    e->set_type(Bool);
+    return Bool;
 }
 
 Symbol ClassTable::typecheck_neg(Expression e) {
