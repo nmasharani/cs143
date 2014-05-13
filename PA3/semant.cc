@@ -243,7 +243,8 @@ int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
 /**
 * *****************************************************
 * Make sure return types and formal parameter types
-*       of all methods are valid for the program. 
+*       of all methods are valid for the program.
+* Method no longer used 
 * *****************************************************
 */
 int ClassTable::check_methods_types(Classes classes_in_program) {
@@ -489,6 +490,7 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
                 if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
                     ostream& err_stream = semant_error(curr_class);
                     err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
+                    class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                 } else {
                     class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                 }
@@ -510,9 +512,10 @@ void ClassTable::initialize_class_enviornment(Class_ curr_class) {
                     err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
                 } else {
                     if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
-                        if (defined_types->lookup(curr_feature->get_type()->get_string()) != NULL) {
+                        /*if (defined_types->lookup(curr_feature->get_type()->get_string()) != NULL) {
                             class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
-                        }
+                        }*/
+                        class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                     }
                 }
             }
@@ -636,7 +639,7 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
         return;
     } 
 
-    /* Recurse case 5: divide */
+    /* Recurse case 5: neg */
     if (strcmp(expression_to_init->get_type_name(), "neg") == 0) {
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         return;
@@ -700,16 +703,6 @@ void ClassTable::initialize_expression(Class_ root_class, SymbolTable<Symbol, En
         Expressions expressions = expression_to_init->get_expressions();
         for (int i = expressions->first(); expressions->more(i); i = expressions->next(i)) {
             initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expressions->nth(i));
-        }
-        initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
-        return;
-    } 
-
-     /* Recurse case 14: assign */
-    if (strcmp(expression_to_init->get_type_name(), "assign") == 0) {
-        if (variables_in_scope->lookup(expression_to_init->get_name()) == NULL) {
-            ostream& err_stream = semant_error(expression_to_init->get_root_class());
-            err_stream << "Undeclared identifier " << expression_to_init->get_name()->get_string() << ".\n";
         }
         initialize_expression(expression_to_init->get_root_class(), expression_to_init->get_variables_in_scope(), expression_to_init->get_expression_1());
         return;
@@ -1593,6 +1586,10 @@ Symbol ClassTable::typecheck_no_expr(Expression e) {
 
 Symbol ClassTable::typecheck_object(Expression e) {
     Symbol type = e->get_variables_in_scope()->lookup(e->get_name());
+    if (type == NULL) {
+        e->set_type(Object);
+        return Object;
+    }
     e->set_type(type);
     return type;
 }
