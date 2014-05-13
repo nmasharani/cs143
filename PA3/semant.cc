@@ -164,12 +164,18 @@ int ClassTable::check_overriden_methods(Classes classes_in_program) {
 */
 int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_feature, Feature inherited_method_def) {
     int status = 0;
+
+    // curr_feature is the method that was inherited
+    // inherited_method_def is the method that is being redefined by curr_feature 
+    if (!curr_feature->check_is_valid_method()) { status = 1; }
     Formals curr_formals = curr_feature->get_formals();
     Formals inherited_formals = inherited_method_def->get_formals();
     if (curr_formals->len() != inherited_formals->len()) {
         ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_feature);
-        err_stream << "Incompatible number of formal parameters in redefined method " << curr_feature->get_name()->get_string() << ".\n";
+        err_stream << "Incompatible number of formal parameters in redefined method " 
+            << curr_feature->get_name()->get_string() << ".\n";
         status = 1;
+        curr_feature->is_not_valid_method();
     }
     if (status == 0) {
         for (int i = curr_formals->first(); curr_formals->more(i); i = curr_formals->next(i)) {
@@ -177,8 +183,10 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
             Formal inherited_formal = inherited_formals->nth(i);
             if (strcmp(curr_formal->get_type()->get_string(), inherited_formal->get_type()->get_string()) != 0) {
                 ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_formal);
-                err_stream << "In redefined method " << curr_feature->get_name()->get_string() << ", parameter '" << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
+                err_stream << "In redefined method " << curr_feature->get_name()->get_string() << ", parameter '" 
+                    << curr_formal->get_name()->get_string() <<"' of type " << curr_formal->get_type()->get_string() << " is different from original type " << inherited_formal->get_type()->get_string() << ".\n";
                 status = 1;
+                curr_feature->is_not_valid_method();
             }
         }
     }
@@ -186,6 +194,7 @@ int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_f
         ostream& err_stream = semant_error(containing_class->get_filename_1(), curr_feature);
         err_stream << "In redefined method " << curr_feature->get_name()->get_string() << " return type " << curr_feature->get_type()->get_string() << " is different from original return type " << inherited_method_def->get_type()->get_string() << ".\n";
         status = 1;
+        curr_feature->is_not_valid_method();
     }
     return status;
 }
@@ -1293,9 +1302,9 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
     }
     Class_ t_class = find_class_by_name(program_classes_AST, e->get_var_type()->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
-    if (method_def == NULL) {
+    if (method_def == NULL || !method_def->check_is_valid_method()) {
         method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
-        if (method_def == NULL) {
+        if (method_def == NULL || !method_def->check_is_valid_method()) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Static dispatch to undefined method " << e->get_name()->get_string() << ".\n";
             e->set_type(Object);
@@ -1351,9 +1360,9 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
     }
     Class_ t_class = find_class_by_name(program_classes_AST, t0->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
-    if (method_def == NULL) {
+    if (method_def == NULL || !method_def->check_is_valid_method()) {
         method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
-        if (method_def == NULL) {
+        if (method_def == NULL || !method_def->check_is_valid_method()) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Dispatch to undefined method " << e->get_name()->get_string() << ".\n";
             e->set_type(Object);

@@ -71,6 +71,7 @@ class Feature_class : public tree_node {
 protected:
    SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
+   bool is_valid_method;
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
@@ -79,7 +80,8 @@ public:
    Class_ get_root_class() { return root_class; }
    void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
    SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
-   
+   void is_not_valid_method() { is_valid_method = false; }
+   bool check_is_valid_method() { return is_valid_method; }
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
@@ -283,6 +285,7 @@ public:
       formals = a2;
       return_type = a3;
       expr = a4;
+      is_valid_method = true;
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
@@ -315,6 +318,7 @@ public:
       name = a1;
       type_decl = a2;
       init = a3; //init is the expression that initializes the attribute name of type type_decl
+      is_valid_method = false;
    }
    Feature copy_Feature(); //override to return a copy of this tree node for attributes
    void dump(ostream& stream, int n);
