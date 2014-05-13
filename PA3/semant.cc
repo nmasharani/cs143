@@ -1310,7 +1310,7 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
         method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
         if (method_def == NULL) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-            err_stream << "Static dispatch to undefined method " << e->get_name()->get_string() << ".\n";
+            err_stream << "Dispatch to undefined method " << e->get_name()->get_string() << ".\n";
             e->set_type(Object);
             return Object;
         }
@@ -1593,7 +1593,7 @@ Symbol ClassTable::typecheck_string_const(Expression e) {
 
 Symbol ClassTable::typecheck_new_(Expression e) {
     Symbol type = e->get_var_type();
-    if (strcmp(type->get_string(), "SELF_TYPE")) {
+    if (strcmp(type->get_string(), "SELF_TYPE") == 0) {
         type = e->get_root_class()->get_name();
     }
     e->set_type(type);

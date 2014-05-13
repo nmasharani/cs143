@@ -125,10 +125,10 @@ str_const1:
 	.word	-1
 str_const0:
 	.word	4
-	.word	14
+	.word	15
 	.word	String_dispTab
 	.word	int_const8
-	.ascii	"Testfiles/list_example_manual_page5.cl"
+	.ascii	"./Testfiles/list_example_manual_page5.cl"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -136,7 +136,7 @@ int_const8:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	38
+	.word	40
 	.word	-1
 int_const7:
 	.word	2
@@ -479,6 +479,21 @@ A.a:
 	li	$t1 34
 	jal	_dispatch_abort
 label0:
+	la	$t1 Cons_dispTab
+	lw	$t1 16($t1)
+	jalr		$t1
+	la	$a0 int_const2
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+	lw	$a0 16($s0)
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+	lw	$a0 12($s0)
+	bne	$a0 $zero label1
+	la	$a0 str_const0
+	li	$t1 35
+	jal	_dispatch_abort
+label1:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1

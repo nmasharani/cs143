@@ -31,7 +31,21 @@ class A {
 	l : List;
 	a() : Cons {
 		{
-			 c.init(1, l);
+			 c@Cons.init(1, l);
+			-- c.init(1, l);
 		}
 	};
 };
+
+class Bravo {
+	bravo() : Cons {
+		{
+			(new Cons).init(1, new Nil);
+		}
+	};
+};
+
+
+
+
+
