@@ -5,7 +5,7 @@ class Main {
 		self
 	};
 };
-
+(*
 class A {
 	y(z : Int) : E {
 		z
@@ -30,5 +30,25 @@ class D {
 	y : Bool <- true;
 	d() : Object {
 		1
+	};
+};
+*)
+
+class A {
+	y : Int;
+	a() : Bool {
+		"hi" = 3
+	};
+};
+
+class C {
+	y : Int;
+};
+
+class B {
+	y : A;
+	z : C;
+	a() : Bool {
+		~z
 	};
 };
