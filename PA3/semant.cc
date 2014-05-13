@@ -124,7 +124,7 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
 */
 int ClassTable::validate_methods(Classes classes_in_program) {
     int status = check_for_multiple_methods(classes_in_program);
-    status += check_methods_types(classes_in_program);
+    //status += check_methods_types(classes_in_program); //done in type checking
     status += check_overriden_methods(classes_in_program);
     return status;
 }
@@ -561,8 +561,9 @@ void ClassTable::initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>
         can_add = false;
     } 
     if (defined_types->lookup(formal_to_init->get_type()->get_string()) == NULL) {
-        ostream& err_stream = semant_error(root_class);
-        err_stream << "Class " << formal_to_init->get_type()->get_string() << " of formal parameter " << formal_to_init->get_name()->get_string() << " is undefined.\n";
+        //ostream& err_stream = semant_error(root_class);
+        //err_stream << "Class " << formal_to_init->get_type()->get_string() << " of formal parameter " << formal_to_init->get_name()->get_string() << " is undefined.\n";
+        //type checking in check_types
     } 
     if (can_add == true) variables_in_scope->addid(formal_to_init->get_name(), formal_to_init->get_type());
 }
@@ -896,7 +897,7 @@ Classes ClassTable::install_basic_classes(Classes classes_of_program) {
 //
 ///////////////////////////////////////////////////////////////////
 
-ostream& ClassTable::semant_error(Class_ c)
+ostream& ClassTable::semant_error(Class_ c) 
 {                                                             
     return semant_error(c->get_filename(),c);
 }    
