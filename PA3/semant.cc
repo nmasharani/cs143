@@ -1864,6 +1864,16 @@ Symbol ClassTable::typecheck_leq(Expression e) {
     return Bool;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_neg
+//
+// To typecheck neg statements:
+// - Expression must be int
+// - Return type must be int
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_neg(Expression e) {
     Symbol t = typecheck_expression(e->get_expression_1());
     if (strcmp(t->get_string(), Int->get_string()) != 0) {
@@ -1888,6 +1898,15 @@ Symbol ClassTable::typecheck_string_const(Expression e) {
     e->set_type(Str);
     return Str;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_new
+//
+// To typecheck new statements:
+// - type must be valid, if not return object
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_new_(Expression e) {
     Symbol type = e->get_var_type();
