@@ -1018,6 +1018,13 @@ bool ClassTable::isparent(Symbol t1, Symbol t2, Class_ root_class) {
 }
 
 Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
+
+    // lub(SELF_TYPE, SELF_TYPE) = SELF_TYPE
+    if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0 && 
+        strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+        return SELF_TYPE;
+    }
+
     if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0) {
         t1 = root_class->get_name();
     }
