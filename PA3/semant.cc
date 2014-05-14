@@ -1640,6 +1640,16 @@ Symbol ClassTable::typecheck_let(Expression e) {
     return return_type;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_plus
+//
+// To typecheck arithmatic statements:
+// - Both expressions must be int
+// - Return type must be int
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_plus(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
@@ -1657,6 +1667,16 @@ Symbol ClassTable::typecheck_plus(Expression e) {
     e->set_type(Int);
     return Int;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_sub
+//
+// To typecheck arithmatic statements:
+// - Both expressions must be int
+// - Return type must be int
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_sub(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
@@ -1676,6 +1696,16 @@ Symbol ClassTable::typecheck_sub(Expression e) {
     return Int;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_mul
+//
+// To typecheck arithmatic statements:
+// - Both expressions must be int
+// - Return type must be int
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_mul(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
@@ -1693,6 +1723,16 @@ Symbol ClassTable::typecheck_mul(Expression e) {
     e->set_type(Int);
     return Int;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_divide
+//
+// To typecheck arithmatic statements:
+// - Both expressions must be int
+// - Return type must be int
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_divide(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
@@ -1712,6 +1752,16 @@ Symbol ClassTable::typecheck_divide(Expression e) {
     return Int;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_comp
+//
+// To typecheck not statements:
+// - Expression must have type Bool
+// - Return type must be Bool
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_comp(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     if (strcmp(t1->get_string(), Bool->get_string()) != 0) {
@@ -1721,6 +1771,16 @@ Symbol ClassTable::typecheck_comp(Expression e) {
     e->set_type(Bool);
     return Bool;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_lt
+//
+// To typecheck lt statements:
+// - Both expressions must be int
+// - Return type must be bool
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_lt(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
@@ -1740,16 +1800,30 @@ Symbol ClassTable::typecheck_lt(Expression e) {
     return Bool;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_eq
+//
+// To typecheck eq statements:
+// - If the types of the expressions are {Bool, Int, String}, they have to be the same type
+// - Return type must be bool
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_eq(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
     Symbol t2 = typecheck_expression(e->get_expression_2());
     bool error = false;
-    if (strcmp(t1->get_string(), Int->get_string()) != 0 || strcmp(t1->get_string(), Bool->get_string()) != 0 || strcmp(t1->get_string(), Str->get_string()) != 0) {
+    if (strcmp(t1->get_string(), Int->get_string()) == 0 || 
+        strcmp(t1->get_string(), Bool->get_string()) == 0 || 
+        strcmp(t1->get_string(), Str->get_string()) == 0) {
         if (strcmp(t1->get_string(), t2->get_string()) != 0) {
             error = true;
         }
     }
-    if (strcmp(t2->get_string(), Int->get_string()) != 0 || strcmp(t2->get_string(), Bool->get_string()) != 0 || strcmp(t2->get_string(), Str->get_string()) != 0) {
+    if (strcmp(t2->get_string(), Int->get_string()) == 0 || 
+        strcmp(t2->get_string(), Bool->get_string()) == 0 || 
+        strcmp(t2->get_string(), Str->get_string()) == 0) {
         if (strcmp(t1->get_string(), t2->get_string()) != 0) {
             error = true;
         }
@@ -1761,6 +1835,16 @@ Symbol ClassTable::typecheck_eq(Expression e) {
     e->set_type(Bool);
     return Bool;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_leq
+//
+// To typecheck leq statements:
+// - Both expressions must be int
+// - Return type must be bool
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_leq(Expression e) {
     Symbol t1 = typecheck_expression(e->get_expression_1());
