@@ -1254,17 +1254,30 @@ void program_class::semant()
 
 
 
-
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_assign
+//
+// To typecheck assignment:
+// - The variable must be declared. 
+// - The inferred type of the expression that is being assigned to the variable
+//   must match the declared type of the variable. 
+// - The return type of the assignment is the type of the expression being 
+//   assigned.
+//
+////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_assign(Expression e) {
     Symbol name_t = e->get_variables_in_scope()->lookup(e->get_name());
     Symbol expr_t = typecheck_expression(e->get_expression_1());
+    // Make sure variable being assigned to is declared
     if (!name_t) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Assignment to undeclared variable " << e->get_name()->get_string() << endl;
         e->set_type(Object);
         return Object;
     }
+    // Make sure inferred return type conforms to declared type
     if (!isparent(name_t, expr_t, e->get_root_class())) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Type " << expr_t->get_string() << " of assigned expression does not conform to declared type "<< name_t->get_string() << " of identifier " << e->get_name()->get_string() << ".\n";
@@ -1275,7 +1288,21 @@ Symbol ClassTable::typecheck_assign(Expression e) {
     return expr_t;
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_static_dispatch
+//
+// To typecheck static dispatch:
+// - The inferred type of the expression must conform to the declared type
+// - The inferred types of the parameter expressions must conform to the declared types
+// - The return type is the inferred type of the expression if the return type 
+//   is declared as SELF_TYPE. Otherwise, the return type is the declared return type. 
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_static_dispatch(Expression e) {
+    // typecheck all expressions recursively
     Symbol t0 = typecheck_expression(e->get_expression_1());
     Expressions params = e->get_expressions();
     int len = params->len();
@@ -1284,22 +1311,30 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         Expression curr_param = params->nth(i);
         symbols_array[i] = typecheck_expression(curr_param);
     }
+
+    // make sure the declared type of the dispatch is valid
     if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Static dispatch to undefined class " << e->get_var_type()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
     }
+
+    // make sure the declared type of the dispatch isn't self type
     if (strcmp(e->get_var_type()->get_string(), SELF_TYPE->get_string()) == 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Static dispatch to SELF_TYPE" << ".\n";
         e->set_type(Object);
         return Object;
     }
+
+    // make sure the inferred type conforms to the declared type
     if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
     }
+
+    // make sure the method name is defined
     Class_ t_class = find_class_by_name(program_classes_AST, e->get_var_type()->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
     if (method_def == NULL || !method_def->check_is_valid_method()) {
@@ -1311,6 +1346,8 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
             return Object;
         }
     }
+
+    // make sure the number of arguments is correct
     Formals method_def_formals = method_def->get_formals();
     if (len != method_def_formals->len()) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1318,6 +1355,8 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         e->set_type(Object);
         return Object;
     } 
+
+    // make sure the order/type of arguments is correct
     bool error = false;
     for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
         Symbol curr_type = method_def_formals->nth(i)->get_type();
@@ -1327,6 +1366,8 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
             error = true;
         }
     }
+
+    // make sure the declared return type is defined
     Symbol return_type = method_def->get_type();
     if (defined_types->lookup(return_type->get_string()) == NULL) {
         //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1338,6 +1379,8 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
         e->set_type(Object);
         return Object;
     }
+
+    // if the return type is self type, return the inferred type of the calling expr.
     if (strcmp(return_type->get_string(), "SELF_TYPE") == 0) {
         e->set_type(t0);
         return t0;
@@ -1346,7 +1389,19 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e) {
     return return_type;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_dispatch
+//
+// To typecheck dispatch:
+// - The inferred types of the parameter expressions must conform to the declared types
+// - The return type is the inferred type of the expression if the return type 
+//   is declared as SELF_TYPE. Otherwise, the return type is the declared return type. 
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_dispatch(Expression e) {
+    // typecheck expressions recursively
     Symbol t0 = typecheck_expression(e->get_expression_1());
     Expressions params = e->get_expressions();
     int len = params->len();
@@ -1355,9 +1410,14 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
         Expression curr_param = params->nth(i);
         symbols_array[i] = typecheck_expression(curr_param);
     }
+
+    // if the type of the current expression is SELF_TYPE, set it to the type
+    // of the class we're still in
     if (strcmp(t0->get_string(), "SELF_TYPE") == 0) {
         t0 = e->get_root_class()->get_name();
     }
+
+    // make sure that the method is valid
     Class_ t_class = find_class_by_name(program_classes_AST, t0->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
     if (method_def == NULL || !method_def->check_is_valid_method()) {
@@ -1369,6 +1429,8 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
             return Object;
         }
     }
+
+    // make sure the number of params is correct
     Formals method_def_formals = method_def->get_formals();
     if (len != method_def_formals->len()) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1376,6 +1438,8 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
         e->set_type(Object);
         return Object;
     } 
+
+    // make sure the types of the params match
     bool error = false;
     for (int i = method_def_formals->first(); method_def_formals->more(i); i = method_def_formals->next(i)) {
         Symbol curr_type = method_def_formals->nth(i)->get_type();
@@ -1386,6 +1450,8 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
             //note if formal types are different, the reference compiler does not return Object, but the return type of the method.
         }
     }
+
+    // make sure the return type is valid
     Symbol return_type = method_def->get_type();
     if (defined_types->lookup(return_type->get_string()) == NULL) {
         //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1405,9 +1471,22 @@ Symbol ClassTable::typecheck_dispatch(Expression e) {
     return return_type;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_cond
+//
+// To typecheck conditional statements:
+// - The inferred type of the predicate must be bool
+// - The return type is the least common parent type of the types of the
+//   then statement and the else statement. 
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_cond(Expression e) {
     Symbol pred_t = typecheck_expression(e->get_expression_1());
     bool error = false;
+
+    // Make sure the predicate is a bool
     if (strcmp(pred_t->get_string(), "Bool") != 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Predicate of 'if' does not have type Bool." << endl;
@@ -1419,14 +1498,28 @@ Symbol ClassTable::typecheck_cond(Expression e) {
         e->set_type(Object);
         return Object;
     }
+
+    // Get the common parent
     Symbol common_parent = get_common_parent(then_t, else_t, e->get_root_class());
     e->set_type(common_parent);
     return common_parent;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_loop
+//
+// To typecheck conditional statements:
+// - The inferred type of the predicate must be bool
+// - The return type of the loop is Object
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_loop(Expression e) {
+    // typecheck recursively
     Symbol predicate_type = typecheck_expression(e->get_expression_1());
     Symbol body_type = typecheck_expression(e->get_expression_2());
+    // pred must be of type bool
     if (strcmp(predicate_type->get_string(), "Bool") != 0 ) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Loop condition does not have type Bool." << endl;
@@ -1435,22 +1528,39 @@ Symbol ClassTable::typecheck_loop(Expression e) {
     return Object;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_typcase
+//
+// To typecheck conditional statements:
+// - Typecheck the predicate
+// - Typecheck the expressions being loaded by the case stmt
+// - Return type is the common parent of all of the types of the case expressions
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_typcase(Expression e) {
     Symbol case_predicate_type = typecheck_expression(e->get_expression_1());
     Cases cases = e->get_cases();
     Symbol case_types [cases->len()];
     for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
         Case curr_case = cases->nth(i);
+
+        // Error for undefined type
         if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
-            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
+            ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
         }
+
+        // No self_type in cases
         if (strcmp(curr_case->get_type_decl()->get_string(), SELF_TYPE->get_string()) == 0) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Identifier " << curr_case->get_name()->get_string() << " declared with type SELF_TYPE in case branch." << endl;
         }
         case_types[i] = typecheck_expression(curr_case->get_expr());
     }
+
+    // Get the comon parent of all of the case expr types
     Symbol highest_parent = case_types[0];
     for (int i = 1; i < cases->len(); i++) {
         highest_parent = get_common_parent(highest_parent, case_types[i], e->get_root_class());

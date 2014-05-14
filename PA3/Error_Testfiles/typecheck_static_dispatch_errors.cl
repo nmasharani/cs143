@@ -30,7 +30,6 @@ class C {
 			a@A.y();
 			a@A.y("hi");
 			a@A.b(1);
-			-- this produces 2 errs
 			a@E.b();
 			true;
 
