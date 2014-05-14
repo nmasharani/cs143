@@ -8,6 +8,14 @@
 class Main { main() : SELF_TYPE { self }; };
 
 class A {
+	-- -------------------------------------------------------------------------
+	-- -------------------------------------------------------------------------
+	-- HERE BE SCOPE ERRORS
+	-- Essentially, what is happening is that a is somehow being marked as 
+	-- having type Int. I think that's coming from the last method, body_type, 
+	-- and somehow the scope of a is the entire class. I don't get it.
+	-- -------------------------------------------------------------------------
+	-- -------------------------------------------------------------------------
 	correct() : Bool {
 		{
 			let a : String <- "hi", b : Int, c : Bool <- true in {
@@ -32,5 +40,10 @@ class A {
 			"hi" = let a : Int <- 1 in a;
 			true;
 		}
+	};
+
+	-- In this method, variable a is not undefined for some reason (SCOPE ERR)
+	scope_error_confirm() : String {
+		a
 	};
 };
