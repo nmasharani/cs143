@@ -1159,7 +1159,7 @@ Symbol ClassTable::check_method_types(Feature feature) {
         }
         if (strcmp(curr_formal->get_name()->get_string(), "self") == 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
-            err_stream << "'self' cannot be the name of a formal parameter." << ".\n";
+            err_stream << "'self' cannot be the name of a formal parameter" << ".\n";
         }
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
@@ -1285,7 +1285,7 @@ Symbol ClassTable::typecheck_assign(Expression e) {
         e->set_type(Object);
         return Object;
     }
-    
+
     // Make sure inferred return type conforms to declared type
     if (strcmp(e->get_name()->get_string(), "self") == 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
@@ -1524,7 +1524,7 @@ Symbol ClassTable::typecheck_cond(Expression e) {
 // 
 // typecheck_loop
 //
-// To typecheck conditional statements:
+// To typecheck loop statements:
 // - The inferred type of the predicate must be bool
 // - The return type of the loop is Object
 //
@@ -1547,7 +1547,7 @@ Symbol ClassTable::typecheck_loop(Expression e) {
 // 
 // typecheck_typcase
 //
-// To typecheck conditional statements:
+// To typecheck case statements:
 // - Typecheck the predicate
 // - Typecheck the expressions being loaded by the case stmt
 // - Return type is the common parent of all of the types of the case expressions
@@ -1587,6 +1587,16 @@ Symbol ClassTable::typecheck_typcase(Expression e) {
     return highest_parent;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_block
+//
+// To typecheck block statements:
+// - Typecheck all expressions
+// - return type is the type of the last expression
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_block(Expression e) {
     Expressions expressions = e->get_expressions();
     Symbol return_symbol; 
@@ -1597,10 +1607,23 @@ Symbol ClassTable::typecheck_block(Expression e) {
     return return_symbol;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// typecheck_let
+//
+// To typecheck let statements:
+// - If there is an initialization, the type must conform to declared type
+// - Return the type of the let statemnet body
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_let(Expression e) {
     Symbol t0 = e->get_var_type();
+
+    // if there is an initialization, check conformation
     Symbol init_type = typecheck_expression(e->get_expression_1());
     if (strcmp(init_type->get_string(), "_no_class") != 0) {
+        // init type must conform with declared type
         if (isparent(t0, init_type, e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
             err_stream << "Inferred type " << init_type->get_string() << " of initialization of " << e->get_name()->get_string() << " does not conform to identifier's declared type " << t0->get_string() << ".\n";
@@ -1608,8 +1631,10 @@ Symbol ClassTable::typecheck_let(Expression e) {
     }
     if (strcmp(e->get_name()->get_string(), "self") == 0) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "'self' cannot be bound in a 'let' expression." << ".\n";
+        err_stream << "'self' cannot be bound in a 'let' expression" << ".\n";
     }
+
+    // the return type is the type of the body of the let stmt
     Symbol return_type = typecheck_expression(e->get_expression_2());
     e->set_type(return_type);
     return return_type;
