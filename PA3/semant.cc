@@ -1856,6 +1856,7 @@ Symbol ClassTable::typecheck_eq(Expression e) {
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Illegal comparison with a basic type" << ".\n";
+        // err_stream << e->get_expression_1()->get_name()->get_string() << " " << t1->get_string() << " " << e->get_expression_2()->get_name()->get_string() << " " << t2->get_string() << endl;
     }
     e->set_type(Bool);
     return Bool;
