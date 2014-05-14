@@ -976,14 +976,32 @@ void ClassTable::setup_inheritance_graph() {
     }
 }
 
+// In this method, we check if t1 is a parent of t2. 
+// So, traverse upwards back from t2 until we reach t1 or the top of the
+// inheritance tree
+// 
+// If we find that t1 is a parent of t2, that means t2 <= t1
 bool ClassTable::isparent(Symbol t1, Symbol t2, Class_ root_class) {
-    if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0) {
-        t1 = root_class->get_name();
-    }
 
-    if (strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+    // SELF_TYPE <= SELF_TYPE
+    if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0 && 
+        strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+        t1 = root_class->get_name();
         t2 = root_class->get_name();
     }
+    // SELF_TYPE <= t1
+    else if (strcmp(t1->get_string(), SELF_TYPE->get_string()) != 0 && 
+             strcmp(t2->get_string(), SELF_TYPE->get_string()) == 0) {
+        t2 = root_class->get_name();
+    }
+
+    // t2 <= SELF_TYPE
+    // INVALID: ALWAYS FALSE
+    else if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0 && 
+             strcmp(t2->get_string(), SELF_TYPE->get_string()) != 0) {
+        return false;
+    }
+
 
     if (!inheritance_graph->lookup(t1)) {
         return false;
