@@ -100,14 +100,6 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
     status = check_for_inheritance_cycle(classes_in_program);
     if (status != 0) return;
 
-    //methods made public and moved to program::semant()
-   /* status = validate_methods(classes_in_program);
-    if (status != 0) return; 
-    */
-
-    /*status = check_for_main(classes_in_program);
-    if (status != 0) return; */
-
     program_classes_AST = classes_in_program;
 
     setup_inheritance_graph(); 
@@ -125,14 +117,14 @@ ClassTable::ClassTable(Classes classes) : semant_errors(0) , error_stream(cerr) 
 */
 int ClassTable::validate_methods(Classes classes_in_program) {
     int status = check_for_multiple_methods(classes_in_program);
-    //status += check_methods_types(classes_in_program); //done in type checking
     status += check_overriden_methods(classes_in_program);
     return status;
 }
 
 /**
 * *****************************************************
-* 
+* Ensures tha overriden methods conform to manual 
+*       specification. 
 * *****************************************************
 */
 int ClassTable::check_overriden_methods(Classes classes_in_program) {
@@ -165,7 +157,7 @@ int ClassTable::check_overriden_methods(Classes classes_in_program) {
 int ClassTable::check_method_definitions(Class_ containing_class, Feature curr_feature, Feature inherited_method_def) {
     int status = 0;
 
-    // curr_feature is the method that was inherited
+    // curr_feature is the method that was inherited (ie the child method)
     // inherited_method_def is the method that is being redefined by curr_feature 
     if (!curr_feature->check_is_valid_method()) { status = 1; }
     Formals curr_formals = curr_feature->get_formals();
@@ -223,7 +215,7 @@ Feature ClassTable::search_for_inherited_method_def(Class_ curr_class, char* cur
 /**
 * *****************************************************
 * Ensures that no class contains two or more methods 
-* of the same name. 
+*       of the same name. 
 * *****************************************************
 */
 int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
@@ -243,43 +235,6 @@ int ClassTable::check_for_multiple_methods(Classes classes_in_program) {
                     status = 1;
                 } else {
                     method_names.addid(curr_method_name, new int(42));
-                }
-            }
-        }
-    }
-    return status;
-}
-
-/**
-* *****************************************************
-* Make sure return types and formal parameter types
-*       of all methods are valid for the program.
-* Method no longer used 
-* *****************************************************
-*/
-int ClassTable::check_methods_types(Classes classes_in_program) {
-    int status = 0;
-    for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
-        Class_ curr_class = classes_in_program->nth(i);
-        Features features = curr_class->get_features();
-        for (int j = features->first(); features->more(j); j = features->next(j)) {
-            Feature curr_feature = features->nth(j);
-            if (strcmp(curr_feature->get_type_name(), "method") == 0) {
-                Formals formals = curr_feature->get_formals();
-                for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
-                    Formal curr_formal = formals->nth(k);
-                    if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
-                        ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_formal);
-                        err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
-                        status = 1;
-                    }
-                }
-                if (strcmp(curr_feature->get_type()->get_string(), "SELF_TYPE") != 0) {
-                    if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
-                        ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
-                        err_stream << "Undefined return type " << curr_feature->get_type()->get_string() << " in method " << curr_feature->get_name()->get_string() << ".\n";
-                        status = 1;
-                    }
                 }
             }
         }
