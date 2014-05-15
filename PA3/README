@@ -189,18 +189,45 @@ We use the classtable as a container for lots of the information that we collect
 and use in later steps, such as a list of valid classes, types, and an 
 inheritance graph. Our code is structured in the following way:
 
-1. First, we check classes. This involves making multiple passes over the AST to
+1. First, we check classes. This is performed in the constructor 
+   for the ClassTable. This involves making multiple passes over the AST to
    collect all valid types and to check the inheritance graph. We also check
-   for a main class.
-2. Secondly, we check methods. This involves making sure that method inheritance
+   for a main class, but this does not happen until after verifying the validity
+   of the inheritance graph, as we do not want to halt compilation in this case. One
+   of the unique things about COOL is that types do not have to be declared before use. 
+   Therefore, in the Classtable we store a symbol table with defined types of the program, 
+   and set this field by iterating over the classes of the program, adding tpyes
+   to the symbol table as we go. After completing this traversal, we then have a collection
+   of all valid types for a program being compiled, and can check types in declarations against 
+   this list. Note, there are several cases for which we halt compilation in the constructor. 
+   If the program class hierarchy has a cycle, or if the class names violate the re-defintion
+   or inheritance of basic types, we report the errors and halt compilation. If this
+   passes, then we set up an inheritance graph used for LUB and isparent conformance operations, 
+   and continue with compilation, moving on to scope and typechecking. 
+
+
+2. Secondly, we check method declarations. This involves making sure that method inheritance
    is consistent, ensuring that method parameters are valid, and making sure 
-   method names are valid.
-3. Thirdly, we ensure that every node has its class environment. 
+   method names are valid. We also do a pass to check for a valid Main class
+   which contains a main method. This is all outlined in the COOL manual.  
+
+3. Thirdly, we ensure that every node has its class environment by calling settup-
+	typecheck-enviornment. This pass was initially going to set both the root_class
+	of the node, and a symbol table detailing the identifier scope of the node. However, 
+	as we outline later in the README, this was problematic, so this pass simply serves to 
+	set the root_class of the node, the C in the typecheck rules, and also checks for 
+	uniqueness of case statement types. 
+
 4. Lastly, we check scope and do typechecking. We do scope and typechecking
    together in one pass, which helps ensure that the necessary scope information
-   (ie, the object and method environments) are there for typechecking.
+   (ie, the object and method environments) are there for typechecking. Note, one of 
+   our design decisions was to not use a new data structure to store the methods. Instead, 
+   in order to access a method, we have a function that looks up a function by name in 
+   a given class. Thus, when we dispatch on a function, we know the class of the object 
+   dipatched on, and can then find the method by passing the class to search in and the
+   name of the method. 
 
-These steps are all invoked from ClassTable::semant, and are all methods of the
+These steps are all invoked from program_class::semant, and are all methods of the
 classtable. Some information, like the class environment and the node type, 
 is stored in the AST. 
 
@@ -209,17 +236,20 @@ DESIGN DECISIONS
 During our design process, our first step was to be able to read and understand
 the AST, so we added accessor methods and some information fields to cool-tree.
 For every node, we maintained a "root_class" variable, which was the class
-environment of that node, and which is set in the third step articlated above.
+environment of that node, and which is set in the third step articulated above.
 For expressions, since different subclasses of Expression_class have different 
 fields, we made multi-purpose accessor methods that encompassed all of those 
-fields. 
+fields. If an accessor method does not apply to a given expresion type, it returns
+NULL. Furthermore, in order to distinguish between the different types of Features
+and the different types of Expressions, we added a get_type_name() funtion to ech of 
+the respective nodes, which returns a string identifying the type of the node. 
 
 Due to the complexity of semantic analysis, we chose to do semantic analysis 
 over several traversals of the AST. While we think that the analysis could have
 been done in fewer traversals, we felt that the structure and order of the code
 was very clear when broken down into smaller parts. We also felt that this
 isolation between parts made it easier to track down errors, and that turned
-out to be true in practice.
+out to be true in practice. 
 
 Another big design decision that we made was to put the typechecking code into
 ClassTable instead of into the AST. Our original instinct was to have a 
@@ -232,15 +262,36 @@ The third design decision that we considered and made was the concurrency of
 scope checking and typechecking. Our original design had scope checking come 
 well before typechecking, but we found in our testing that this lead to 
 some errors in scope because of the way we were storing the scopes for each 
-node. Our hope had been to store the scope of each node in the AST, but we 
-found in practice that duplicating a symboltable was impossible, rendering our 
-method useless.  Therefore, as a fix, we decided that we needed to calculate 
-the scope for each node during typechecking, and that we could enter and exit 
-scopes as needed (entering a new method, let statement, case statement branch). 
+node. In our initial study of the symtab.h support code, we read the documentation 
+as saying that the = operator made a deep copy of the associated symbol table. 
+Instead, the = operator simply copies a pointer. Our hope had been to store the scope of 
+each node in the AST, essentially giving each node a unique deep copy of the symbols
+defined up to that point in the tree. The purpose of this was to avoid having to call
+exitscope(), which simplified the logic. However, because the = operator
+returns only a copied pointer, the symbol tables stored in each node did not
+end up being unique. For example, an identifier declared in the formal list
+of a method but not declared in a subsequent method was reported as declared
+because of the single symbole table. Therefore, we had to redesign. Our first
+redisign attempt was to simply define a deep copy constructor for the Symbol Table. 
+However, this proved to be very difficult, given that the symtab.h is included
+via a symboic link, and the majority of data memembers are private. One solution 
+would be to make a copy of the file, and then edit the local copy, but this was advised
+against by the course staff. Our second approach was the one we used, which was to 
+incorperte scope checking with type checking. Thus, at all times, we have a single 
+active Symbol Table, and we use enterscope and exitscope to maintain the appropriate
+symbol shadowings. With this design, we check for scope in the folowing cases as
+defined in the handout and the manual:
+(class defintion, entering a new method, let statement, case statement branch). 
 With this design, we also encountered some problems--one in particular was that
 inherited attributes were hard to track in this way. We ended up developing a 
 helper method that is called upon entering the scope of a class, that looks for 
-parent classes and adds those attributes as well.
+parent classes and adds those attributes as well. This method simply starts 
+from the current class, adds its attributes, and then walks up the inheritance 
+tree, adding all the attributes of the parents. 
+
+Miscellaneous notes: 
+- To each node, we add accessor methods to get the fields of the class. We also define
+a get_type_name on nodes that have 
 
 
 
