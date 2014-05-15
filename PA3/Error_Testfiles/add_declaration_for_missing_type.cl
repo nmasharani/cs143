@@ -15,4 +15,12 @@ class A {
 	c() : Dog {
 		y
 	}; 
+
+	open(z: Dog) : Barry {
+		y
+	};
+
+	open2(z: Dog) : Barry {
+		z
+	};
 };

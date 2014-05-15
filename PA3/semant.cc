@@ -1113,7 +1113,6 @@ void ClassTable::typecheck_method(Feature method, SymbolTable<Symbol, Entry>* sc
     }
 
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) {
-
         scope->exitscope();
         return;
     }
@@ -1142,6 +1141,7 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
     Formals formals = feature->get_formals();
     for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
         Formal curr_formal = formals->nth(k);
+        bool can_add = true;
         if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
@@ -1155,12 +1155,15 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
         if (strcmp(curr_formal->get_name()->get_string(), "self") == 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "'self' cannot be the name of a formal parameter" << ".\n";
+            can_add = false;
         } 
         if (scope->probe(curr_formal->get_name()) && strcmp(curr_formal->get_name()->get_string(), "self") != 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "Formal parameter " << curr_formal->get_name()->get_string() << " is multiply defined.\n";
         } else {
-            scope->addid(curr_formal->get_name(), curr_formal->get_type());
+            if (can_add == true) {
+                scope->addid(curr_formal->get_name(), curr_formal->get_type());
+            }
         }
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
