@@ -43,14 +43,23 @@ Error_Testfiles/inherits_errors.cl
 
 In this file, we test for errors with class declarations and inheritances. 
 We test cycles, inheritance from basic classes, undefined classes, and 
-redeclaration of classes. 
+redeclaration of classes. We used this file to test our inheritance graph
+construction and checking. 
 
 
 Error_Testfiles/typecheck_case_errors.cl
 
+We use this file to check for errors in case statements. For example, using 
+SELF_TYPE, self, and undefined types in case statements. We also used this to
+verify that valid case statements are also recocnized and that scope is 
+consistent and correct.
 
 
 Error_Testfiles/method_errors.cl
 
-
+This file checks for errors with method definitions and redefinitions. We test 
+for inherited methods with different parameters, redefinitions, invalid
+formal types, and invalid return types. We found that this test file was good
+for testing both method validation prior to typechecking and for testing formal
+parameter typechecking.
 
