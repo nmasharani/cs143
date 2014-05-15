@@ -31,6 +31,7 @@ class D {
 			x <- (z <- y);
 			-- z has type B so this is not fine
 			x <- z;
+			--z <- x; //uncomment to make this method def valid. 
 		}
 		
 	};

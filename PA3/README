@@ -333,7 +333,33 @@ and adressed any issues presented there.
 
 - Note, our test script allows us to compare our output with the output of the reference compiler. 
 In all cases, we match the reference, except for slight differences in order of error statememts and
-structure of error statemtns. For example, 
+structure of error statemtns. For example:
+Error_Testfiles/self_usage.cl
+1,2d0
+< Class Main is not defined.
+< Error_Testfiles/self_usage.cl:48: Method a4 is multiply defined.
+5a4,5
+> Error_Testfiles/self_usage.cl:48: Method a4 is multiply defined.
+> Class Main is not defined.
+8c8
+< Error_Testfiles/self_usage.cl:12: Inferred return type Object of method a does not conform to declared return type A2.
+---
+> Error_Testfiles/self_usage.cl:12: Inferred return type Int of method a does not conform to declared return type A2.
+
+As seen here, we convet the type of an erronous error to Object while the reference leaves it as Int. Furthemore, the order
+of the statements is different. We confirmed with Professor Aiken that this behavior is ok. 
+
+Another point worth making is that whenever we encounter an error in a typecheck rule, we assign the 
+type of the node we are checking to be object. In other words, whenever we see an error in a hypothesis,
+the type of the conclusion is set to Object. This is what is specified in the assignment spec. However, the reference
+compiler employs a smart tactic where it returns the type of what the node should be in certain cases for certain errors.
+For example, in arithmetic, if the type of one of the epxressions is not Int, we set and retun Object as the type
+of the node. However, the reference compiler sets and returns type Int. We also confirmed this with Professor Aiken, and he
+indicated that our behaviour is fine. 
+
+Finally we found and reported a bug in the reference. In the case of dispatching on a method, if mulitple
+types do not match, the reference reports only one and quits. Our solution reports them all. Professor Aiken
+confirmed that this is indeed a bug in the reference. 
 
 
 
