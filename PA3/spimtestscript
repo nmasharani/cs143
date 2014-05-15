@@ -1,0 +1,80 @@
+for file in Error_Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		/usr/class/cs143/bin/spim -file $file &> mine_runtime.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		/usr/class/cs143/bin/spim -file $file &> reference_runtime.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		diff mine_runtime.txt reference_runtime.txt
+		echo ""
+
+
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+	done
+
+for file in Valid_Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		/usr/class/cs143/bin/spim -file $file &> mine_runtime.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		/usr/class/cs143/bin/spim -file $file &> reference_runtime.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		diff mine_runtime.txt reference_runtime.txt
+		echo ""
+
+
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+	done
+
+for file in Testfiles/*
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		/usr/class/cs143/bin/spim -file $file &> mine_runtime.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		/usr/class/cs143/bin/spim -file $file &> reference_runtime.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		diff mine_runtime.txt reference_runtime.txt
+		echo ""
+
+
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+	done
+
+for file in *.cl
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		/usr/class/cs143/bin/spim -file $file &> mine_runtime.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		/usr/class/cs143/bin/spim -file $file &> reference_runtime.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		diff mine_runtime.txt reference_runtime.txt
+		echo ""
+
+
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+	done
+
