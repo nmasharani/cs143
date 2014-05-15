@@ -13,7 +13,7 @@ class A {
 
 			2 = let a : String <- "hi" in
 			case a of
-			a : Int => 1;
+			a : Int => b <- a;
 			b : String => 2;
 			c : Bool => 3;
 			esac;

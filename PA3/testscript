@@ -49,3 +49,17 @@ for file in Valid_Testfiles/*
 		echo "***********************************************************************************************************"
 		echo ""
 	done
+
+for file in *.cl
+	do
+		echo $file
+		./mycoolc -k $file &> mine_console.txt
+		\cp semant.out mine.out
+		\cp mine_console.txt reference_console.txt
+		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+		diff mine.out semant.out
+		diff mine_console.txt reference_console.txt
+		echo ""
+		echo "***********************************************************************************************************"
+		echo ""
+	done
