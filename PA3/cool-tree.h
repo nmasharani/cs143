@@ -38,7 +38,6 @@ typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
 protected:
-   SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		     { return copy_Class_(); }
@@ -46,8 +45,6 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
-   SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    
 
    /* ********** LP added functions ********** */
@@ -69,7 +66,6 @@ typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
 protected:
-   SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
    bool is_valid_method;
 public:
@@ -78,8 +74,6 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
-   SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
    void is_not_valid_method() { is_valid_method = false; }
    bool check_is_valid_method() { return is_valid_method; }
    /* ********** LP added functions ********** */
@@ -101,7 +95,6 @@ typedef class Formal_class *Formal;
 
 class Formal_class : public tree_node {
 protected:
-   SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Formal(); }
@@ -109,8 +102,6 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
-   SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;
@@ -128,7 +119,6 @@ typedef class Expression_class *Expression;
 
 class Expression_class : public tree_node {
 protected:
-   SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Expression(); }
@@ -136,8 +126,6 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
-   SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0; // assign, static dispatch, normal dispatch, let, int_const, str_const, object
@@ -163,7 +151,6 @@ typedef class Case_class *Case;
 
 class Case_class : public tree_node {
 protected:
-   SymbolTable<Symbol, Entry>* variables_in_scope; //tracks the variables in scope. The O in the. 
    Class_ root_class; //tracks the class for which this node descends from. The C in the type-check rules. 
 public:
    tree_node *copy()		 { return copy_Case(); }
@@ -171,8 +158,6 @@ public:
 
    void set_root_class(Class_ _root_class) { root_class = _root_class; }
    Class_ get_root_class() { return root_class; }
-   void set_variables_in_scope(SymbolTable<Symbol, Entry>* _variables_in_scope) {variables_in_scope = _variables_in_scope; }
-   SymbolTable<Symbol, Entry>* get_variables_in_scope() { return variables_in_scope; }
 
    /* ********** LP added functions ********** */
    virtual Symbol get_name() = 0;

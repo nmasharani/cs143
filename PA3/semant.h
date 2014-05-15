@@ -98,14 +98,14 @@ private:
   * Description: typecheck helper methods. 
   * *****************************************************
   */
-  void typecheck_feature(Feature feature);
+  void typecheck_feature(Feature feature, SymbolTable<Symbol, Entry>* scope);
 
-  void typecheck_method(Feature method);
-  Symbol check_method_types(Feature feature);
+  void typecheck_method(Feature method, SymbolTable<Symbol, Entry>* scope);
+  Symbol check_method_types(Feature feature, SymbolTable<Symbol, Entry>* scope);
 
-  void typecheck_attribute(Feature attribute);
+  void typecheck_attribute(Feature attribute, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_expression(Expression expr);
+  Symbol typecheck_expression(Expression expr, SymbolTable<Symbol, Entry>* scope);
 
   /**
   * *****************************************************
@@ -155,15 +155,15 @@ private:
   *     class. 
   * *****************************************************
   */
-  void initialize_class_enviornment(Class_ curr_class);
+  SymbolTable<Symbol, Entry>*  initialize_class_enviornment(Class_ curr_class);
 
   void initialize_feature_enviornment(Class_ parent_class, Feature feature_to_init);
 
-  void initialize_formal(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Formal formal_to_init);
+  void initialize_formal(Class_ root_class, Formal formal_to_init);
 
-  void initialize_expression(Class_ root_class, SymbolTable<Symbol, Entry>* variables_in_scope, Expression expression_to_init);
+  void initialize_expression(Class_ root_class, Expression expression_to_init);
 
-  void initialize_case_enviornment(SymbolTable<Symbol, Entry>* variables_in_scope, SymbolTable<char*, int>* case_types_so_far, Class_ root_class, Case curr_case);
+  void initialize_case_enviornment(SymbolTable<char*, int>* case_types_so_far, Class_ root_class, Case curr_case);
 
 
 
@@ -179,53 +179,53 @@ private:
   Symbol get_common_parent(Symbol t1, Symbol t2, Class_ root_class);
 
 
-  Symbol typecheck_assign(Expression e);
+  Symbol typecheck_assign(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_static_dispatch(Expression e);
+  Symbol typecheck_static_dispatch(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_dispatch(Expression e);
+  Symbol typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_cond(Expression e);
+  Symbol typecheck_cond(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_loop(Expression e);
+  Symbol typecheck_loop(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_typcase(Expression e);
+  Symbol typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_block(Expression e);
+  Symbol typecheck_block(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_let(Expression e);
+  Symbol typecheck_let(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_plus(Expression e);
+  Symbol typecheck_plus(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_sub(Expression e);
+  Symbol typecheck_sub(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_mul(Expression e);
+  Symbol typecheck_mul(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_divide(Expression e);
+  Symbol typecheck_divide(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_neg(Expression e);
+  Symbol typecheck_neg(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_lt(Expression e);
+  Symbol typecheck_lt(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_eq(Expression e);
+  Symbol typecheck_eq(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_leq(Expression e);
+  Symbol typecheck_leq(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_comp(Expression e);
+  Symbol typecheck_comp(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_int_const(Expression e);
+  Symbol typecheck_int_const(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_bool_const(Expression e);
+  Symbol typecheck_bool_const(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_string_const(Expression e);
+  Symbol typecheck_string_const(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_new_(Expression e);
+  Symbol typecheck_new_(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_isvoid(Expression e);
+  Symbol typecheck_isvoid(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_no_expr(Expression e);
+  Symbol typecheck_no_expr(Expression e, SymbolTable<Symbol, Entry>* scope);
 
-  Symbol typecheck_object(Expression e);
+  Symbol typecheck_object(Expression e, SymbolTable<Symbol, Entry>* scope);
 
 
 public:

@@ -1,11 +1,15 @@
 (* test valid conformance *)
 
 class Main {
+
+	a : Int;
+	b : String; 
 	main() : Int {
 		42
 	};
 };
 
+(*
 class Alpha {
 
 };
@@ -19,3 +23,4 @@ class Charlie {
 	alpha : Alpha <- bravo;
 };
 
+*)
