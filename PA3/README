@@ -181,13 +181,22 @@ Instructions
 Write-up for PA3
 ----------------
 
+user: lpappas9
+user: nisham
 
 CODE STRUCTURE
 
 The majority of the work we do happens in semant.cc, in the classtable.
 We use the classtable as a container for lots of the information that we collect
 and use in later steps, such as a list of valid classes, types, and an 
-inheritance graph. Our code is structured in the following way:
+inheritance graph. Specifically, the ClassTable contains the following data structures:
+- SymbolTable<Symbol, Entry> * inheritance_graph; //used to impliment lub and conforms to. 
+- SymbolTable<char*, int>* defined_types; //contains the valid types declared in the program. 
+- Classes program_classes_AST; //The AST we are checking. Need to have a centrailized single copy as we 
+	want the modifications we make to the copy to persist and translate to the next module of the
+	compiler. 
+
+Our code is structured in the following way:
 
 1. First, we check classes. This is performed in the constructor 
    for the ClassTable. This involves making multiple passes over the AST to
@@ -225,7 +234,20 @@ inheritance graph. Our code is structured in the following way:
    in order to access a method, we have a function that looks up a function by name in 
    a given class. Thus, when we dispatch on a function, we know the class of the object 
    dipatched on, and can then find the method by passing the class to search in and the
-   name of the method. 
+   name of the method. The method search function returns a pointer to the feature for 
+   the given method in the AST. Furthermore, the search method starts in the class passed
+   in for the search, and then walks up the ineheritance path, returning the first feature
+   encountered with a matching name (Note, because features can be methods or attributes, 
+   our design will only work if we only compare the name to the method names. Therefore, 
+   we first check the tpe of the node using get_type_name, and then check feature name
+   if the node type is a method). Because we have previously verfied method defintions 
+   we do not report on eronous defintions here. Furthermore, because COOL does not allow
+   two methods to be defined by the same name in the same class defintion, we know that 
+   once we find the first match, it is the method we want. We then check the conditions 
+   of a valid dispatch as outlined in the manual. Note, the nice thing about this 
+   design is that the feature has all the type information for a method, so we can simply
+   check the types of the expressions in the dispatch against the declared types of the 
+   formal in the feature defintion, and the declared return type of the feature. 
 
 These steps are all invoked from program_class::semant, and are all methods of the
 classtable. Some information, like the class environment and the node type, 
@@ -249,14 +271,20 @@ over several traversals of the AST. While we think that the analysis could have
 been done in fewer traversals, we felt that the structure and order of the code
 was very clear when broken down into smaller parts. We also felt that this
 isolation between parts made it easier to track down errors, and that turned
-out to be true in practice. 
+out to be true in practice. Because speed and memory usage are not issues
+of this assignment, mutlitple passes are actually a better design because they 
+allow each pass to serve a very specific function, as opposed to maintaining
+several logic levels in the same pass. 
 
 Another big design decision that we made was to put the typechecking code into
 ClassTable instead of into the AST. Our original instinct was to have a 
 typecheck method for each node, and to call that method appropriately. However, 
 in practice, we found that a lot of the information that we needed for 
 typechecking about class hierarchies and scope was not easily maintained within
-the AST. 
+the AST. In other words, the circular refernce between cool-tree.h and semant.cc
+made it difficult to share information. Therefore, we defined type check methods 
+for each node in the semant.cc file, and dispatch to these methods in a conditional
+expression based on the return value of get_type_name(). 
 
 The third design decision that we considered and made was the concurrency of 
 scope checking and typechecking. Our original design had scope checking come 
@@ -289,9 +317,23 @@ parent classes and adds those attributes as well. This method simply starts
 from the current class, adds its attributes, and then walks up the inheritance 
 tree, adding all the attributes of the parents. 
 
-Miscellaneous notes: 
-- To each node, we add accessor methods to get the fields of the class. We also define
-a get_type_name on nodes that have 
+TESTING: 
+
+- In our project, we tested very extensively. See below for a description of our test case
+directories, and a description of 5 test files. Furthermore, each test file contains comments
+within the file detailing the case each file tests. The files are appropriately named to allow
+the reader to infer the purpose of the test file as well. Furthemore, we included
+test files from PA1 and PA2 for further testing with our script (note the erronous files
+from those directories are not of much use, but the valid ones are. We include all just
+to be safe). 
+
+- Our implementation is robust and correct. We have combed the entire manual several times, and 
+have included test for each of the error cases outline in the manual. We have also combed piazza
+and adressed any issues presented there. 
+
+- Note, our test script allows us to compare our output with the output of the reference compiler. 
+In all cases, we match the reference, except for slight differences in order of error statememts and
+structure of error statemtns. For example, 
 
 
 
