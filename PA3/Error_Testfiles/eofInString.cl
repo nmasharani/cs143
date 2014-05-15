@@ -1,0 +1,1 @@
+"end of file before string closes

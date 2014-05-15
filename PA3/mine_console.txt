@@ -1,0 +1,3 @@
+Valid_Testfiles/test_expression_24:25.cl:3: No 'main' method in class Main.
+Compilation halted due to static semantic errors.
+semant returned error code: 1

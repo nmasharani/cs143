@@ -1,33 +1,31 @@
-(*
- * Taken from cool manual section 7.7
- *
- * The expressions of a block may have any static types. The static type of a 
- * block is the static type of the last expression.
- *)
+(* This file tests errors within block statements. *)
 
+class Test {
+	i : Int;
 
-class Main { main() : SELF_TYPE { self }; };
-
-class A {
-	invalid_and_return_check() : Bool {
+	no_first_semicolon() : Int {
 		{
-			new E;
-			true;
+			i <- 3
+			if i < 2 then true else false fi;
+			i;
 		}
 	};
-
-	inherit_check() : C {
+	no_last_semicolon() : Int {
 		{
-			new B;
+			i <- 3;
+			if i < 2 then true else false fi;
+			i
 		}
 	};
-
-	ok_inherit_check() : B {
+	no_middle_semicolon() : Int {
 		{
-			new C;
+			i <- 3;
+			if i < 3 then true else false fi
+			i;
+		}
+	};
+	blank_block() : Int {
+		{
 		}
 	};
 };
-
-class B {};
-class C inherits B {};

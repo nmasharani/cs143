@@ -1,0 +1,37 @@
+class
+class
+CLASS
+ELSE
+else
+false
+FALSE
+fi
+FI 
+if
+IF 
+in
+IN 
+inherits
+INHERITS 
+isvoid
+ISVOID
+LET elselet
+let
+loop loop
+LOOP
+pool
+POOL
+then
+THEN
+while
+WHILE
+case
+ESAC
+new
+NEW
+of
+OF
+not
+NOT
+true
+TRUE 
