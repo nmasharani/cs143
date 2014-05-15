@@ -67,5 +67,8 @@ class Onedog inherits Str {
 };
 
 
+class A1 inherits A2 {};
+class A2 inherits A3 {};
+class A3 inherits A1 {};
 
 

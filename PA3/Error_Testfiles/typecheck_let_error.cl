@@ -14,10 +14,10 @@ class A {
 			-- error
 			let self : SELF_TYPE in self;
 			-- error
-			let self : SELF_TYPE <- new A in self;
+			q <- let self : SELF_TYPE <- new A in self;
 			-- no error
 			q <- let b : Int <- 5 in b;
-			true;
+			let self : SELF_TYPE, b : Bool <- true in b;
 		}
 	};
 };

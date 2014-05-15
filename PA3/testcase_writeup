@@ -1,0 +1,56 @@
+TESTING
+
+For testing, we have three different directories of test files: Error_Testfiles,
+Testfiles, and Valid_Testfiles. Error_Testfiles is for files that we knew
+would cause semantic errors, Valid_Testfiles is for files that we knew were
+correct, and Testfiles is for files that we wanted to check against the 
+reference compiler to determine the behavior of our program. We tried to write
+test cases to catch every valid as well as every invalid behavior referenced
+in the cool manual, as well as several we found when testing against the 
+reference compiler.
+
+For each file in the directory, we ran hand-checked tests as well as automated 
+tests that diff'd the outputs of the reference compiler with our own compiler. 
+We looked at the AST, the semanter outputs, as well as the output of the execution
+of the compiled program on SPIM. 
+
+
+Here, we detail the purposes of five different test files:
+
+
+Error_Testfiles/nested_scope_test.cl
+
+In this file, we test the scope of nested let and case statements, to ensure
+that we are always using the variable declared in the scope closest to where we 
+are. This file contains a mix of valid and invalid expressions. We specifically 
+wanted to test let and case statements because let statements and case statements
+are the two places in expressions that variables can be declared, meaning that 
+they are the only places where we enter a new scope, which is tricky and leaves
+room for mistakes.
+
+
+Error_Testfiles/self_usage.cl
+
+In this file, we perform a variety of tests to catch errors with the usage
+of the self identifier. self cannot be declared as an attribute, in let statements, 
+or in case statements, so we used this test file to ensure that our behavior
+upon seeing self and afterwards matched the reference and the manual. We also 
+similarly test the usage of SELF_TYPE in this file, although that also gets
+tested more robustly elsewhere.
+
+
+Error_Testfiles/inherits_errors.cl
+
+In this file, we test for errors with class declarations and inheritances. 
+We test cycles, inheritance from basic classes, undefined classes, and 
+redeclaration of classes. 
+
+
+Error_Testfiles/typecheck_case_errors.cl
+
+
+
+Error_Testfiles/method_errors.cl
+
+
+
