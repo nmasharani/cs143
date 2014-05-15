@@ -1963,7 +1963,6 @@ Symbol ClassTable::typecheck_neg(Expression e, SymbolTable<Symbol, Entry>* scope
 }
 
 Symbol ClassTable::typecheck_int_const(Expression e, SymbolTable<Symbol, Entry>* scope) {
-    // cout << "typechecking int const" << endl;
     e->set_type(Int);
     return Int;
 }
@@ -2030,10 +2029,6 @@ Symbol ClassTable::typecheck_object(Expression e, SymbolTable<Symbol, Entry>* sc
     e->set_type(type);
     return type;
 }
-
-
-
-
 
 
 /* ***************************************************/

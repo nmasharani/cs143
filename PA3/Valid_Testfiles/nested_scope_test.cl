@@ -23,3 +23,38 @@ class A {
 		}
 	};
 };
+
+class A2 {
+	a(y: Int ) : Int {
+		42
+	};
+	b() : Int {
+		y
+	};
+};
+
+class A3 {
+	a() : Int {
+		a
+	};
+};
+
+
+class A4 {
+	a(x: String) : String {
+		{
+			case x of 
+				y: Int => 42;
+				a: String => "hello";
+			esac;
+		}
+	};
+};
+
+class A5 {
+	a() : Int {
+		let x: String <- "hello" in a
+	};
+};
+
+
