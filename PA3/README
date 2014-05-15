@@ -180,3 +180,70 @@ Instructions
 
 Write-up for PA3
 ----------------
+
+
+CODE STRUCTURE
+
+The majority of the work we do happens in semant.cc, in the classtable.
+We use the classtable as a container for lots of the information that we collect
+and use in later steps, such as a list of valid classes, types, and an 
+inheritance graph. Our code is structured in the following way:
+
+1. First, we check classes. This involves making multiple passes over the AST to
+   collect all valid types and to check the inheritance graph. We also check
+   for a main class.
+2. Secondly, we check methods. This involves making sure that method inheritance
+   is consistent, ensuring that method parameters are valid, and making sure 
+   method names are valid.
+3. Thirdly, we ensure that every node has its class environment. 
+4. Lastly, we check scope and do typechecking. We do scope and typechecking
+   together in one pass, which helps ensure that the necessary scope information
+   (ie, the object and method environments) are there for typechecking.
+
+These steps are all invoked from ClassTable::semant, and are all methods of the
+classtable. Some information, like the class environment and the node type, 
+is stored in the AST. 
+
+DESIGN DECISIONS
+
+During our design process, our first step was to be able to read and understand
+the AST, so we added accessor methods and some information fields to cool-tree.
+For every node, we maintained a "root_class" variable, which was the class
+environment of that node, and which is set in the third step articlated above.
+For expressions, since different subclasses of Expression_class have different 
+fields, we made multi-purpose accessor methods that encompassed all of those 
+fields. 
+
+Due to the complexity of semantic analysis, we chose to do semantic analysis 
+over several traversals of the AST. While we think that the analysis could have
+been done in fewer traversals, we felt that the structure and order of the code
+was very clear when broken down into smaller parts. We also felt that this
+isolation between parts made it easier to track down errors, and that turned
+out to be true in practice.
+
+Another big design decision that we made was to put the typechecking code into
+ClassTable instead of into the AST. Our original instinct was to have a 
+typecheck method for each node, and to call that method appropriately. However, 
+in practice, we found that a lot of the information that we needed for 
+typechecking about class hierarchies and scope was not easily maintained within
+the AST. 
+
+The third design decision that we considered and made was the concurrency of 
+scope checking and typechecking. Our original design had scope checking come 
+well before typechecking, but we found in our testing that this lead to 
+some errors in scope because of the way we were storing the scopes for each 
+node. Our hope had been to store the scope of each node in the AST, but we 
+found in practice that duplicating a symboltable was impossible, rendering our 
+method useless.  Therefore, as a fix, we decided that we needed to calculate 
+the scope for each node during typechecking, and that we could enter and exit 
+scopes as needed (entering a new method, let statement, case statement branch). 
+With this design, we also encountered some problems--one in particular was that
+inherited attributes were hard to track in this way. We ended up developing a 
+helper method that is called upon entering the scope of a class, that looks for 
+parent classes and adds those attributes as well.
+
+
+
+
+
+

@@ -888,11 +888,15 @@ ostream& ClassTable::semant_error()
     return error_stream;
 } 
 
-/**
-* ***************************************************
-* Notes: 
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::settup_typecheck_environment
+//
+// This method assigns a class environment to every node in the AST, so that
+// every node always knows where it is, for things like SELF_TYPE.
+// 
+////////////////////////////////////////////////////////////////////////////////
+
 void ClassTable::settup_typecheck_enviornment() {
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
@@ -905,6 +909,16 @@ void ClassTable::settup_typecheck_enviornment() {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::setup_inheritance_graph
+//
+// This method traverses the class list to get an inheritance graph-like structure
+// that can easily be used for isparent and get_common_parent. This graph is 
+// stored as an attribute of the ClassTable class. 
+// 
+////////////////////////////////////////////////////////////////////////////////
+
 void ClassTable::setup_inheritance_graph() {
     inheritance_graph = new SymbolTable<Symbol, Entry>();
     inheritance_graph->enterscope();
@@ -914,11 +928,17 @@ void ClassTable::setup_inheritance_graph() {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::isparent
+//
 // In this method, we check if t1 is a parent of t2. 
 // So, traverse upwards back from t2 until we reach t1 or the top of the
 // inheritance tree
 // 
 // If we find that t1 is a parent of t2, that means t2 <= t1
+//
+////////////////////////////////////////////////////////////////////////////////
 bool ClassTable::isparent(Symbol t1, Symbol t2, Class_ root_class) {
 
     // SELF_TYPE <= SELF_TYPE
@@ -955,6 +975,17 @@ bool ClassTable::isparent(Symbol t1, Symbol t2, Class_ root_class) {
     return false;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::get_common_parent
+//
+// This method finds the lub function, or the least upper bound, for two types.
+// Essentially, we want to find the lowest parent class that these two types
+// share, so we traverse backwards from the types until they meet or we reach
+// Object. The current class is maintained for the sake of self_type checking.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
 
     // lub(SELF_TYPE, SELF_TYPE) = SELF_TYPE
@@ -963,6 +994,7 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
         return SELF_TYPE;
     }
 
+    // SELF_TYPE <= root_class, so lub(root_class, t) = lub(SELF_TYPE, t)
     if (strcmp(t1->get_string(), SELF_TYPE->get_string()) == 0) {
         t1 = root_class->get_name();
     }
@@ -974,6 +1006,9 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
     if (!inheritance_graph->lookup(t1)) { return NULL; }
     if (!inheritance_graph->lookup(t2)) { return NULL; }
 
+    // Traverse t2 upwards while t1 stays in the same place, until t2 can't go 
+    // further up. Then move t1 up by one, and repeat until t1 can't go further
+    // up. 
     Symbol temp;
     while (t1) {
      temp = t2;
@@ -986,8 +1021,16 @@ Symbol ClassTable::get_common_parent(Symbol t1, Symbol t2, Class_ root_class) {
     return NULL; // This is an error; object, at least, should be a common parent
 }
 
-/**
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::typecheck_expression
+//
+// Since every expression type has a different set of typechecking rules, each 
+// expression must go through this condtional to find its type, which has its
+// own method.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::typecheck_expression(Expression e, SymbolTable<Symbol, Entry>* scope) {
 
     if (strcmp(e->get_type_name(), "assign") == 0) {
@@ -1088,10 +1131,17 @@ Symbol ClassTable::typecheck_expression(Expression e, SymbolTable<Symbol, Entry>
     return Object;
 }
 
-/**
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::typecheck_method
+//
+// This method first checks to see that the method declaration is valid in type
+// and in scope, and then recursively descends into the tree to complete 
+// typechecking. 
+//
+////////////////////////////////////////////////////////////////////////////////
+
 void ClassTable::typecheck_method(Feature method, SymbolTable<Symbol, Entry>* scope) {
-    // cout << "typechecking method " << method->get_name()->get_string() << endl;
     scope->enterscope();
 
     // get formals setup
@@ -1100,17 +1150,10 @@ void ClassTable::typecheck_method(Feature method, SymbolTable<Symbol, Entry>* sc
         scope->exitscope();
         return;
     }
-    // cout << "dump" << endl;
-    // scope->dump();
-    // cout << "end dump" << endl;
-
-    // cout << "typechecking expr" << endl;
     Symbol method_body_type = typecheck_expression(method->get_expression(), scope);
-    // cout << "method body type = " << method_body_type->get_string() << endl;
 
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) {
-        // ostream& err_stream = semant_error(method->get_root_class()->get_filename_1(), method);
-        // err_stream << "Error2" << endl;
+
         scope->exitscope();
         return;
     }
@@ -1122,12 +1165,17 @@ void ClassTable::typecheck_method(Feature method, SymbolTable<Symbol, Entry>* sc
     scope->exitscope();
 }
 
-/**
-* ***************************************************
-* Return the return type of the method, or 
-*       Null if error.
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::check_method_types
+//
+// This method ensures that the scope of formal parameters and the declarations
+// of the parameters are valid. In this method, too, formal parameters are added
+// to the scope symboltable, which entered a new scope at the start of the 
+// typecheck_method method.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry>* scope) {
     
 
@@ -1174,26 +1222,38 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
     return SELF_TYPE;
 }
 
-/**
-* ***************************************************
-* Rule on page 22 of manual. 
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::typecheck_attribute
+//
+// The validity of the type of the attribute declaration has already been 
+// checked when the attribute was added to the current scope, so this method 
+// simply checks that the initialization of the attribute (if it exists) is
+// valid by recursively typechecking the attribute expression. 
+//
+////////////////////////////////////////////////////////////////////////////////
+
 void ClassTable::typecheck_attribute(Feature attribute, SymbolTable<Symbol, Entry>* scope) {
     if (strcmp(attribute->get_expression()->get_type_name(), "no_expr") == 0) return;
     Symbol expression_type = typecheck_expression(attribute->get_expression(), scope);
     Symbol attribute_type = attribute->get_type();
     
+    // See if the expression conforms to the declared type of the attribute.
     if (isparent(attribute_type, expression_type, attribute->get_root_class()) == false) {
         ostream& err_stream = semant_error(attribute->get_root_class()->get_filename_1(), attribute);
         err_stream << "Inferred type " << expression_type->get_string() << " of initialization of attribute " << attribute->get_name()->get_string() << " does not conform to declared type " << attribute_type->get_string() <<".\n"; 
     }
 }
 
-/**
-* ***************************************************
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::typecheck_feature
+//
+// This method determines whether or not a feature should be checked as a method
+// or as an attribute.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 void ClassTable::typecheck_feature(Feature feature,  SymbolTable<Symbol, Entry>* scope) {
     if (strcmp(feature->get_type_name(), "attribute") == 0) {
         typecheck_attribute(feature, scope);
@@ -1209,25 +1269,29 @@ void ClassTable::typecheck_feature(Feature feature,  SymbolTable<Symbol, Entry>*
 *       work up the tree, moving next to the features. 
 * ***************************************************
 */
+
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::typecheck_program
+//
+// This method begins the recursive typechecking. Typechecking in our semantic
+// analyzer works as follows: First, the subtrees are recursively typechecked.
+// Then, the current node is typechecked. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void ClassTable::typecheck_program() {
     for (int i = program_classes_AST->first(); program_classes_AST->more(i); i = program_classes_AST->next(i)) {
         Class_ curr_class = program_classes_AST->nth(i);
+
+        // This method gets the attributes of the class plus the attributes of
+        // the parent type of the current class. Since nothing in the current
+        // class is in the scope of any other class, creating a new scope
+        // symbol table here is okay. 
         SymbolTable<Symbol, Entry>* scope = initialize_class_enviornment(curr_class);
-        // cout << "typechecking class " << curr_class->get_name()->get_string() << endl;
-        // scope->dump();
+
         Features features = curr_class->get_features();
-        // for (int j = features->first(); features->more(j); j = features->next(j)) {
-        //     Feature curr_feature = features->nth(j);
-        //     if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
-        //         typecheck_attribute(curr_feature, scope);
-        //     }
-        // }
         for (int j = features->first(); features->more(j); j = features->next(j)) {
             Feature curr_feature = features->nth(j);
-            // if (strcmp(curr_feature->get_type_name(), "method") == 0) {
-            //     typecheck_method(curr_feature, scope);
-            // }
-
             typecheck_feature(curr_feature, scope);
         }
     }
@@ -1252,8 +1316,11 @@ void program_class::semant()
     initialize_constants();
 
     /* ClassTable constructor may do some semantic analysis */
-    // put class checking into the constructor. 
-    // Shawn also did all other checking here. 
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // classtable constructor -- used for class checking (inheritance)
+    //
+    ////////////////////////////////////////////////////////////////////////////
     ClassTable *classtable = new ClassTable(classes);
 
     if (classtable->errors()) {
@@ -1261,10 +1328,36 @@ void program_class::semant()
 	   exit(1);
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // check_for_main -- used for checking the existence of a main function
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
     int status = classtable->check_for_main(classtable->program_classes_AST); //status is currently unused.
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // validate methods -- used to check inheritance and parameters of methods
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
     classtable->validate_methods(classtable->program_classes_AST);
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // settup_typecheck_environment -- used to add class context to AST nodes
+    //
+    ////////////////////////////////////////////////////////////////////////////
+
     classtable->settup_typecheck_enviornment();
-    // cout << "typechecking" << endl;
+    
+
+    ////////////////////////////////////////////////////////////////////////////
+    // 
+    // typecheck_program -- typecheck program and check var scope
+    //
+    ////////////////////////////////////////////////////////////////////////////
     classtable->typecheck_program();
 
     if (classtable->errors()) {
@@ -1481,8 +1574,6 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
     // make sure the return type is valid
     Symbol return_type = method_def->get_type();
     if (defined_types->lookup(return_type->get_string()) == NULL) {
-        //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        //err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
         //printed in typechecking of method defs. 
         error = true;
     }
@@ -1862,7 +1953,6 @@ Symbol ClassTable::typecheck_eq(Expression e, SymbolTable<Symbol, Entry>* scope)
     if (error == true) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Illegal comparison with a basic type" << ".\n";
-        // err_stream << e->get_expression_1()->get_name()->get_string() << " " << t1->get_string() << " " << e->get_expression_2()->get_name()->get_string() << " " << t2->get_string() << endl;
     }
     e->set_type(Bool);
     return Bool;
