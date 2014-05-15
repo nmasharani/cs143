@@ -4,6 +4,14 @@ class Main {
 	};
 };
 
+class A1 inherits A {
+
+};
+
+class A2 inherits A1 {
+
+};
+
 class A {
 	x: Int;
 	a() : Int {
@@ -16,5 +24,9 @@ class A {
 
 	a3() : Int {
 		let y: Bool in x
+	};
+
+	a4(x: A2) : Int {
+		let y: A <- x in x
 	};
 };

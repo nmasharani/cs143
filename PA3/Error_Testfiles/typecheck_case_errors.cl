@@ -51,3 +51,22 @@ class Test2 {
 		}
 	};
 };
+
+class Test3 {
+	a : A;
+	b : B;
+	test_method() : Bool {
+		{
+			case a + b of 
+				x : Seven => 5+x;
+				y: Eight => 8+y;
+				z: SELF_TYPE => 9+z;
+				z: Bool => true;
+			esac;
+		}
+	};
+};
+
+
+
+

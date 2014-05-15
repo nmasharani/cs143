@@ -1625,7 +1625,7 @@ Symbol ClassTable::typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* s
         if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
-            error = true;
+            //error = true;
         }
         // No self_type in cases
         if (strcmp(curr_case->get_name()->get_string(), "self") == 0) {
@@ -1636,7 +1636,7 @@ Symbol ClassTable::typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* s
         if (strcmp(curr_case->get_type_decl()->get_string(), SELF_TYPE->get_string()) == 0) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Identifier " << curr_case->get_name()->get_string() << " declared with type SELF_TYPE in case branch." << endl;
-            error = true;
+            //error = true;
         }
 
         if (!error) {
