@@ -379,6 +379,12 @@ SymbolTable<char*, int>* ClassTable::collect_all_valid_types(Classes classes) {
     return defined_types;
 }
 
+/**
+* ***************************************************
+* Returns true if the passed in name matches the 
+*       class names that are reserved in COOL. 
+* ***************************************************
+*/
 bool ClassTable::name_is_reserved_classname(char* name) {
     if (strcmp(name, SELF_TYPE->get_string()) == 0) return true;
     if (strcmp(name, Object->get_string()) == 0) return true;
@@ -391,7 +397,7 @@ bool ClassTable::name_is_reserved_classname(char* name) {
 
 /**
 * ***************************************************
-* Returns a class object
+* Returns a class object who's name matches name. 
 * ***************************************************
 */
 Class_ ClassTable::find_class_by_name(Classes classes, char* name) {
@@ -423,13 +429,20 @@ Feature ClassTable::find_method_by_name(Class_ containing_class, char* method_na
 }
 
 /**
+* ***************************************************
+* Lookup the attribute in class who's name matches 
+*       name. Note, have to ensure feature is a method
+*       as methods and features can have same name. 
+* ***************************************************
 */
 Feature ClassTable::find_attribute_by_name(Class_ containing_class, char* name) {
     Features features = containing_class->get_features();
     for (int i = features->first(); features->more(i); i = features->next(i)) {
         Feature curr_feature = features->nth(i);
-        if (strcmp(curr_feature->get_name()->get_string(), name) == 0) {
-            return curr_feature;
+        if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
+            if (strcmp(curr_feature->get_name()->get_string(), name) == 0) {
+                return curr_feature;
+            }
         }
     }
     return NULL;
@@ -487,9 +500,7 @@ SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr
                     err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
                 } else {
                     if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
-                        /*if (defined_types->lookup(curr_feature->get_type()->get_string()) != NULL) {
-                            class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
-                        }*/
+                        //add a declaration even if its type is not defined. 
                         class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                     }
                 }
@@ -1095,11 +1106,11 @@ void ClassTable::typecheck_method(Feature method, SymbolTable<Symbol, Entry>* sc
 
     // get formals setup
     Symbol method_return_type = check_method_types(method, scope);
+    Symbol method_body_type = typecheck_expression(method->get_expression(), scope);
     if (method_return_type == NULL) {
         scope->exitscope();
         return;
     }
-    Symbol method_body_type = typecheck_expression(method->get_expression(), scope);
 
     if (strcmp(method_body_type->get_string(), No_class->get_string()) == 0) {
 
@@ -1134,25 +1145,20 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
         if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
-        
         } 
 
         if (strcmp(curr_formal->get_type()->get_string(), SELF_TYPE->get_string()) == 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "Formal parameter " << curr_formal->get_name()->get_string() << " cannot have type SELF_TYPE" << ".\n";
-        
         } 
 
         if (strcmp(curr_formal->get_name()->get_string(), "self") == 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "'self' cannot be the name of a formal parameter" << ".\n";
-        
         } 
-
         if (scope->probe(curr_formal->get_name()) && strcmp(curr_formal->get_name()->get_string(), "self") != 0) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), curr_formal);
             err_stream << "Formal parameter " << curr_formal->get_name()->get_string() << " is multiply defined.\n";
-        
         } else {
             scope->addid(curr_formal->get_name(), curr_formal->get_type());
         }
@@ -1161,12 +1167,10 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
         if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n"; 
-            
             return NULL;
         }
         return feature->get_type();
     }
-
     // self type
     return SELF_TYPE;
 }
@@ -1503,7 +1507,7 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
     Formals method_def_formals = method_def->get_formals();
     if (len != method_def_formals->len()) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Method " << e->get_name()->get_string() << " invoked with wrong number of arguments.\n";
+        err_stream << "Method " << e->get_name()->get_string() << " called with wrong number of arguments.\n";
         e->set_type(Object);
         return Object;
     } 
@@ -1514,7 +1518,7 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
         Symbol curr_type = method_def_formals->nth(i)->get_type();
         if (isparent(curr_type, symbols_array[i], e->get_root_class()) == false) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-            err_stream << "In call of method " << e->get_name()->get_string() << " type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
+            err_stream << "In call of method " << e->get_name()->get_string() << ", type " << symbols_array[i]->get_string() << " of parameter " << method_def_formals->nth(i)->get_name()->get_string() << " does not conform to declared type " << curr_type->get_string() << ".\n";
             //error = true;
             //note if formal types are different, the reference compiler does not return Object, but the return type of the method.
         }
