@@ -1585,7 +1585,7 @@ Symbol ClassTable::typecheck_cond(Expression e, SymbolTable<Symbol, Entry>* scop
 //
 // To typecheck loop statements:
 // - The inferred type of the predicate must be bool
-// - The return type of the loop is Object
+// - The Static return type of the loop is Object, manual page 11
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1663,6 +1663,9 @@ Symbol ClassTable::typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* s
 // To typecheck block statements:
 // - Typecheck all expressions
 // - return type is the type of the last expression
+// - continually update return symbol so it contains the last value, 
+//    and return that. 
+// - every block has at least one expression is caught in the PA2 component. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 
