@@ -141,16 +141,6 @@ private:
 
   /**
   * *****************************************************
-  * Description: helper function. checks if type1 is a 
-  *     parent of type2.
-  * Return: true if type 1 is a parent of type 2, false
-  *     otherwise. 
-  * *****************************************************
-  */
-  bool is_parent(Classes classes_in_program, Symbol type1, Symbol type2);
-
-  /**
-  * *****************************************************
   * Description: initializes the enviornment for this
   *     class. 
   * *****************************************************
@@ -179,6 +169,7 @@ private:
   Symbol get_common_parent(Symbol t1, Symbol t2, Class_ root_class);
 
 
+  /* See semant.cc for documentation */ 
   Symbol typecheck_assign(Expression e, SymbolTable<Symbol, Entry>* scope);
 
   Symbol typecheck_static_dispatch(Expression e, SymbolTable<Symbol, Entry>* scope);

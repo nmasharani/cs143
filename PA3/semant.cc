@@ -468,23 +468,6 @@ Feature ClassTable::find_method_by_name(Class_ containing_class, char* method_na
 }
 
 /**
-* ***************************************************
-* Return true if type1 is a parent of type2, fale othewise. 
-* check all of type2's parents and if one matches type1's name
-* return true. 
-* ***************************************************
-*/
-bool ClassTable::is_parent(Classes classes_in_program, Symbol type1, Symbol type2) {
-    Class_ curr_class = find_class_by_name(classes_in_program, type2->get_string());
-    while (true) {
-        if (strcmp(curr_class->get_parent()->get_string(), type1->get_string()) == 0) return true;
-        if (strcmp(curr_class->get_parent()->get_string(), "_no_class") == 0) break;
-        curr_class = find_class_by_name(classes_in_program, curr_class->get_parent()->get_string());
-    }
-    return false;
-}
-
-/**
 */
 Feature ClassTable::find_attribute_by_name(Class_ containing_class, char* name) {
     Features features = containing_class->get_features();
@@ -497,12 +480,16 @@ Feature ClassTable::find_attribute_by_name(Class_ containing_class, char* name) 
     return NULL;
 }
 
-/**
-* ***************************************************
-* Allocate a new symbol table and give the node a copy.
-* Take care to add all attributes from parent classes. 
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// ClassTable::initialize_class_environment
+// 
+// This method adds all of the current variables in scope, as well as the vars
+// in scope from parent classes, to the scope symboltable. Minor error checking
+// for repeated attributes and poorly defined classes is done here as well.
+// 
+////////////////////////////////////////////////////////////////////////////////
+
 SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr_class) {
     SymbolTable<Symbol, Entry>* class_scope_variables = new SymbolTable<Symbol, Entry>();
     class_scope_variables->enterscope();
@@ -559,11 +546,18 @@ SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr
     return class_scope_variables;
 }
 
-/**
-* ***************************************************
-* Enter a new scope for a formal. 
-* ***************************************************
-*/
+////////////////////////////////////////////////////////////////////////////////
+// 
+// All of the following methods:
+// 
+// initialize_feature_environment
+// initialize_formal
+// initialize_expression
+// initialize_case_environment
+//
+// serve the same purpose: they add the current class to every node in the AST.
+// 
+////////////////////////////////////////////////////////////////////////////////
 void ClassTable::initialize_feature_enviornment(Class_ parent_class, Feature feature_to_init) {
     feature_to_init->set_root_class(parent_class->get_root_class());
     if (strcmp(feature_to_init->get_type_name(), "method") == 0) {
