@@ -22,7 +22,7 @@ class Inter inherits A_plus {
 
 
 
-(*class A inherits Inter {
+class A inherits Inter {
 	a(two : Some, one : Other) : Int {
 		z + 5
 	};
@@ -30,5 +30,5 @@ class Inter inherits A_plus {
 	checkwa(a: Int, a: String) : Int {
 		5
 	};
-};*)
+};
 
