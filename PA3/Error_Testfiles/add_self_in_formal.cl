@@ -1,5 +1,5 @@
 class Main {
-
+	z: Int <- "hello";
 };
 
 class A {
