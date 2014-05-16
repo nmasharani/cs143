@@ -53,7 +53,7 @@ private:
   *     class defintions. 
   * *****************************************************
   */
-  SymbolTable<Symbol, int>* collect_all_valid_types(Classes classes_in_program);
+  SymbolTable<char *, Entry>* collect_all_valid_types(Classes classes_in_program);
   bool name_is_reserved_classname(char* name);
 
 
@@ -65,7 +65,7 @@ private:
   * Returns 0 on success, 1 on error. 
   * *****************************************************
   */
-  int check_for_valid_inheritance(Classes classes, SymbolTable<Symbol, int>* defined_types);
+  int check_for_valid_inheritance(Classes classes, SymbolTable<char *, Entry>* defined_types);
   bool parent_is_forbidden(char* name);
 
   /**
@@ -237,7 +237,7 @@ public:
   *     table as a container.
   * *****************************************************
   */
-  SymbolTable<Symbol, int>* defined_types;
+  SymbolTable<char *, Entry>* defined_types;
 
   /**
   * *****************************************************

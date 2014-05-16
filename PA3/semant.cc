@@ -329,7 +329,7 @@ int ClassTable::check_for_inheritance_cycle(Classes classes_in_program) {
 *     - cannot inherit from Int, Str, Bool, SELF_TYPE
 * *****************************************************
 */
-int ClassTable::check_for_valid_inheritance(Classes classes, SymbolTable<Symbol, int>* defined_types) {
+int ClassTable::check_for_valid_inheritance(Classes classes, SymbolTable<char *, Entry>* defined_types) {
     int status = 0;
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
         Class_ curr_class = classes->nth(i);
@@ -339,7 +339,7 @@ int ClassTable::check_for_valid_inheritance(Classes classes, SymbolTable<Symbol,
             ostream& err_stream = semant_error(curr_class);
             err_stream << "Class " << curr_class->get_name()->get_string() << " cannot inherit class " << parent_name << ".\n";
             status = 1;
-        } else if (defined_types->probe(parent) == NULL) {
+        } else if (defined_types->probe(parent->get_string()) == NULL) {
             ostream& err_stream = semant_error(curr_class);
             err_stream << "Class " << curr_class->get_name()->get_string() << " inherits from an undefined class " << parent_name << ".\n";
             status = 1;
@@ -363,8 +363,8 @@ bool ClassTable::parent_is_forbidden(char* name) {
 *   - checks for class names using SELF_TYPE
 * ***************************************************
 */
-SymbolTable<Symbol, int>* ClassTable::collect_all_valid_types(Classes classes) {
-    SymbolTable<Symbol, int>* defined_types = new SymbolTable<Symbol, int>();
+SymbolTable<char *, Entry>* ClassTable::collect_all_valid_types(Classes classes) {
+    SymbolTable<char *, Symbol>* defined_types = new SymbolTable<char *, Entry>();
     defined_types->enterscope();
     for (int i = classes->first(); classes->more(i); i = classes->next(i)) {
         Class_ curr_class = classes->nth(i);
@@ -372,20 +372,19 @@ SymbolTable<Symbol, int>* ClassTable::collect_all_valid_types(Classes classes) {
         if (name_is_reserved_classname(curr_class_name) == true) {
             ostream& err_stream = semant_error(curr_class);
             err_stream << "Redefinition of basic class " << curr_class_name << ".\n";
-        } else if (defined_types->probe(curr_class->get_name()) != NULL) {
+        } else if (defined_types->probe(curr_class->get_name()->get_string()) != NULL) {
             ostream& err_stream = semant_error(curr_class);
             err_stream << "Class " << curr_class_name << " was previously defined.\n";
         } else {
-            idtable.add_string(curr_class_name)
-            defined_types->addid(curr_class->get_name(), new int(42));
+            defined_types->addid(curr_class_name, idtable.add_string(curr_class_name));
         }
     }
-    defined_types->addid(Object, new int(42));
-    defined_types->addid(IO, new int(42));
-    defined_types->addid(Int, new int(42));
-    defined_types->addid(Bool, new int(42));
-    defined_types->addid(Str, new int(42));
-    defined_types->addid(SELF_TYPE, new int(42));
+    defined_types->addid(Object->get_string(), Object));
+    defined_types->addid(IO->get_string(), IO);
+    defined_types->addid(Int->get_string(), Int);
+    defined_types->addid(Bool->get_string(), Bool);
+    defined_types->addid(Str->get_string(), Str);
+    defined_types->addid(SELF_TYPE->get_string(), SELF_TYPE);
     return defined_types;
 }
 
@@ -488,7 +487,7 @@ SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr
                 can_add = false;
             } 
             if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
-                if (defined_types->lookup(curr_feature->get_type()) == NULL) {
+                if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
                     ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
                 } 
@@ -1157,7 +1156,7 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
     for (int k = formals->first(); formals->more(k); k = formals->next(k)) {
         Formal curr_formal = formals->nth(k);
         bool can_add = true;
-        if (defined_types->lookup(curr_formal->get_type()) == NULL) {
+        if (defined_types->lookup(curr_formal->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Class " << curr_formal->get_type()->get_string() << " of formal parameter " << curr_formal->get_name()->get_string() <<" is undefined.\n";
         } 
@@ -1182,7 +1181,7 @@ Symbol ClassTable::check_method_types(Feature feature, SymbolTable<Symbol, Entry
         }
     }
     if (strcmp(feature->get_type()->get_string(), "SELF_TYPE") != 0) {   // not self type
-        if (defined_types->lookup(feature->get_type()) == NULL) {
+        if (defined_types->lookup(feature->get_type()->get_string()) == NULL) {
             ostream& err_stream = semant_error(feature->get_root_class()->get_filename_1(), feature);
             err_stream << "Undefined return type " << feature->get_type()->get_string() << " in method " << feature->get_name()->get_string() << ".\n"; 
             return NULL;
@@ -1375,7 +1374,7 @@ Symbol ClassTable::typecheck_assign(Expression e, SymbolTable<Symbol, Entry>* sc
         e->set_type(Object);
         return Object;
     }
-    e->set_type(expr_t);
+    e->set_type(defined_types->lookup(expr_t->get_string()));
     return expr_t;
 }
 
@@ -1404,7 +1403,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e, SymbolTable<Symbol, E
     }
 
     // make sure the declared type of the dispatch is valid
-    if (defined_types->lookup(e->get_var_type()) == NULL) {
+    if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Static dispatch to undefined class " << e->get_var_type()->get_string() << ".\n";
         e->set_type(Object);
@@ -1460,7 +1459,7 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e, SymbolTable<Symbol, E
 
     // make sure the declared return type is defined
     Symbol return_type = method_def->get_type();
-    if (defined_types->lookup(return_type) == NULL) {
+    if (defined_types->lookup(return_type->get_string()) == NULL) {
         //ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         //err_stream << "Undefined return type " << return_type->get_string() << " in method " << e->get_name()->get_string() << ".\n";
         //printed in type checking of method defs. 
@@ -1473,10 +1472,10 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e, SymbolTable<Symbol, E
 
     // if the return type is self type, return the inferred type of the calling expr.
     if (strcmp(return_type->get_string(), "SELF_TYPE") == 0) {
-        e->set_type(t0);
+        e->set_type(defined_types->lookup(t0->get_string()));
         return t0;
     }
-    e->set_type(return_type);
+    e->set_type(defined_types->lookup(return_type->get_string()));
     return return_type;
 }
 
@@ -1544,7 +1543,7 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
 
     // make sure the return type is valid
     Symbol return_type = method_def->get_type();
-    if (defined_types->lookup(return_type) == NULL) {
+    if (defined_types->lookup(return_type->get_string()) == NULL) {
         //printed in typechecking of method defs. 
         error = true;
     }
@@ -1553,10 +1552,10 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
         return Object;
     }
     if (strcmp(return_type->get_string(), "SELF_TYPE") == 0) {
-        e->set_type(t0);
+        e->set_type(defined_types->lookup(t0->get_string()));
         return t0;
     }
-    e->set_type(return_type);
+    e->set_type(defined_types->lookup(return_type->get_string()));
     return return_type;
 }
 
@@ -1590,7 +1589,7 @@ Symbol ClassTable::typecheck_cond(Expression e, SymbolTable<Symbol, Entry>* scop
 
     // Get the common parent
     Symbol common_parent = get_common_parent(then_t, else_t, e->get_root_class());
-    e->set_type(common_parent);
+    e->set_type(defined_types->lookup(common_parent->get_string()));
     return common_parent;
 }
 
@@ -1637,7 +1636,7 @@ Symbol ClassTable::typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* s
         scope->enterscope();
         bool error = false;
         // Error for undefined type
-        if (defined_types->lookup(curr_case->get_type_decl()) == NULL) {
+        if (defined_types->lookup(curr_case->get_type_decl()->get_string()) == NULL) {
             ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), curr_case);
             err_stream << "Class " << curr_case->get_type_decl()->get_string() << " of case branch is undefined." << endl;
             //error = true;
@@ -1667,7 +1666,7 @@ Symbol ClassTable::typecheck_typcase(Expression e, SymbolTable<Symbol, Entry>* s
     for (int i = 1; i < cases->len(); i++) {
         highest_parent = get_common_parent(highest_parent, case_types[i], e->get_root_class());
     }
-    e->set_type(highest_parent);
+    e->set_type(defined_types->lookup(highest_parent->get_string()));
     return highest_parent;
 }
 
@@ -1690,7 +1689,7 @@ Symbol ClassTable::typecheck_block(Expression e, SymbolTable<Symbol, Entry>* sco
     for (int i = expressions->first(); expressions->more(i); i = expressions->next(i)) {
         return_symbol = typecheck_expression(expressions->nth(i), scope);
     }
-    e->set_type(return_symbol);
+    e->set_type(defined_types->lookup(return_symbol->get_string()));
     return return_symbol;
 }
 
@@ -1711,7 +1710,7 @@ Symbol ClassTable::typecheck_let(Expression e, SymbolTable<Symbol, Entry>* scope
     // if there is an initialization, check conformation
     Symbol init_type = typecheck_expression(e->get_expression_1(), scope);
 
-    if (defined_types->lookup(e->get_var_type()) == NULL) {
+    if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Class " << e->get_var_type()->get_string() << " of let-bound identifier " << e->get_name()->get_string() << " is undefined.\n";
     }
@@ -1731,7 +1730,7 @@ Symbol ClassTable::typecheck_let(Expression e, SymbolTable<Symbol, Entry>* scope
 
     // the return type is the type of the body of the let stmt
     Symbol return_type = typecheck_expression(e->get_expression_2(), scope);
-    e->set_type(return_type);
+    e->set_type(defined_types->lookup(return_type->get_string()));
     scope->exitscope();
     return return_type;
 }
@@ -2006,13 +2005,13 @@ Symbol ClassTable::typecheck_string_const(Expression e, SymbolTable<Symbol, Entr
 
 Symbol ClassTable::typecheck_new_(Expression e, SymbolTable<Symbol, Entry>* scope) {
     Symbol type = e->get_var_type();
-    if (defined_types->lookup(type) == NULL) {
+    if (defined_types->lookup(type->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "'new' used with undefined class " << e->get_var_type()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
     }
-    e->set_type(type);
+    e->set_type(defined_types->lookup(type->get_string()));
     return type;
 }
 
@@ -2035,7 +2034,7 @@ Symbol ClassTable::typecheck_object(Expression e, SymbolTable<Symbol, Entry>* sc
         e->set_type(Object);
         return Object;
     }
-    if (defined_types->lookup(type) == NULL) {
+    if (defined_types->lookup(type->get_string()) == NULL) {
         e->set_type(Object);
         return Object;
     }
@@ -2044,7 +2043,7 @@ Symbol ClassTable::typecheck_object(Expression e, SymbolTable<Symbol, Entry>* sc
         e->set_type(SELF_TYPE);
         return SELF_TYPE;
     }
-    e->set_type(type);
+    e->set_type(defined_types->lookup(type->get_string()));
     return type;
 }
 
