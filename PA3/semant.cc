@@ -2022,7 +2022,7 @@ Symbol ClassTable::typecheck_isvoid(Expression e, SymbolTable<Symbol, Entry>* sc
 }
 
 Symbol ClassTable::typecheck_no_expr(Expression e, SymbolTable<Symbol, Entry>* scope) {
-    e->set_type(No_class);
+    e->set_type(No_type);
     return No_class;
 }
 
