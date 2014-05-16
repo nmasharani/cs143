@@ -377,6 +377,7 @@ SymbolTable<char*, int>* ClassTable::collect_all_valid_types(Classes classes) {
             err_stream << "Class " << curr_class_name << " was previously defined.\n";
         } else {
             defined_types->addid((curr_class_name), new int(42));
+            idtable.add_string(curr_class_name);
         }
     }
     defined_types->addid(Object->get_string(), new int(42));
@@ -2022,7 +2023,7 @@ Symbol ClassTable::typecheck_isvoid(Expression e, SymbolTable<Symbol, Entry>* sc
 }
 
 Symbol ClassTable::typecheck_no_expr(Expression e, SymbolTable<Symbol, Entry>* scope) {
-    e->set_type(No_class);
+    e->set_type(No_type);
     return No_class;
 }
 
