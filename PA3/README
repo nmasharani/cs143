@@ -361,7 +361,10 @@ the type of the conclusion is set to Object. This is what is specified in the as
 compiler employs a smart tactic where it returns the type of what the node should be in certain cases for certain errors.
 For example, in arithmetic, if the type of one of the epxressions is not Int, we set and retun Object as the type
 of the node. However, the reference compiler sets and returns type Int. We also confirmed this with Professor Aiken, and he
-indicated that our behaviour is fine. 
+indicated that our behaviour is fine. Note, it would be easy to set the types conditionaly to the legit node type
+even on error, as discussed in OH, but per the assignment spec, we are supposed to set to Object if the type rule
+is false. The reference compiler does not do this, but we do, to match the spec. Confirmed in OH that it is advised
+to do this on every node that has a typecheck rule evaluate to false (error case in the hypothesis). 
 
 Another point has to do with inheriting attributes. The manual indicates that it is an error to redefine an attribute
 in a class. However, the manual does not specify whether the decleration in the parent is to be the one used in typechecking

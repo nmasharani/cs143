@@ -1706,11 +1706,10 @@ Symbol ClassTable::typecheck_block(Expression e, SymbolTable<Symbol, Entry>* sco
 ////////////////////////////////////////////////////////////////////////////////
 
 Symbol ClassTable::typecheck_let(Expression e, SymbolTable<Symbol, Entry>* scope) {
-    scope->enterscope();
     Symbol t0 = e->get_var_type();
-
     // if there is an initialization, check conformation
     Symbol init_type = typecheck_expression(e->get_expression_1(), scope);
+    scope->enterscope();
 
     if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
