@@ -29,4 +29,10 @@ class A {
 	a4(x: A2) : Int {
 		let y: A <- x in x
 	};
+
+	a5(x: Zebra) : Int {
+		let y: Int <- x in 5
+	};
 };
+
+

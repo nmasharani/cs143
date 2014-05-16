@@ -1714,7 +1714,7 @@ Symbol ClassTable::typecheck_let(Expression e, SymbolTable<Symbol, Entry>* scope
     if (defined_types->lookup(e->get_var_type()->get_string()) == NULL) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Class " << e->get_var_type()->get_string() << " of let-bound identifier " << e->get_name()->get_string() << " is undefined.\n";
-    }
+    } 
     if (strcmp(init_type->get_string(), "_no_class") != 0) {
         // init type must conform with declared type
         if (isparent(t0, init_type, e->get_root_class()) == false) {

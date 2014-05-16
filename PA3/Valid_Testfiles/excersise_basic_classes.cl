@@ -16,9 +16,7 @@ class A {
 	a2a(s: String) : String {
 		x.in_string()
 	};
-	a3a(s: String) : String {
-		x.in_int(s)
-	};
+	
 	aa3a(s: String) : String {
 		x.in_int()
 	};
