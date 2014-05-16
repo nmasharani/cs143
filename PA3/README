@@ -196,6 +196,11 @@ inheritance graph. Specifically, the ClassTable contains the following data stru
 - Classes program_classes_AST; //The AST we are checking. Need to have a centrailized single copy as we 
 	want the modifications we make to the copy to persist and translate to the next module of the
 	compiler. 
+- Note, we did not build a graph for the inhertiance per say. We could have given each class node
+	a pointer to a parent class, thus creating a graph, or given each parent an array of pointers
+	to children, or both. Instead, weopted to keep the classes in list form, and traverse the list. 
+	This might not be the most effecient with respect to speed, but it reduce the amount
+	of data stored in each node, so there is a tradeoff either way. 
 
 Our code is structured in the following way:
 
@@ -358,6 +363,15 @@ For example, in arithmetic, if the type of one of the epxressions is not Int, we
 of the node. However, the reference compiler sets and returns type Int. We also confirmed this with Professor Aiken, and he
 indicated that our behaviour is fine. 
 
+Another point has to do with inheriting attributes. The manual indicates that it is an error to redefine an attribute
+in a class. However, the manual does not specify whether the decleration in the parent is to be the one used in typechecking
+the rest of the program, or if the one in the child is to be used. Intuitively, given the notion of infromation
+hiding, we use the varibale in the child class as the id:type pair to add to the symbol table. The reference
+compiler does the opposite, adding the one from the parent. Note, we report the same error as the reference compiler,
+ie the attrivute is an attrbiute of an inherited class, but then use the attribute decleration in the child 
+because it is far more likely that the programmer intended to use the varibale as declared, but forgot to change
+the name, whereas they probably do not know of inherited attributes from inherited classes. 
+
 Finally we found and reported a bug in the reference. In the case of dispatching on a method, if mulitple
 types do not match, the reference reports only one and quits. Our solution reports them all. Professor Aiken
 confirmed that this is indeed a bug in the reference. 
@@ -426,6 +440,14 @@ for inherited methods with different parameters, redefinitions, invalid
 formal types, and invalid return types. We found that this test file was good
 for testing both method validation prior to typechecking and for testing formal
 parameter typechecking.
+
+
+INTERESTING OBSERVATIONS:
+
+- the specification is not clear what to do in the case of an invalid decleration. 
+ie if we declare a variable of an undefined type, or declare a variable of SEF_TYPE
+or declare a varibale with id = 'self'. Do we add the varibale to the symbol
+table or do we not? The reference seems to add it, so we follow that behavior. 
 
 
 

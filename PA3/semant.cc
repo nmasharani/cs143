@@ -251,6 +251,7 @@ int ClassTable::check_for_main(Classes classes_in_program) {
     int status = 0;
     bool main_class_present = false;
     bool main_method_present = false;
+    bool main_contains_params_printed = false;
     for (int i = classes_in_program->first(); classes_in_program->more(i); i = classes_in_program->next(i)) {
         Class_ curr_class = classes_in_program->nth(i);
         if (strcmp(curr_class->get_name()->get_string(), "Main") == 0) {
@@ -261,6 +262,14 @@ int ClassTable::check_for_main(Classes classes_in_program) {
                 if (strcmp(curr_feature->get_type_name(), "method") == 0) {
                     if (strcmp(curr_feature->get_name()->get_string(), "main") == 0) {
                         main_method_present = true;
+                        if (curr_feature->get_formals()->len() > 0) {
+                            if (main_contains_params_printed == false) {
+                                ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
+                                err_stream << "'main' method in class " << curr_class->get_name()->get_string() << " should have no arguments.\n";
+                                status = 1;
+                            }   
+                            main_contains_params_printed = true;
+                        }
                     }
                 }
             }
@@ -465,23 +474,25 @@ SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr
     Features features = curr_class->get_features();
     for (int i = features->first(); features->more(i); i = features->next(i)) {
         Feature curr_feature = features->nth(i);
+        bool can_add = true;
         if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
             if (strcmp(curr_feature->get_name()->get_string(), "self") == 0) {
                 ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                 err_stream << "'self' cannot be the name of an attribute"  << ".\n";
-            } else if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
+                can_add = false;
+            } 
+            if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
                 ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                 err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is multiply defined in class.\n";
+                can_add = false;
             } 
             if (name_is_reserved_classname(curr_class->get_name()->get_string()) == false) {
                 if (defined_types->lookup(curr_feature->get_type()->get_string()) == NULL) {
                     ostream& err_stream = semant_error(curr_class->get_filename_1(), curr_feature);
                     err_stream << "Class " << curr_feature->get_type()->get_string() << " of attribute " << curr_feature->get_name()->get_string() << " is undefined.\n";
-                    class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
-                } else {
-                    class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
-                }
-            } else {
+                } 
+            } 
+            if (can_add == true) {
                 class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
             }
         }
@@ -493,16 +504,19 @@ SymbolTable<Symbol, Entry>* ClassTable::initialize_class_enviornment(Class_ curr
         Features features = curr_parent->get_features();
         for (int i = features->first(); features->more(i); i = features->next(i)) {
             Feature curr_feature = features->nth(i);
+            bool can_add = true;
             if (strcmp(curr_feature->get_type_name(), "attribute") == 0) {
                 if (class_scope_variables->probe(curr_feature->get_name()) != NULL) {
                     Feature duplicate_attr = find_attribute_by_name(curr_class, curr_feature->get_name()->get_string());
                     ostream& err_stream = semant_error(curr_class->get_filename_1(), duplicate_attr);
                     err_stream << "Attribute " << curr_feature->get_name()->get_string() << " is an attribute of an inherited class.\n";
-                } else {
-                    if(name_is_reserved_classname(curr_parent->get_name()->get_string()) == false) {
-                        //add a declaration even if its type is not defined. 
-                        class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
-                    }
+                    can_add = false;
+                } 
+                if (strcmp(curr_feature->get_name()->get_string(), "self") == 0) {
+                    can_add = false;
+                }
+                if (can_add == true) {
+                    class_scope_variables->addid(curr_feature->get_name(), curr_feature->get_type());
                 }
             }
         } 
@@ -1343,7 +1357,7 @@ Symbol ClassTable::typecheck_assign(Expression e, SymbolTable<Symbol, Entry>* sc
     // Make sure variable being assigned to is declared
     if (!name_t) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
-        err_stream << "Assignment to undeclared variable " << e->get_name()->get_string() << endl;
+        err_stream << "Assignment to undeclared variable " << e->get_name()->get_string() << ".\n";
         e->set_type(Object);
         return Object;
     }
