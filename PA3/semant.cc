@@ -1422,6 +1422,8 @@ Symbol ClassTable::typecheck_static_dispatch(Expression e, SymbolTable<Symbol, E
     if (isparent(e->get_var_type(), t0, e->get_root_class()) == false) {
         ostream& err_stream = semant_error(e->get_root_class()->get_filename_1(), e);
         err_stream << "Expression type " << t0->get_string() << " does not conform to declared static dispatch type " << e->get_var_type()->get_string() << ".\n";
+        e->set_type(Object);
+        return Object;
     }
 
     // make sure the method name is defined
