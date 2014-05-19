@@ -1505,12 +1505,13 @@ Symbol ClassTable::typecheck_dispatch(Expression e, SymbolTable<Symbol, Entry>* 
 
     // if the type of the current expression is SELF_TYPE, set it to the type
     // of the class we're still in
-    if (strcmp(t0->get_string(), "SELF_TYPE") == 0) {
-        t0 = e->get_root_class()->get_name();
+    Symbol t0_prime = t0;
+    if (strcmp(t0_prime->get_string(), "SELF_TYPE") == 0) {
+        t0_prime = e->get_root_class()->get_name();
     }
 
     // make sure that the method is valid
-    Class_ t_class = find_class_by_name(program_classes_AST, t0->get_string());
+    Class_ t_class = find_class_by_name(program_classes_AST, t0_prime->get_string());
     Feature method_def = find_method_by_name(t_class, e->get_name()->get_string());
     if (method_def == NULL || !method_def->check_is_valid_method()) {
         method_def = search_for_inherited_method_def(t_class, e->get_name()->get_string(), program_classes_AST);
