@@ -136,3 +136,181 @@ Instructions
 
 Write-up for PA2
 ----------------
+
+user: lpappas9
+user: nisham
+
+DESIGN DECISIONS
+
+We designed our parser according to the figure 1 of the COOL manual. 
+Essentially, we translated figure 1 into bison syntax and added
+appropriate actions to productions to build the AST, as specified 
+by the Tour of Cool Support Code. As such, there was not a significant
+amount of design involved in the productions to match proper syntax. 
+
+The one case that did invovle significant design was the handling 
+of the let statement. Given the constructor definition of a let
+statement in the Tour of Cool Support code, the constructor only
+takes a single ID:TYPE[<- expr], while the let statement supports
+any number of these seperated by commas. Thus, to properly parse 
+let statements and handle them as nested lets (as specified in 
+piazza and in the handout), we did the following:
+1. We defined a new non_terminal "let_list". We then worked right
+to left in the let statement, building the rightmost (is most nested)
+let statament, and then using this as the exression of the next let
+statement (variable decleration) to the immediate left. 
+
+On the flip side, neither the handout, nor the COOL manual specified
+exactly how we are to handle syntax errors in the parser. Thus, the majority
+of our designing occured in this realm. According to the specification, 
+we are only required to recover from errors in class def's (to next class), 
+features (to next feature), let bindings (to next variable), and 
+expressions within blocks. We designed four error productions, one for 
+each of these cases. 
+
+Class error handling: We are slightly more fingrained than the assignment
+requirnments, which is good. The assignment requirenemnts only require 
+recovery if the  next class is well-formed after a malformed class. However, 
+this does not catch the case of an error in the last class defintion of a file. 
+Therefore, we disigned our class error production to match on the valid close
+of a class, ie '{' followed by ';' (synchronizing tokens). 
+We use the error sudo/terminal to represent
+any sequence of characters that could be an error in class definition. Note, if 
+an error occurs in the feature defintion of a class, it will get caught 
+by the feature_list error production. 
+
+Feature_list error handling: Becuase the feature list can be empty, 
+we recover by simply matching on the sequence feature_list error ';' 
+where the ';' is used as the synchronizing token to distinguish features.  
+
+Let_list error recovery: Same as above, only in this case, the 
+syncrhonizing token is ',' let_list. 
+
+Block error recovery: same as above, only in this case, the synchronizing
+token is '}'.
+
+Finally, wrt precendence, we copy the precendence verbatim from the manual into
+bison syntax, and add the precendence directive LET_PREC to force the IN to be 
+left associative. 
+
+NOTE: we opted to not use the '|' in our productions. Instead, we used
+block style headers to denote the different sections, and then 
+explicitlty wrote out each production. This is obviosly 
+more lines of code, but it is more readbale than the alternative 
+presented in the starter code. Given tha that the complexity of 
+CFG comes with reasoning about the potential cases, it is helpful
+to see all productions expanded out, and labeled, which 
+is why we opted for this strategy. 
+
+CORRECTNESS 
+
+Our cool.y contains all of the productions listed in figure 1 of the 
+COOL manual, which is given to be a comprehensive grammar. Therefore, 
+we match all possible syntaxtically correct cool files. We have written
+extensive test files to verify this, and we match the reference solution, 
+down to the line numbers (which, based on OH discussion, is more than the
+java strater code can say!)!
+
+In addition to figure 1, we also took care to include the proper precedence
+directives to match the precendence stated in the MANUAL. Finally, we took
+care to invoke the proper constructors in our production Actions to 
+build the AST according to the outline in the Tour Support Code, and the 
+files in the include/src directories. 
+
+With respect to error checking, our parser recovers from the errors 
+specified in the assignment specification. We have written test files
+for each of these specifications, and have verified our output accordingly
+both by visual inspection of the output, and by automated inspection (diff
+with the reference solution). Note, on some files containing errors, our 
+parser and reference solution report errors differently. We visually compared
+our ouput to the reference and are confident that our output follows
+the assignment specification, and that the reference does not. We also
+walked through our error handling cases in OH, and confirmed this. 
+
+This assignment invovled proper translation of figure 1 and precedence
+declerations in the the COOL MANUAL into bison syntax, proper invoking
+of provided AST constructors, and error checking. Assuming that the COOL
+MANUAL and the AST constructors are written correctly (which we are
+told to assume on piazza), then our code is correct. 
+
+TESTING
+
+As mentioned in the above correctness section, we have defined test
+files for both good and bad uses of the COOL programming language. 
+
+Our test cases for good usage excersize all possible producitons in
+figure 1. Our test cases for bad usage excersize all possible base errors
+that contain the recovery cases specified in the assignment. 
+
+Having moved past the lexer stage of the assignment, our test cases 
+in this parser phase contain actual COOL code, both comments and 
+programming syntax, used correctly and incorrectly. 
+
+our test files reside in two directories. Testfiles_good contains the 
+test files that contain proper usage of the COOL programming language. 
+These files should result in a valid AST. Testfiles_bad contains the 
+test files that contain improper usage of the COOL programming language. 
+These files do not result in an AST, as the parser stops constructing it
+when it encounters the error sud-non terminal. Instead, the compiler
+outputs information regarding the nature of the error and the general 
+location (line #) of where the error takes place. 
+
+(Note, our test files are named to indicate the purpose of each test. We wrote shell 
+scripts (./parsetest) to iterate over every one of the files in the test files directory and 
+compare our lexer output to that of the sample. This allowed for easier and 
+faster testing.)
+
+We now detail five test cases from good and bad directories. Note, the files
+of each test case contain comments explaing test case purpose as well. 
+
+
+Testfiles_bad/expr_bad_test.cl
+
+This is a fairly comprehensive test file that contains errors within 
+expressions. This includes errors within block expressions as well as errors 
+within all other expression productions. This file tested two things: firstly, 
+that all of our productions for expressions were correct and specific--that no 
+other incorrect programs would be matched by our expression productions. 
+Secondly, it tested error recovery within the body of a class from one feature 
+to the next. In this case, we found that our output was slightly different to 
+the reference compiler's output, but, from examining the file, we are confident 
+that our output is correct. (The reference compiler gives an error at line 15, 
+which is a valid line, while our compiler gives an error at line 17, which is 
+an invalid expression.)
+
+Testfiles_bad/let_bad_test.cl
+
+This is a test file to test errors and error recovery within let statements. 
+We test errors in expressions in both nested and non-nested let statements, as 
+well as the omission of the "in" keyword from a let statement. Again, in this 
+case, we found that our output was slightly different to the reference 
+compiler's output. The reference compiler gives an error on line 8, which is 
+valid, while our compiler gives an error on line 9, which is an invalid line.
+
+Testfiles_bad/block_error_test.cl
+
+This file tests errors within block expressions. The file looks specifically at 
+the omission of semicolons after expressions within the block, as well as empty 
+blocks. There are four test cases: one with a semicolon missing after the first 
+line, one with a semicolon missing after the last line, one with a semicolon 
+missing after the middle line, and one without anything in the block. The first 
+three test cases should theoretically have the same error reporting behavior, 
+and that is the behavior that our parser exhibits. Here, the reference compiler 
+and our parser report the same errors, but the reference compiler reports an 
+additional error on line 20 that we feel is not an error. 
+
+Testfiles_good/dispatch_test.cl
+
+This file tests the correct behavior of dispatch. There are many different 
+cases for dispatch (with or without type, with or without caller, with or 
+without arguments), so it made sense to test all of those syntaxes with our 
+parser. In addition to testing dispatch, this file also indirectly tests the 
+structure of classes and inheritance, as well as the declaration of features. 
+Our parser and the reference compiler have the same parser output for this file.
+
+Testfiles_good/class_test.cl
+
+This class allows us to test the valid syntaxes for classes. We wanted to ensure 
+that we matched empty classes as well as classes with features, and that we 
+matched both inherited classes and classes that inherit from Object correctly. 
+This file also allowed us to test the correctness of block expressions.
