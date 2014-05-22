@@ -519,6 +519,7 @@ void CgenClassTable::code_global_data()
   // The following global names must be defined first.
   //
   str << GLOBAL << CLASSNAMETAB << endl;
+
   str << GLOBAL; emit_protobj_ref(main,str);    str << endl;
   str << GLOBAL; emit_protobj_ref(integer,str); str << endl;
   str << GLOBAL; emit_protobj_ref(string,str);  str << endl;
@@ -616,18 +617,95 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
+// TODO(nm)
+void CgenClassTable::code_protos() {
+  // nl = node list
+  for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
+    CgenNode nd = nl->hd();
+    Symbol class_name = nd->get_name();
+
+    // get tags from name_to_tag
+    
+    emit_protobj_ref(class_name->get_string(), str);
+    str << endl;
+
+    // Class tag
+    int tag;
+    if (name_to_tag.lookup(class_name)) {
+      tag = name_to_tag.lookup(class_name);
+    } else {
+      tag = tagtracker;
+      name_to_tag.addid(class_name, tag);
+      tagtracker++;
+    }
+
+    // Attributes
+
+    List<Symbol> attribute_types = new List<Symbol>();
+    // list only prepends, so traverse attributes backwards
+
+    CgenNode curclass = nd;
+    while (strcmp(curclass->get_name()->get_string(), Object->get_string()) != 0) {
+      Features feats = curclass->get_features();
+      int len = feats->len();
+      for (int i = len-1; i >= 0; i--) {
+        Feature curfeat = feats->nth(i);
+        if (curfeat->ismethod()) continue;
+        attribute_types = new List<Symbol>(curfeat->get_type(), attribute_types);
+      }
+      curclass = curclass->get_parentnd();
+    }
+
+    // Object size
+
+    // 1 for tag, 1 for size, 1 for dispatch pointer, 1 for each attr
+    int size = 1 + 1 + 1 + list_length(attribute_types);
+
+    // emit class tag
+    str << WORD << tag << endl;
+    // emit size
+    str << WORD << size << endl;
+    // emit dispatch table
+    str << WORD;
+    emit_disptable_ref(class_name->get_string(), str);
+    str << endl;
+    // emit attributes
+    for (; attribute_types != NULL; attribute_types = attribute_types->tl()) {
+      Symbol type = attribute_types->hd();
+      str << WORD << get_default_init(type) << endl;
+    }
+
+    // garbage collector tag
+    if (nl->tl()) {
+      str << WORD << "-1" << endl;
+    }
+  }
+}
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
-   stringclasstag = 0 /* Change to your String class tag here */;
-   intclasstag =    0 /* Change to your Int class tag here */;
-   boolclasstag =   0 /* Change to your Bool class tag here */;
+   stringclasstag = 4 /* Change to your String class tag here */;
+   intclasstag =    2 /* Change to your Int class tag here */;
+   boolclasstag =   3 /* Change to your Bool class tag here */;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
    install_basic_classes();
    install_classes(classes);
    build_inheritance_tree();
+
+   /* added by NM */
+   // Stores a mapping from class name to tag.
+   SymbolTable<Symbol, Integer> name_to_tag = new SymbolTable<Symbol, Integer>(); 
+   name_to_tag.addid(Object, 0);
+   name_to_tag.addid(IO, 1);
+   name_to_tag.addid(Integer, intclasstag);
+   name_to_tag.addid(Bool, boolclasstag);
+   name_to_tag.addid(String, stringclasstag);
+   name_to_tag.addid(Main, 5);
+
+   tagtracker = 6;
+   /* end added by NM */
 
    code();
    exitscope();
@@ -719,8 +797,8 @@ void CgenClassTable::install_basic_classes()
 //
     install_class(
      new CgenNode(
-      class_(Bool, Object, single_Features(attr(val, prim_slot, no_expr())),filename),
-      Basic,this));
+      class_(Bool, Object, single_Features(attr(val, prim_slot, no_expr())), 
+        filename), Basic,this));
 
 //
 // The class Str has a number of slots and operations:
@@ -828,11 +906,17 @@ void CgenClassTable::code()
   if (cgen_debug) cout << "coding constants" << endl;
   code_constants();
 
+/* TODO(nm): protos! */
+
 //                 Add your code to emit
 //                   - prototype objects
 //                   - class_nameTab
 //                   - dispatch tables
 //
+
+  if (cgen_debug) cout << "building prototype objects" << endl;
+  code_protos();
+
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
@@ -863,7 +947,8 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
    children(NULL),
    basic_status(bstatus)
 { 
-   stringtable.add_string(name->get_string());          // Add class name to string table
+   stringtable.add_string(name->get_string());       
+   // Add class name to string table
 }
 
 

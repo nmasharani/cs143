@@ -24,3 +24,6 @@ class Main {
 	};
 };
 
+
+
+class A {};

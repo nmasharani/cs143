@@ -22,6 +22,12 @@ private:
    int intclasstag;
    int boolclasstag;
 
+   
+   /* FOR GENERATING PROTOTYPE OBJECTS */
+   int tagtracker;
+   SymbolTable<Symbol, Integer> name_to_tag; 
+
+
 
 // The following methods emit code for
 // constants and global declarations.
@@ -31,6 +37,7 @@ private:
    void code_bools(int);
    void code_select_gc();
    void code_constants();
+   void code_protos();
 
 // The following creates an inheritance graph from
 // a list of classes.  The graph is implemented as
