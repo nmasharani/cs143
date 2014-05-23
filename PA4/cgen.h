@@ -39,8 +39,9 @@ private:
    void code_select_gc();
    void code_constants();
    void code_protos();
+   void code_name_table();
 
-   char* get_default_init(Symbol type);
+   void emit_proto_attribute(ostream& s, Symbol type);
 
 // The following creates an inheritance graph from
 // a list of classes.  The graph is implemented as

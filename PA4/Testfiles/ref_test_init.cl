@@ -1,5 +1,5 @@
 class Main {
-	x: Aardvark <- new Aardvark;
+	x: String <- "happy";
 	main() : Int {
 		42
 	};

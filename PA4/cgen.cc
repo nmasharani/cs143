@@ -623,9 +623,29 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
-// TODO(nm) : this method is likely more complex -- THIS IS WRONG
-char* CgenClassTable::get_default_init(Symbol type) {
-  return "0";
+//********************************************************
+//
+// Outputs the string representation of the label that 
+// appears in the attrbute slot of the given type
+// within the prototype for a class's object. 
+//
+//********************************************************
+
+void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
+  if (strcmp(type->get_string(), Int->get_string()) == 0) {
+    //find the int const label associated with 0 and return that
+    s << WORD; inttable.lookup_string("0")->code_ref(s); s << endl;
+    return;
+  }
+  if (strcmp(type->get_string(), Str->get_string()) == 0) {
+    //find the str_const label associated with the empty string and return that
+    s << WORD; stringtable.lookup_string("")->code_ref(s); s << endl;
+    return;
+  }
+  if (strcmp(type->get_string(), Bool->get_string()) == 0) {
+    s << WORD; falsebool.code_ref(s);  s << endl; 
+  }
+  s << WORD << "0" << endl;
 }
 
 Symbol attr_class::get_type() { return type_decl; };
@@ -698,10 +718,14 @@ void CgenClassTable::code_protos() {
     // emit attributes
     for (; attribute_types != NULL; attribute_types = attribute_types->tl()) {
       Symbol type = attribute_types->hd();
-      str << WORD << get_default_init(type) << endl;
+      emit_proto_attribute(str, type);
     }
     
   }
+}
+
+void CgenClassTable::code_name_table() {
+  
 }
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
@@ -956,7 +980,7 @@ void CgenClassTable::code()
   code_protos();
 
   if (cgen_debug) cout << "coding name table" << endl;
-
+  code_name_table();
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
