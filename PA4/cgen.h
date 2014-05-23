@@ -40,6 +40,7 @@ private:
    void code_constants();
    void code_protos();
    void code_name_table();
+   void code_object_table();
 
    void emit_proto_attribute(ostream& s, Symbol type);
 

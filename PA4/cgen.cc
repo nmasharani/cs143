@@ -724,8 +724,33 @@ void CgenClassTable::code_protos() {
   }
 }
 
+/////////////////////////////////////////////////
+//
+// Prints the class_nameTab to the file. 
+//
+/////////////////////////////////////////////////
 void CgenClassTable::code_name_table() {
-  
+  str << CLASSNAMETAB << LABEL;
+  for (int i = 0; i < tagtracker; i++) {
+    Symbol curr_class = tag_to_name->lookup(i);
+    str << WORD;
+    stringtable.lookup_string(curr_class->get_string())->code_ref(str);
+    str << endl;
+  }
+}
+
+/////////////////////////////////////////////////
+//
+// Prints the class_objTab to the file. 
+//
+/////////////////////////////////////////////////
+void CgenClassTable::code_object_table() {
+  str << CLASSOBJTAB << LABEL;
+  for (int i = 0; i < tagtracker; i++) {
+    Symbol curr_class = tag_to_name->lookup(i);
+    str << WORD << curr_class->get_string() << PROTOBJ_SUFFIX << endl;
+    str << WORD << curr_class->get_string() << CLASSINIT_SUFFIX << endl;
+  }
 }
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
@@ -981,6 +1006,9 @@ void CgenClassTable::code()
 
   if (cgen_debug) cout << "coding name table" << endl;
   code_name_table();
+
+  if (cgen_debug) cout << "coding object table" << endl;
+  code_object_table();
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
