@@ -626,6 +626,7 @@ char* CgenClassTable::get_default_init(Symbol type) {
 void CgenClassTable::code_protos() {
   // nl = node list
   for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
+    str << WORD << "-1" << endl;
     CgenNode * nd = nl->hd();
     Symbol class_name = nd->get_name();
 
@@ -686,9 +687,7 @@ void CgenClassTable::code_protos() {
     }
 
     // garbage collector tag
-    if (nl->tl()) {
-      str << WORD << "-1" << endl;
-    }
+    
   }
 }
 

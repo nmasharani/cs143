@@ -249,7 +249,7 @@ bool_const1:
 	.word	4
 	.word	
 	.word	1
+	.word	-1
 Starting new protobj: B
 B_protObj
-Class tag
 1
