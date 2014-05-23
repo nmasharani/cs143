@@ -240,18 +240,27 @@ bool_const1:
 	.word	-1
 C_protObj:
 	.word	6
-	.word	3
+	.word	7
 	.word	C_dispTab
+	.word	0
+	.word	0
+	.word	0
+	.word	0
 	.word	-1
 B_protObj:
 	.word	7
-	.word	3
+	.word	6
 	.word	B_dispTab
+	.word	0
+	.word	0
+	.word	0
 	.word	-1
 A_protObj:
 	.word	8
-	.word	3
+	.word	5
 	.word	A_dispTab
+	.word	0
+	.word	0
 	.word	-1
 Main_protObj:
 	.word	5

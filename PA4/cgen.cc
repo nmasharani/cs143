@@ -664,29 +664,12 @@ void CgenClassTable::code_protos() {
 
     // Attributes
 
-    List<Entry> * attribute_types = NULL;
-    // list only prepends, so traverse attributes backwards
-
-    CgenNode * curclass = nd;
-    while (strcmp(curclass->get_name()->get_string(), Object->get_string()) != 0) {
-
-      Features feats = curclass->features;
-      int len = feats->len();
-
-      for (int i = len-1; i >= 0; i--) {
-        Feature curfeat = feats->nth(i);
-        if (!curfeat->ismethod) {
-          attribute_types = new List<Entry>(curfeat->get_type(), attribute_types);
-        }
-        
-      }
-      curclass = curclass->get_parentnd();
-    }
+    Features attributes = class_attributes->lookup(class_name);
 
     // Object size
 
     // 1 for tag, 1 for size, 1 for dispatch pointer, 1 for each attr
-    int size = 1 + 1 + 1 + list_length(attribute_types);
+    int size = 1 + 1 + 1 + attributes->len();
 
     // emit class tag
     str << WORD << tag << endl;
@@ -700,8 +683,8 @@ void CgenClassTable::code_protos() {
     str << endl;
 
     // emit attributes
-    for (; attribute_types != NULL; attribute_types = attribute_types->tl()) {
-      Symbol type = attribute_types->hd();
+    for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
+      Symbol type = attributes->nth(i)->get_type();
       str << WORD << get_default_init(type) << endl;
     }
     
@@ -797,7 +780,7 @@ void CgenClassTable::build_subclass_methods(CgenNodeP current, Symbol parent) {
   }
 }
 
-void CgenClassTable::build_class_methods() {
+void CgenClassTable::build_classes_methods() {
   class_methods->enterscope();
   Symbol parent = NULL;
   CgenNodeP rt = root();
@@ -820,7 +803,54 @@ void CgenClassTable::dump_classes_methods(ostream& s) {
     dump_class_methods(nl->hd()->name, s);
 }
 
-void CgenClassTable::build_class_attributes() {}
+void CgenClassTable::dump_class_attributes(Symbol class_name, ostream& s) {
+  s << class_name->get_string() << endl;
+  Features attributes = class_attributes->lookup(class_name);
+  if (!attributes) return;
+  for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
+    Feature attribute = attributes->nth(i);
+    s << "\t" << attribute->current_class << "." << attribute->get_name()->get_string() << endl;
+  }
+}
+
+void CgenClassTable::dump_classes_attributes(ostream& s) {
+  for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl())
+    dump_class_attributes(nl->hd()->name, s);
+}
+
+void CgenClassTable::build_class_attributes(CgenNodeP current, Symbol parent) {
+  Symbol class_name = current->name;
+  Features features = current->features;
+  Features attributes = nil_Features();
+
+  if (parent) {
+    Features parent_attrs = class_attributes->lookup(parent);
+    attributes = append_Features(parent_attrs, nil_Features());
+  }
+
+  for (int i = features->first(); features->more(i); i = features->next(i)) {
+    Feature feature = features->nth(i);
+    if (!feature->ismethod) {
+      attributes = append_Features(attributes, single_Features(feature));
+    } 
+  }
+
+  class_attributes->addid(class_name, attributes);
+
+  List<CgenNode>* children = current->get_children();
+
+  for (List<CgenNode>* l = children; l != NULL; l = l->tl()) {
+    CgenNodeP curr_child = l->hd();
+    build_class_attributes(curr_child, class_name);    
+  }
+}
+
+void CgenClassTable::build_classes_attributes() {
+  class_attributes->enterscope();
+  Symbol parent = NULL;
+  CgenNodeP rt = root();
+  build_class_attributes(rt, parent);
+}
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
@@ -866,10 +896,11 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    /* TRACKING CLASS METHODS AND ATTRIBUTES */
    class_attributes = new SymbolTable<Symbol, Features_class>();
    class_methods = new SymbolTable<Symbol, Features_class>();
-   build_class_attributes();
-   build_class_methods();
+   build_classes_attributes();
+   build_classes_methods();
 
    if (cgen_debug) dump_classes_methods(cout);
+   if (cgen_debug) dump_classes_attributes(cout);
 
    code();
    exitscope();

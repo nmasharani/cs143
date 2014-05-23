@@ -57,13 +57,16 @@ private:
    void build_inheritance_tree();
    void set_relations(CgenNodeP nd);
 
-   void build_class_attributes();
-   void build_class_methods();
+   void build_class_attributes(CgenNodeP current, Symbol parent);
+   void build_classes_attributes();
+   void build_classes_methods();
    void build_subclass_methods(CgenNodeP current, Symbol parent);
    bool lookup_method(Feature f, Features f_list);
    Feature resolve_method(Feature f, Features f_list);
    void dump_classes_methods(ostream& s);
    void dump_class_methods(Symbol class_name, ostream& s);
+   void dump_classes_attributes(ostream& s);
+   void dump_class_attributes(Symbol class_name, ostream& s);
 public:
    CgenClassTable(Classes, ostream& str);
    void code();
