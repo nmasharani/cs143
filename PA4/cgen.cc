@@ -632,14 +632,14 @@ void CgenClassTable::code_protos() {
 
     // get tags from name_to_tag
     
-    str << "Starting new protobj: " << class_name->get_string() << endl;
+    str << "[debug] Starting new protobj: " << class_name->get_string() << endl;
     emit_protobj_ref(class_name, str);
     str << endl;
     // Class tag
     int tag;
-    str << "1" << endl;
+    str << "[debug] 1" << endl;
     name_to_tag->probe(class_name);
-    str << "1.5" << endl;
+    str << "[debug] 1.5" << endl;
 
     if (name_to_tag->probe(class_name) != NULL) {
       tag = *(name_to_tag->probe(class_name));
