@@ -25,7 +25,8 @@ private:
    
    /* FOR GENERATING PROTOTYPE OBJECTS */
    int tagtracker;
-   SymbolTable<Symbol, int> * name_to_tag; 
+   SymbolTable<Symbol, int> * name_to_tag;
+   SymbolTable<int, Entry> * tag_to_name; 
 
 
 

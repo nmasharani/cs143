@@ -404,6 +404,8 @@ void StringEntry::code_def(ostream& s, int stringclasstag)
 
  /***** Add dispatch information for class String ******/
 
+      emit_disptable_ref(Str, s);
+
       s << endl;                                              // dispatch table
       s << WORD;  lensym->code_ref(s);  s << endl;            // string length
   emit_string_constant(s,str);                                // ascii string
@@ -445,6 +447,8 @@ void IntEntry::code_def(ostream &s, int intclasstag)
       << WORD; 
 
  /***** Add dispatch information for class Int ******/
+
+      emit_disptable_ref(Int, s);
 
       s << endl;                                          // dispatch table
       s << WORD << str << endl;                           // integer value
@@ -489,6 +493,8 @@ void BoolConst::code_def(ostream& s, int boolclasstag)
       << WORD;
 
  /***** Add dispatch information for class Bool ******/
+
+      emit_disptable_ref(Bool, s);
 
       s << endl;                                            // dispatch table
       s << WORD << val << endl;                             // value (0 or 1)
@@ -617,7 +623,7 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
-// TODO(nm) : this method is likely more complex
+// TODO(nm) : this method is likely more complex -- THIS IS WRONG
 char* CgenClassTable::get_default_init(Symbol type) {
   return "0";
 }
@@ -626,7 +632,7 @@ Symbol attr_class::get_type() { return type_decl; };
 
 Symbol method_class::get_type() { return return_type; };
 
-// TODO(nm)
+
 void CgenClassTable::code_protos() {
   // nl = node list
   for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
@@ -647,6 +653,7 @@ void CgenClassTable::code_protos() {
     } else {
       tag = tagtracker;
       name_to_tag->addid(class_name, new int(tag));
+      tag_to_name->addid(tag, class_name);
       tagtracker++;
     }
 
@@ -712,13 +719,28 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    /* added by NM */
    // Stores a mapping from class name to tag.
    name_to_tag = new SymbolTable<Symbol, int>(); 
+   tag_to_name = new SymbolTable<int, Entry>();
+   
    name_to_tag->enterscope();
+   tag_to_name->enterscope();
+
    name_to_tag->addid(Object, new int(0));
+   tag_to_name->addid(0, Object);
+
    name_to_tag->addid(IO, new int(1));
+   tag_to_name->addid(1, IO);
+
    name_to_tag->addid(Int, new int(intclasstag));
+   tag_to_name->addid(intclasstag, Int);
+
    name_to_tag->addid(Bool, new int(boolclasstag));
+   tag_to_name->addid(boolclasstag, Bool);
+
    name_to_tag->addid(Str, new int(stringclasstag));
+   tag_to_name->addid(stringclasstag, Str);
+
    name_to_tag->addid(Main, new int(5));
+   tag_to_name->addid(5, Main);
 
    tagtracker = 6;
    /* end added by NM */
@@ -930,8 +952,10 @@ void CgenClassTable::code()
 //                   - dispatch tables
 //
 
-  if (cgen_debug) cout << "building prototype objects" << endl;
+  if (cgen_debug) cout << "coding prototype objects" << endl;
   code_protos();
+
+  if (cgen_debug) cout << "coding name table" << endl;
 
 
   if (cgen_debug) cout << "coding global text" << endl;

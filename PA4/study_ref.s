@@ -29,7 +29,7 @@ _MemMgr_TEST:
 str_const14:
 	.word	4
 	.word	5
-	.word	
+	.word	String_dispTab
 	.word	int_const2
 	.byte	0	
 	.align	2
@@ -37,7 +37,7 @@ str_const14:
 str_const13:
 	.word	4
 	.word	5
-	.word	
+	.word	String_dispTab
 	.word	int_const3
 	.ascii	"B"
 	.byte	0	
@@ -46,7 +46,7 @@ str_const13:
 str_const12:
 	.word	4
 	.word	5
-	.word	
+	.word	String_dispTab
 	.word	int_const3
 	.ascii	"A"
 	.byte	0	
@@ -55,7 +55,7 @@ str_const12:
 str_const11:
 	.word	4
 	.word	6
-	.word	
+	.word	String_dispTab
 	.word	int_const4
 	.ascii	"Main"
 	.byte	0	
@@ -64,7 +64,7 @@ str_const11:
 str_const10:
 	.word	4
 	.word	6
-	.word	
+	.word	String_dispTab
 	.word	int_const5
 	.ascii	"String"
 	.byte	0	
@@ -73,7 +73,7 @@ str_const10:
 str_const9:
 	.word	4
 	.word	6
-	.word	
+	.word	String_dispTab
 	.word	int_const4
 	.ascii	"Bool"
 	.byte	0	
@@ -82,7 +82,7 @@ str_const9:
 str_const8:
 	.word	4
 	.word	5
-	.word	
+	.word	String_dispTab
 	.word	int_const6
 	.ascii	"Int"
 	.byte	0	
@@ -91,7 +91,7 @@ str_const8:
 str_const7:
 	.word	4
 	.word	5
-	.word	
+	.word	String_dispTab
 	.word	int_const7
 	.ascii	"IO"
 	.byte	0	
@@ -100,7 +100,7 @@ str_const7:
 str_const6:
 	.word	4
 	.word	6
-	.word	
+	.word	String_dispTab
 	.word	int_const5
 	.ascii	"Object"
 	.byte	0	
@@ -109,7 +109,7 @@ str_const6:
 str_const5:
 	.word	4
 	.word	7
-	.word	
+	.word	String_dispTab
 	.word	int_const8
 	.ascii	"_prim_slot"
 	.byte	0	
@@ -118,7 +118,7 @@ str_const5:
 str_const4:
 	.word	4
 	.word	7
-	.word	
+	.word	String_dispTab
 	.word	int_const9
 	.ascii	"SELF_TYPE"
 	.byte	0	
@@ -127,7 +127,7 @@ str_const4:
 str_const3:
 	.word	4
 	.word	7
-	.word	
+	.word	String_dispTab
 	.word	int_const9
 	.ascii	"_no_class"
 	.byte	0	
@@ -136,7 +136,7 @@ str_const3:
 str_const2:
 	.word	4
 	.word	8
-	.word	
+	.word	String_dispTab
 	.word	int_const10
 	.ascii	"<basic class>"
 	.byte	0	
@@ -145,7 +145,7 @@ str_const2:
 str_const1:
 	.word	4
 	.word	8
-	.word	
+	.word	String_dispTab
 	.word	int_const11
 	.ascii	"NishaMasharani"
 	.byte	0	
@@ -154,7 +154,7 @@ str_const1:
 str_const0:
 	.word	4
 	.word	10
-	.word	
+	.word	String_dispTab
 	.word	int_const12
 	.ascii	"Testfiles/study_ref.cl"
 	.byte	0	
@@ -163,91 +163,91 @@ str_const0:
 int_const12:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	22
 	.word	-1
 int_const11:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	14
 	.word	-1
 int_const10:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	13
 	.word	-1
 int_const9:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	9
 	.word	-1
 int_const8:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	10
 	.word	-1
 int_const7:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	2
 	.word	-1
 int_const6:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	3
 	.word	-1
 int_const5:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	6
 	.word	-1
 int_const4:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	4
 	.word	-1
 int_const3:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	1
 	.word	-1
 int_const2:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	0
 	.word	-1
 int_const1:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	42
 	.word	-1
 int_const0:
 	.word	2
 	.word	4
-	.word	
+	.word	Int_dispTab
 	.word	100
 	.word	-1
 bool_const0:
 	.word	3
 	.word	4
-	.word	
+	.word	Bool_dispTab
 	.word	0
 	.word	-1
 bool_const1:
 	.word	3
 	.word	4
-	.word	
+	.word	Bool_dispTab
 	.word	1
 	.word	-1
 B_protObj:
