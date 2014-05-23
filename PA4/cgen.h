@@ -25,7 +25,7 @@ private:
    
    /* FOR GENERATING PROTOTYPE OBJECTS */
    int tagtracker;
-   SymbolTable<Symbol, Integer> name_to_tag; 
+   SymbolTable<Symbol, int> * name_to_tag; 
 
 
 
@@ -38,6 +38,8 @@ private:
    void code_select_gc();
    void code_constants();
    void code_protos();
+
+   char* get_default_init(Symbol type);
 
 // The following creates an inheritance graph from
 // a list of classes.  The graph is implemented as

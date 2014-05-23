@@ -27,3 +27,7 @@ class Main {
 
 
 class A {};
+
+class B {
+	a : A;
+};

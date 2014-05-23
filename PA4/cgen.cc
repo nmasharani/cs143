@@ -617,41 +617,51 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
+// TODO(nm) : this method is likely more complex
+char* CgenClassTable::get_default_init(Symbol type) {
+  return "0";
+}
+
 // TODO(nm)
 void CgenClassTable::code_protos() {
   // nl = node list
   for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
-    CgenNode nd = nl->hd();
+    CgenNode * nd = nl->hd();
     Symbol class_name = nd->get_name();
 
     // get tags from name_to_tag
     
-    emit_protobj_ref(class_name->get_string(), str);
+    str << "Starting new protobj: " << class_name->get_string() << endl;
+    emit_protobj_ref(class_name, str);
     str << endl;
-
     // Class tag
     int tag;
-    if (name_to_tag.lookup(class_name)) {
-      tag = name_to_tag.lookup(class_name);
+    str << "1" << endl;
+    name_to_tag->probe(class_name);
+    str << "1.5" << endl;
+
+    if (name_to_tag->probe(class_name) != NULL) {
+      tag = *(name_to_tag->probe(class_name));
     } else {
       tag = tagtracker;
-      name_to_tag.addid(class_name, tag);
+      name_to_tag->addid(class_name, new int(tag));
       tagtracker++;
     }
 
+
     // Attributes
 
-    List<Symbol> attribute_types = new List<Symbol>();
+    List<Entry> * attribute_types = NULL;
     // list only prepends, so traverse attributes backwards
 
-    CgenNode curclass = nd;
+    CgenNode * curclass = nd;
     while (strcmp(curclass->get_name()->get_string(), Object->get_string()) != 0) {
       Features feats = curclass->get_features();
       int len = feats->len();
       for (int i = len-1; i >= 0; i--) {
         Feature curfeat = feats->nth(i);
         if (curfeat->ismethod()) continue;
-        attribute_types = new List<Symbol>(curfeat->get_type(), attribute_types);
+        attribute_types = new List<Entry>(curfeat->get_type(), attribute_types);
       }
       curclass = curclass->get_parentnd();
     }
@@ -667,7 +677,7 @@ void CgenClassTable::code_protos() {
     str << WORD << size << endl;
     // emit dispatch table
     str << WORD;
-    emit_disptable_ref(class_name->get_string(), str);
+    emit_disptable_ref(class_name, str);
     str << endl;
     // emit attributes
     for (; attribute_types != NULL; attribute_types = attribute_types->tl()) {
@@ -696,13 +706,14 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 
    /* added by NM */
    // Stores a mapping from class name to tag.
-   SymbolTable<Symbol, Integer> name_to_tag = new SymbolTable<Symbol, Integer>(); 
-   name_to_tag.addid(Object, 0);
-   name_to_tag.addid(IO, 1);
-   name_to_tag.addid(Integer, intclasstag);
-   name_to_tag.addid(Bool, boolclasstag);
-   name_to_tag.addid(String, stringclasstag);
-   name_to_tag.addid(Main, 5);
+   SymbolTable<Symbol, int> * name_to_tag = new SymbolTable<Symbol, int>(); 
+   name_to_tag->enterscope();
+   name_to_tag->addid(Object, new int(0));
+   name_to_tag->addid(IO, new int(1));
+   name_to_tag->addid(Int, new int(intclasstag));
+   name_to_tag->addid(Bool, new int(boolclasstag));
+   name_to_tag->addid(Str, new int(stringclasstag));
+   name_to_tag->addid(Main, new int(5));
 
    tagtracker = 6;
    /* end added by NM */
