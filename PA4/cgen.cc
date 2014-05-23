@@ -623,9 +623,29 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
-// TODO(nm) : this method is likely more complex -- THIS IS WRONG
-char* CgenClassTable::get_default_init(Symbol type) {
-  return "0";
+//********************************************************
+//
+// Outputs the string representation of the label that 
+// appears in the attrbute slot of the given type
+// within the prototype for a class's object. 
+//
+//********************************************************
+
+void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
+  if (strcmp(type->get_string(), Int->get_string()) == 0) {
+    //find the int const label associated with 0 and return that
+    s << WORD; inttable.lookup_string("0")->code_ref(s); s << endl;
+    return;
+  }
+  if (strcmp(type->get_string(), Str->get_string()) == 0) {
+    //find the str_const label associated with the empty string and return that
+    s << WORD; stringtable.lookup_string("")->code_ref(s); s << endl;
+    return;
+  }
+  if (strcmp(type->get_string(), Bool->get_string()) == 0) {
+    s << WORD; falsebool.code_ref(s);  s << endl; 
+  }
+  s << WORD << "0" << endl;
 }
 
 Symbol attr_class::get_type() { return type_decl; };
@@ -685,7 +705,7 @@ void CgenClassTable::code_protos() {
     // emit attributes
     for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
       Symbol type = attributes->nth(i)->get_type();
-      str << WORD << get_default_init(type) << endl;
+      emit_proto_attribute(str, type);
     }
     
   }
@@ -850,6 +870,47 @@ void CgenClassTable::build_classes_attributes() {
   Symbol parent = NULL;
   CgenNodeP rt = root();
   build_class_attributes(rt, parent);
+}
+
+/////////////////////////////////////////////////
+//
+// Prints the class_nameTab to the file. 
+//
+/////////////////////////////////////////////////
+void CgenClassTable::code_name_table() {
+  str << CLASSNAMETAB << LABEL;
+  for (int i = 0; i < tagtracker; i++) {
+    Symbol curr_class = tag_to_name->lookup(i);
+    str << WORD;
+    stringtable.lookup_string(curr_class->get_string())->code_ref(str);
+    str << endl;
+  }
+}
+
+/////////////////////////////////////////////////
+//
+// Prints the class_objTab to the file. 
+//
+/////////////////////////////////////////////////
+void CgenClassTable::code_object_table() {
+  str << CLASSOBJTAB << LABEL;
+  for (int i = 0; i < tagtracker; i++) {
+    Symbol curr_class = tag_to_name->lookup(i);
+    str << WORD << curr_class->get_string() << PROTOBJ_SUFFIX << endl;
+    str << WORD << curr_class->get_string() << CLASSINIT_SUFFIX << endl;
+  }
+}
+
+void CgenClassTable::code_dispatch_table() {
+  for (int i = 0; i < tagtracker; i++) {
+    Symbol class_name = tag_to_name->lookup(i);
+    Features methods = class_methods->lookup(class_name);
+    emit_disptable_ref(class_name, str); str << endl;
+    for (int j = methods->first(); methods->more(j); j = methods->next(j)) {
+      Feature method = methods->nth(j);
+      str << WORD; emit_method_ref(method->current_class, method->get_name(), str); str << endl;
+    }
+  }
 }
 
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
@@ -1113,7 +1174,13 @@ void CgenClassTable::code()
   code_protos();
 
   if (cgen_debug) cout << "coding name table" << endl;
+  code_name_table();
 
+  if (cgen_debug) cout << "coding object table" << endl;
+  code_object_table();
+
+  if (cgen_debug) cout << "coding dispatch table" << endl;
+  code_dispatch_table();
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
