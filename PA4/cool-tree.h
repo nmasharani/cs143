@@ -49,9 +49,11 @@ class Feature_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Feature(); }
    virtual Feature copy_Feature() = 0;
+   virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
 
    bool ismethod;
+   Symbol current_class;
 
 #ifdef Feature_EXTRAS
    Feature_EXTRAS
@@ -191,6 +193,7 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+   Symbol get_name();
    Symbol get_type();
    
 
@@ -218,6 +221,7 @@ public:
    }
    Feature copy_Feature();
    void dump(ostream& stream, int n);
+   Symbol get_name();
    Symbol get_type();
 
 

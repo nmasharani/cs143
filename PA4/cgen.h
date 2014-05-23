@@ -28,6 +28,10 @@ private:
    SymbolTable<Symbol, int> * name_to_tag;
    SymbolTable<int, Entry> * tag_to_name; 
 
+   /* FOR TRACKING CLASS METHODS AND ATTRS */
+   SymbolTable<Symbol, Features_class> * class_methods;
+   SymbolTable<Symbol, Features_class> * class_attributes;
+
 
 
 // The following methods emit code for
@@ -52,6 +56,14 @@ private:
    void install_classes(Classes cs);
    void build_inheritance_tree();
    void set_relations(CgenNodeP nd);
+
+   void build_class_attributes();
+   void build_class_methods();
+   void build_subclass_methods(CgenNodeP current, Symbol parent);
+   bool lookup_method(Feature f, Features f_list);
+   Feature resolve_method(Feature f, Features f_list);
+   void dump_classes_methods(ostream& s);
+   void dump_class_methods(Symbol class_name, ostream& s);
 public:
    CgenClassTable(Classes, ostream& str);
    void code();

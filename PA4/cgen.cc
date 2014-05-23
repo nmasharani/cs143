@@ -632,6 +632,10 @@ Symbol attr_class::get_type() { return type_decl; };
 
 Symbol method_class::get_type() { return return_type; };
 
+Symbol attr_class::get_name() { return name; };
+
+Symbol method_class::get_name() { return name; };
+
 
 void CgenClassTable::code_protos() {
   // nl = node list
@@ -704,6 +708,120 @@ void CgenClassTable::code_protos() {
   }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//  lookup_method
+//  
+//  Looks for the method represented by feature f in the feature list. If the 
+//  method is found in the list, the value found in the list REPLACES f and the
+//  function returns true. Otherwise, the method returns false for not found.
+//  
+//  TRUE: method found in list
+//  FALSE: method not found in list
+//
+////////////////////////////////////////////////////////////////////////////////
+
+bool CgenClassTable::lookup_method(Feature f, Features f_list) {
+  for (int i = f_list->first(); f_list->more(i); i = f_list->next(i)) {
+    Feature feat = f_list->nth(i);
+    if (strcmp(feat->get_name()->get_string(), f->get_name()->get_string()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+Feature CgenClassTable::resolve_method(Feature parent_feat, Features child_feats) {
+  for (int i = child_feats->first(); child_feats->more(i); i = child_feats->next(i)) {
+    Feature child_feat = child_feats->nth(i);
+    if (strcmp(child_feat->get_name()->get_string(), parent_feat->get_name()->get_string()) == 0) {
+      return child_feat;
+    }
+  }
+  return parent_feat;
+}
+
+
+void CgenClassTable::build_subclass_methods(CgenNodeP current, Symbol parent) {
+  Symbol class_name = current->name;
+  Features features = current->features;
+  Features methods = nil_Features();
+
+  // cout << "Assigning current class to all features in class " << class_name->get_string() << endl;
+  for (int i = features->first(); features->more(i); i = features->next(i)) {
+    features->nth(i)->current_class = current->name;
+    // cout << features->nth(i)->current_class->get_string() << endl;
+  }
+  // cout << "done" << endl;
+
+  if (!parent) {
+    for (int i = features->first(); features->more(i); i = features->next(i)) {
+      Feature feature = features->nth(i);
+      if (feature->ismethod) {
+        methods = append_Features(methods, single_Features(feature));
+      }
+    }
+
+  } else {
+    Features parent_feats = class_methods->lookup(parent);
+
+    // get all methods from parent class
+    for (int i = parent_feats->first(); parent_feats->more(i); i = parent_feats->next(i)) {
+      Feature parent_feat = parent_feats->nth(i);
+      if (parent_feat->ismethod) {
+        Feature feature_to_add = resolve_method(parent_feat, features);
+        methods = append_Features(methods, single_Features(feature_to_add));
+        
+      }
+    }
+
+    // find all methods that are not in the parent class
+    for (int i = features->first(); features->more(i); i = features->next(i)) {
+      Feature feature = features->nth(i);
+      if (feature->ismethod) {
+        if (!lookup_method(feature, parent_feats)) {
+          methods = append_Features(methods, single_Features(feature));
+        }
+      }
+    }
+  }
+
+  class_methods->addid(class_name, methods);
+
+  List<CgenNode>* children = current->get_children();
+
+  for (List<CgenNode>* l = children; l != NULL; l = l->tl()) {
+    CgenNodeP curr_child = l->hd();
+    build_subclass_methods(curr_child, class_name);    
+  }
+}
+
+void CgenClassTable::build_class_methods() {
+  class_methods->enterscope();
+  Symbol parent = NULL;
+  CgenNodeP rt = root();
+  build_subclass_methods(rt, parent);
+}
+
+void CgenClassTable::dump_class_methods(Symbol class_name, ostream& s) {
+  s << class_name->get_string() << endl;
+  Features methods = class_methods->lookup(class_name);
+  if (!methods) return;
+  for (int i = methods->first(); methods->more(i); i = methods->next(i)) {
+    Feature method = methods->nth(i);
+    s << "\t" << method->current_class << "." << method->get_name()->get_string() << endl;
+    // s << "\t" << method->get_name()->get_string() << endl;
+  }
+}
+
+void CgenClassTable::dump_classes_methods(ostream& s) {
+  for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl())
+    dump_class_methods(nl->hd()->name, s);
+}
+
+void CgenClassTable::build_class_attributes() {}
+
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
    stringclasstag = 4 /* Change to your String class tag here */;
@@ -744,6 +862,14 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 
    tagtracker = 6;
    /* end added by NM */
+
+   /* TRACKING CLASS METHODS AND ATTRIBUTES */
+   class_attributes = new SymbolTable<Symbol, Features_class>();
+   class_methods = new SymbolTable<Symbol, Features_class>();
+   build_class_attributes();
+   build_class_methods();
+
+   if (cgen_debug) dump_classes_methods(cout);
 
    code();
    exitscope();
