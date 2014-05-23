@@ -144,10 +144,10 @@ str_const2:
 	.word	-1
 str_const1:
 	.word	4
-	.word	6
+	.word	8
 	.word	
 	.word	int_const11
-	.ascii	"Nisha"
+	.ascii	"NishaMasharani"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -170,7 +170,7 @@ int_const11:
 	.word	2
 	.word	4
 	.word	
-	.word	5
+	.word	14
 	.word	-1
 int_const10:
 	.word	2
@@ -250,6 +250,60 @@ bool_const1:
 	.word	
 	.word	1
 	.word	-1
-Starting new protobj: B
-B_protObj
-1
+B_protObj:
+	.word	6
+	.word	5
+	.word	B_dispTab
+	.word	0
+	.word	0
+	.word	-1
+A_protObj:
+	.word	7
+	.word	3
+	.word	A_dispTab
+	.word	-1
+Main_protObj:
+	.word	5
+	.word	4
+	.word	Main_dispTab
+	.word	0
+	.word	-1
+String_protObj:
+	.word	4
+	.word	5
+	.word	String_dispTab
+	.word	0
+	.word	0
+	.word	-1
+Bool_protObj:
+	.word	3
+	.word	4
+	.word	Bool_dispTab
+	.word	0
+	.word	-1
+Int_protObj:
+	.word	2
+	.word	4
+	.word	Int_dispTab
+	.word	0
+	.word	-1
+IO_protObj:
+	.word	1
+	.word	3
+	.word	IO_dispTab
+	.word	-1
+Object_protObj:
+	.word	0
+	.word	3
+	.word	Object_dispTab
+	.globl	heap_start
+heap_start:
+	.word	0
+	.text
+	.globl	Main_init
+	.globl	Int_init
+	.globl	String_init
+	.globl	Bool_init
+	.globl	Main.main
+
+# end of generated code

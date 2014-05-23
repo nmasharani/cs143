@@ -622,6 +622,10 @@ char* CgenClassTable::get_default_init(Symbol type) {
   return "0";
 }
 
+Symbol attr_class::get_type() { return type_decl; };
+
+Symbol method_class::get_type() { return return_type; };
+
 // TODO(nm)
 void CgenClassTable::code_protos() {
   // nl = node list
@@ -632,17 +636,14 @@ void CgenClassTable::code_protos() {
 
     // get tags from name_to_tag
     
-    str << "[debug] Starting new protobj: " << class_name->get_string() << endl;
     emit_protobj_ref(class_name, str);
-    str << endl;
+    str << ":" << endl;
     // Class tag
+    int * tag_ptr = name_to_tag->probe(class_name);
     int tag;
-    str << "[debug] 1" << endl;
-    name_to_tag->probe(class_name);
-    str << "[debug] 1.5" << endl;
 
-    if (name_to_tag->probe(class_name) != NULL) {
-      tag = *(name_to_tag->probe(class_name));
+    if (tag_ptr != NULL) {
+      tag = *tag_ptr;
     } else {
       tag = tagtracker;
       name_to_tag->addid(class_name, new int(tag));
@@ -657,12 +658,16 @@ void CgenClassTable::code_protos() {
 
     CgenNode * curclass = nd;
     while (strcmp(curclass->get_name()->get_string(), Object->get_string()) != 0) {
-      Features feats = curclass->get_features();
+
+      Features feats = curclass->features;
       int len = feats->len();
+
       for (int i = len-1; i >= 0; i--) {
         Feature curfeat = feats->nth(i);
-        if (curfeat->ismethod()) continue;
-        attribute_types = new List<Entry>(curfeat->get_type(), attribute_types);
+        if (!curfeat->ismethod) {
+          attribute_types = new List<Entry>(curfeat->get_type(), attribute_types);
+        }
+        
       }
       curclass = curclass->get_parentnd();
     }
@@ -674,19 +679,20 @@ void CgenClassTable::code_protos() {
 
     // emit class tag
     str << WORD << tag << endl;
+
     // emit size
     str << WORD << size << endl;
+
     // emit dispatch table
-    str << WORD;
+     str << WORD;
     emit_disptable_ref(class_name, str);
     str << endl;
+
     // emit attributes
     for (; attribute_types != NULL; attribute_types = attribute_types->tl()) {
       Symbol type = attribute_types->hd();
       str << WORD << get_default_init(type) << endl;
     }
-
-    // garbage collector tag
     
   }
 }
@@ -705,7 +711,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 
    /* added by NM */
    // Stores a mapping from class name to tag.
-   SymbolTable<Symbol, int> * name_to_tag = new SymbolTable<Symbol, int>(); 
+   name_to_tag = new SymbolTable<Symbol, int>(); 
    name_to_tag->enterscope();
    name_to_tag->addid(Object, new int(0));
    name_to_tag->addid(IO, new int(1));

@@ -20,14 +20,16 @@ class Main {
 	};
 
 	test_str() : String {
-		"Nisha"
+		"NishaMasharani"
 	};
 };
 
 
 
+
 class A {};
 
-class B {
+
+class B inherits Main {
 	a : A;
 };
