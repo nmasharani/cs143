@@ -1,10 +1,10 @@
 class Main {
-	x: Ardvark;
+	x: Aardvark <- new Aardvark;
 	main() : Int {
 		42
 	};
 };
 
-class Ardvark {
+class Aardvark {
 	x: Int;
 };
