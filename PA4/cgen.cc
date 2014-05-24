@@ -1338,53 +1338,121 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 void assign_class::code(ostream &s) {
 }
 
+int assign_class::compute_max_locals() {
+  return 0;
+}
+
 void static_dispatch_class::code(ostream &s) {
+}
+
+int static_dispatch_class::compute_max_locals() {
+  return 0;
 }
 
 void dispatch_class::code(ostream &s) {
 }
 
+int dispatch_class::compute_max_locals() {
+  return 0;
+}
+
 void cond_class::code(ostream &s) {
+}
+
+int cond_class::compute_max_locals() {
+  return 0;
 }
 
 void loop_class::code(ostream &s) {
 }
 
+int loop_class::compute_max_locals() {
+  return 0;
+}
+
 void typcase_class::code(ostream &s) {
+}
+
+int typcase_class::compute_max_locals() {
+  return 0;
 }
 
 void block_class::code(ostream &s) {
 }
 
+int block_class::compute_max_locals() {
+  return 0;
+}
+
 void let_class::code(ostream &s) {
+}
+
+int let_class::compute_max_locals() {
+  return 0;
 }
 
 void plus_class::code(ostream &s) {
 }
 
+int plus_class::compute_max_locals() {
+  return 0;
+}
+
 void sub_class::code(ostream &s) {
+}
+
+int sub_class::compute_max_locals() {
+  return 0;
 }
 
 void mul_class::code(ostream &s) {
 }
 
+int mul_class::compute_max_locals() {
+  return 0;
+}
+
 void divide_class::code(ostream &s) {
+}
+
+int divide_class::compute_max_locals() {
+  return 0;
 }
 
 void neg_class::code(ostream &s) {
 }
 
+int neg_class::compute_max_locals() {
+  return 0;
+}
+
 void lt_class::code(ostream &s) {
+}
+
+int lt_class::compute_max_locals() {
+  return 0;
 }
 
 void eq_class::code(ostream &s) {
 }
 
+int eq_class::compute_max_locals() {
+  return 0;
+}
+
 void leq_class::code(ostream &s) {
+}
+
+int leq_class::compute_max_locals() {
+  return 0;
 }
 
 void comp_class::code(ostream &s) {
 
+}
+
+int comp_class::compute_max_locals() {
+  return 0;
 }
 
 void int_const_class::code(ostream& s)  
@@ -1396,7 +1464,7 @@ void int_const_class::code(ostream& s)
 }
 
 int int_const_class::compute_max_locals() {
-
+  return 0;
 }
 
 void string_const_class::code(ostream& s)
@@ -1405,7 +1473,7 @@ void string_const_class::code(ostream& s)
 }
 
 int string_const_class::compute_max_locals() {
-
+  return 0;
 }
 
 void bool_const_class::code(ostream& s)
@@ -1421,14 +1489,14 @@ void new__class::code(ostream &s) {
 }
 
 int new__class::compute_max_locals() {
-
+  return 0;
 }
 
 void isvoid_class::code(ostream &s) {
 }
 
 int isvoid_class::compute_max_locals() {
-
+  return 0;
 }
 
 void no_expr_class::code(ostream &s) {
