@@ -30,10 +30,6 @@ private:
    SymbolTable<Symbol, int> * name_to_tag;
    SymbolTable<int, Entry> * tag_to_name; 
 
-   /* FOR TRACKING CLASS METHODS AND ATTRS */
-   SymbolTable<Symbol, Features_class> * class_methods;
-   SymbolTable<Symbol, Features_class> * class_attributes;
-
 
 
 
@@ -115,3 +111,6 @@ class BoolConst
   void code_ref(ostream&) const;
 };
 
+/* FOR TRACKING CLASS METHODS AND ATTRS */
+   SymbolTable<Symbol, Features_class> * class_methods;
+   SymbolTable<Symbol, Features_class> * class_attributes;
