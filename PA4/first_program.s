@@ -320,7 +320,7 @@ Main_init:
 	jal	Object_init
 	la	$a0 IO_protObj
 	jal	Object.copy
-	jal	 IO_init
+	jal	IO_init
 	sw	$a0 12($s0)
 	la	$a0 str_const1
 	sw	$a0 16($s0)
@@ -414,7 +414,7 @@ Main.main:
 	sw	$a0 0($sp)
 	lw	$a0 12($s0)
 	lw	$t1 8($a0)
-	addiu	$t2 $t1 0
+	addiu	$t2 $t1 12
 	jalr		$t2
 	addiu	$sp $sp 16
 	lw	$fp 0($sp)
