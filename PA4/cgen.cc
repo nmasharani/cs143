@@ -1250,7 +1250,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
-      curr_feat->get_expr()->code(cout, (num_locals_needed - 3), curr_class->envr);
+      curr_feat->get_expr()->code(cout, (num_locals_needed - 3), curr_class->envr, this);
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       emit_store(ACC, offset, SELF, cout);
     }
@@ -1314,7 +1314,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
     curr_class->envr->addid(curr_formal->get_name(), loc);
   }
 
-  curr_feat->get_expr()->code(cout, num_locals_needed, curr_class->envr);
+  curr_feat->get_expr()->code(cout, num_locals_needed, curr_class->envr, this);
 
   emit_load(FP, num_locals_needed, SP, cout);
   emit_load(SELF, (num_locals_needed - 1), SP, cout);
@@ -1429,14 +1429,14 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 //
 //*****************************************************************
 
-void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int assign_class::compute_max_locals() {
   return expr->compute_max_locals();
 }
 
-void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int static_dispatch_class::compute_max_locals() {
@@ -1449,15 +1449,17 @@ int static_dispatch_class::compute_max_locals() {
   return sum;
 }
 
-void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+//////////////////////////////////////////////
+//
+//////////////////////////////////////////////
+void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
-    curr_param->code(cout, temp_start, envr);
+    curr_param->code(cout, temp_start, envr, table);
     int curr_offset = i + 1;
-    emit_store(ACC, curr_offset, SP, cout);
+    emit_store(ACC, curr_offset, SP, cout); //caller pushes function arguments to stack. Pushes first argument first, and adds arguments upwards. 
   }
-  expr->code(cout, temp_start, envr);
-  //we know the value of expr is now in ACC. 
+  expr->code(cout, temp_start, envr, table); //we know the value of expr is now in ACC. 
   emit_load(T1, DISPTABLE_OFFSET, ACC, cout);
   Features attrs = class_attributes->lookup(expr->get_type());
   int offset_in_disp_tab = 0;
@@ -1481,7 +1483,7 @@ int dispatch_class::compute_max_locals() {
   return sum;
 }
 
-void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int cond_class::compute_max_locals() {
@@ -1491,7 +1493,7 @@ int cond_class::compute_max_locals() {
   return num1 + num2 + num3 + 2;
 }
 
-void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int loop_class::compute_max_locals() {
@@ -1500,7 +1502,7 @@ int loop_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int typcase_class::compute_max_locals() {
@@ -1513,7 +1515,7 @@ int typcase_class::compute_max_locals() {
   return sum;
 }
 
-void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int block_class::compute_max_locals() {
@@ -1525,7 +1527,7 @@ int block_class::compute_max_locals() {
   return sum;
 }
 
-void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int let_class::compute_max_locals() {
@@ -1534,7 +1536,7 @@ int let_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int plus_class::compute_max_locals() {
@@ -1543,7 +1545,7 @@ int plus_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int sub_class::compute_max_locals() {
@@ -1552,7 +1554,7 @@ int sub_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int mul_class::compute_max_locals() {
@@ -1561,7 +1563,7 @@ int mul_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int divide_class::compute_max_locals() {
@@ -1570,14 +1572,14 @@ int divide_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int neg_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
-void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int lt_class::compute_max_locals() {
@@ -1586,7 +1588,7 @@ int lt_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int eq_class::compute_max_locals() {
@@ -1595,7 +1597,7 @@ int eq_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int leq_class::compute_max_locals() {
@@ -1604,7 +1606,7 @@ int leq_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
-void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 
 }
 
@@ -1612,7 +1614,7 @@ int comp_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
-void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr)  
+void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)  
 {
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
@@ -1624,7 +1626,7 @@ int int_const_class::compute_max_locals() {
   return 0;
 }
 
-void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr)
+void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)
 {
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
 }
@@ -1633,7 +1635,7 @@ int string_const_class::compute_max_locals() {
   return 0;
 }
 
-void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr)
+void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)
 {
   emit_load_bool(ACC, BoolConst(val), s);
 }
@@ -1642,28 +1644,28 @@ int bool_const_class::compute_max_locals() {
   return 0;
 }
 
-void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int new__class::compute_max_locals() {
   return 0;
 }
 
-void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int isvoid_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
-void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int no_expr_class::compute_max_locals() {
   return 0;
 }
 
-void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr) {
+void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
 
 int object_class::compute_max_locals() {
