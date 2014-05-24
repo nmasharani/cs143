@@ -1449,20 +1449,36 @@ void CgenClassTable::initialize_class_enviornment() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Return the locals needed to evaluate the attributes of a class. 
+//
+////////////////////////////////////////////////////////////////////////////////
+int CgenClassTable::compute_max_locals_for_class_init(CgenNodeP curr_class) {
+  int num_locals_needed = 0;
+  Features feats = curr_class->features;
+  for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
+    Feature curr_feat = feats->nth(i);
+    if (curr_feat->ismethod == false) {
+      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
+    }
+  }
+  return num_locals_needed;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // Gnerates the Class_init method for each class
 // in the program.
 // NOTE: it is assumed that the object being initialized
 // is passed to this function in the self register ($s0)
 // just as if the init method were defined for this object
 // as a feature method. 
+// 
+// NOTE, by convention, every call to init will expect the 
+// object to be initialized passed in ACC. 
 //
 // NOTE: Potential optimization. If the method is object,
 // there is nothing to init, so simply return (don't need
 // any assembly in this case). 
-// /* 1st needs to call the init method for the parent class */
-//  /* So output assembly to do this */
-//
-//  /* Note, we wont do this here, but be sure to check for dispatch on void */
 //
 //  /* Then after the parent is initialized, you can output the assembly */
 //  /* to initialize the attributes */
@@ -1475,47 +1491,46 @@ void CgenClassTable::initialize_class_enviornment() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
+  cout << "Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
   curr_class->envr->enterscope();
-
   emit_init_ref(curr_class->name, str); str << LABEL;
   /* first we set up the stack */
-  int num_locals_needed = 0;
-  Features feats = curr_class->features;
-  for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
-    Feature curr_feat = feats->nth(i);
-    if (curr_feat->ismethod == false) {
-      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
-    }
-  }
+  
+  int num_locals_needed = compute_max_locals_for_class_init(curr_class);
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), str);
-  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), str);
-  emit_move(SELF, ACC, str); //e0 is in a0
+  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+
+  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
+  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
+  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
+  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
+  emit_move(SELF, ACC, str); // Move to new context, the object being initialized is calling Parent.init
 
   /* first we initialize the parent class, so long as we are not Object */
   if (strcmp(curr_class->name->get_string(), Object->get_string()) != 0) {
     CgenNodeP parent = curr_class->get_parentnd();
     char* parent_label = parent->name->get_string();
     str << JAL << parent_label << CLASSINIT_SUFFIX << endl;
+    // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
+  Features feats = curr_class->features;
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
-      curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
+      cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
+      curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this); //now ACC has value of intializer expression
       emit_store(ACC, offset, SELF, str);
     }
   }
-  emit_move(ACC, SELF, str);
-  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), str);
-  emit_return(str);
+  emit_move(ACC, SELF, str); // the return value, in this case, the object being initialized, gets put in ACC
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
+  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
+  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
+  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA. 
 
+  emit_return(str);
   curr_class->envr->exitscope();
 }
 
@@ -1567,40 +1582,38 @@ void CgenClassTable::code_init_methods() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
+  cout << "Emitting code for method " << curr_feat->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-
   emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
+
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
-  if (cgen_debug) {
-    cout << "Coding method " << curr_feat->get_name()->get_string() << endl;
-    cout << "     num locals needed = " << num_locals_needed << endl;
-  }
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), str);
-  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), str);
-  emit_move(SELF, ACC, str); //e0 if in a0
+  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+
+  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
+  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
+  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
+  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
+  emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
 
   Formals formals = curr_feat->get_formals();
   for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
     Formal curr_formal = formals->nth(i);
-    int offset = i + OFFSET_FROM_FP_TO_FIRST_PARAM; 
+    int offset = i; 
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
-    loc->offset = offset;
+    loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
     curr_class->envr->addid(curr_formal->get_name(), loc);
   }
+  curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this); // now the return Object of this expression is in ACC
 
-  curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
+  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
+  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
+  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA.
 
-  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), str);
   emit_return(str);
-
   curr_class->envr->exitscope();
 }
 
@@ -1620,8 +1633,8 @@ void CgenClassTable::code_class_methods() {
         Feature curr_feat = feats->nth(i);
         if (curr_feat->ismethod) {
          code_method(curr_class, curr_feat); 
+        }
       }
-    }
     }
   }
 }
@@ -1633,9 +1646,9 @@ void CgenClassTable::code_class_methods() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 int CgenClassTable::compute_offset_in_disp_table(Symbol name, Symbol type) {
-  Features attrs = class_attributes->lookup(type);
-  for (int i = attrs->first(); attrs->more(i); i = attrs->next(i)) {
-    if (strcmp(name->get_string(), attrs->nth(i)->get_name()->get_string()) == 0) {
+  Features methods = class_methods->lookup(type);
+  for (int i = methods->first(); methods->more(i); i = methods->next(i)) {
+    if (strcmp(name->get_string(), methods->nth(i)->get_name()->get_string()) == 0) {
       return i;
     }
   }
@@ -1741,6 +1754,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 ////////////////////////////////////////////////////////////////////////////////
 
 void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code assign expression." << endl;
 }
 
 int assign_class::compute_max_locals() {
@@ -1748,6 +1762,7 @@ int assign_class::compute_max_locals() {
 }
 
 void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code static dispatch expression." << endl;
 }
 
 int static_dispatch_class::compute_max_locals() {
@@ -1755,7 +1770,7 @@ int static_dispatch_class::compute_max_locals() {
   sum += expr->compute_max_locals();
   for (int i = actual->first(); actual->more(i); i++) {
     Expression curr_expr = actual->nth(i);
-    sum += curr_expr->compute_max_locals();
+    sum += curr_expr->compute_max_locals() + 1;
   }
   return sum;
 }
@@ -1773,18 +1788,21 @@ int static_dispatch_class::compute_max_locals() {
 // visible from the caller. The callee can access values that the caller has access
 // to, but the callee defines its names for these variable via the formals list.  
 //
+// TODO, Need to handle the dispatch on void TODO
+//
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
-  cout << "Coding dispatch " << endl;
+  cout << "Code disptach expression." << endl;
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
-    curr_param->code(s, temp_start, envr, table);
-    int curr_offset = i + 1;
-    emit_store(ACC, curr_offset, SP, s); //caller pushes function arguments to stack. Pushes first argument first, and adds arguments upwards. 
+    curr_param->code(s, temp_start, envr, table); // Now the return value for this argument is in ACC. 
+    int curr_offset = i;
+    emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
   }
-  expr->code(s, temp_start, envr, table); //we know the value of expr is now in ACC. 
-  emit_load(T1, DISPTABLE_OFFSET, ACC, s);
+  expr->code(s, temp_start, envr, table); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
+  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // now, we load the address of the dispatch table for this class into a temporary T1. 
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
+  cout << " loaded dispatch for class " << expr->get_type()->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_addiu(T2, T1, offset_in_disp_tab * WORD_SIZE, s); //This loads the address of the function we want to dispatch to in the register T2. 
   emit_jalr(T2, s);
 }
@@ -1794,12 +1812,13 @@ int dispatch_class::compute_max_locals() {
   sum += expr->compute_max_locals();
   for (int i = actual->first(); actual->more(i); i++) {
     Expression curr_expr = actual->nth(i);
-    sum += curr_expr->compute_max_locals();
+    sum += curr_expr->compute_max_locals() + 1;
   }
   return sum;
 }
 
 void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code cond expression." << endl;
 }
 
 int cond_class::compute_max_locals() {
@@ -1810,6 +1829,7 @@ int cond_class::compute_max_locals() {
 }
 
 void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code loop expression." << endl;
 }
 
 int loop_class::compute_max_locals() {
@@ -1819,6 +1839,7 @@ int loop_class::compute_max_locals() {
 }
 
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code typecase expression." << endl;
 }
 
 int typcase_class::compute_max_locals() {
@@ -1832,7 +1853,7 @@ int typcase_class::compute_max_locals() {
 }
 
 void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
-  cout << "Coding block" << endl;
+  cout << "Code block epression." << endl;
   for (int i = body->first(); body->more(i); i = body->next(i)) {
     Expression curr_exp = body->nth(i);
     curr_exp->code(s, temp_start, envr, table);
@@ -1849,6 +1870,7 @@ int block_class::compute_max_locals() {
 }
 
 void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code let expression." << endl;
 }
 
 int let_class::compute_max_locals() {
@@ -1858,6 +1880,7 @@ int let_class::compute_max_locals() {
 }
 
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code plus expression." << endl;
 }
 
 int plus_class::compute_max_locals() {
@@ -1867,6 +1890,7 @@ int plus_class::compute_max_locals() {
 }
 
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code sub expression." << endl;
 }
 
 int sub_class::compute_max_locals() {
@@ -1876,6 +1900,7 @@ int sub_class::compute_max_locals() {
 }
 
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code mul expression." << endl;
 }
 
 int mul_class::compute_max_locals() {
@@ -1885,6 +1910,7 @@ int mul_class::compute_max_locals() {
 }
 
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code divide expression." << endl;
 }
 
 int divide_class::compute_max_locals() {
@@ -1894,6 +1920,7 @@ int divide_class::compute_max_locals() {
 }
 
 void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code neg expression." << endl;
 }
 
 int neg_class::compute_max_locals() {
@@ -1901,6 +1928,7 @@ int neg_class::compute_max_locals() {
 }
 
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code lt expression." << endl;
 }
 
 int lt_class::compute_max_locals() {
@@ -1910,6 +1938,7 @@ int lt_class::compute_max_locals() {
 }
 
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code eq expression." << endl;
 }
 
 int eq_class::compute_max_locals() {
@@ -1919,6 +1948,7 @@ int eq_class::compute_max_locals() {
 }
 
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code leq expression." << endl;
 }
 
 int leq_class::compute_max_locals() {
@@ -1928,15 +1958,15 @@ int leq_class::compute_max_locals() {
 }
 
 void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
-
+  cout << "Code comp expression." << endl;
 }
 
 int comp_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
-void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)  
-{
+void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code int const expression." << endl;
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
@@ -1947,8 +1977,8 @@ int int_const_class::compute_max_locals() {
   return 0;
 }
 
-void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)
-{
+void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code string const expression." << endl;
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
 }
 
@@ -1956,8 +1986,8 @@ int string_const_class::compute_max_locals() {
   return 0;
 }
 
-void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table)
-{
+void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code bool expression." << endl;
   emit_load_bool(ACC, BoolConst(val), s);
 }
 
@@ -1970,6 +2000,8 @@ int bool_const_class::compute_max_locals() {
 // The typename of the new object is stored in the AST node new__class.
 // Use that typname to generate the labels for the prototype and 
 // init methods we want the code to access. 
+//
+// TODO, need to handle SELF_TYPE TODO
 //
 // We will then need to call the copy method, passing the address of this
 // prototype object, and then call the init method, this time passing
@@ -1992,6 +2024,7 @@ int bool_const_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code new with type " << type_name->get_string() << endl;
   if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) {
     //handle self type here. 
   } else {
@@ -2000,7 +2033,7 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     //call the init method. 
     s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl;
     emit_jal(OBJECT_DOT_COPY, s);
-    s << JAL << " " << type_name->get_string() << CLASSINIT_SUFFIX << endl;
+    s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl;
   }
 }
 
@@ -2009,6 +2042,7 @@ int new__class::compute_max_locals() {
 }
 
 void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code isvoid expression." << endl;
 }
 
 int isvoid_class::compute_max_locals() {
@@ -2016,6 +2050,8 @@ int isvoid_class::compute_max_locals() {
 }
 
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code no_epression expression." << endl;
+  return;
 }
 
 int no_expr_class::compute_max_locals() {
@@ -2041,6 +2077,7 @@ int no_expr_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  cout << "Code objectID expression." << endl;
   if (strcmp(name->get_string(), self->get_string()) == 0) {
     emit_move(ACC, SELF, s);
     return;

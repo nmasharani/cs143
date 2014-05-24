@@ -1,7 +1,7 @@
 class Main {
 	x: String <- "happy";
 	main() : Int {
-		42
+		new Int
 	};
 };
 
