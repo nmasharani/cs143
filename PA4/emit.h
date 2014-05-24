@@ -14,8 +14,19 @@
 
 #include "stringtab.h"
 
+///////////////////////////////////////////////////////////////////////
+//
+// Stack convention constants
+// 
+// NOTE: All offsets are given in terms of words!!
+//
+///////////////////////////////////////////////////////////////////////
 #define OFFSET_FROM_FP_TO_FIRST_PARAM 4 
 #define NUM_REGISTERS_SAVED_BY_CALLER 3
+#define SAVE_FP_OFFSET 0
+#define SAVE_SELF_OFFSET 1
+#define SAVE_RA_OFFSET 2
+
 
 #define MAXINT  100000000    
 #define WORD_SIZE    4

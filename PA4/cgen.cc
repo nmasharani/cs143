@@ -1487,10 +1487,10 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   }
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), cout);
-  emit_store(FP, num_locals_needed, SP, cout);
-  emit_store(SELF, (num_locals_needed - 1), SP, cout);
-  emit_store(RA, (num_locals_needed - 2), SP, cout);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - 3), cout);
+  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, cout);
+  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, cout);
+  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, cout);
+  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), cout);
   emit_move(SELF, ACC, cout); //e0 is in a0
 
   /* first we initialize the parent class, so long as we are not Object */
@@ -1508,9 +1508,9 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     }
   }
   emit_move(ACC, SELF, cout);
-  emit_load(FP, num_locals_needed, SP, cout);
-  emit_load(SELF, (num_locals_needed - 1), SP, cout);
-  emit_load(RA, (num_locals_needed - 2), SP, cout);
+  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, cout);
+  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, cout);
+  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, cout);
   emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), cout);
   emit_return(cout);
 }
@@ -1571,10 +1571,10 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   }
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), cout);
-  emit_store(FP, num_locals_needed, SP, cout);
-  emit_store(SELF, (num_locals_needed - 1), SP, cout);
-  emit_store(RA, (num_locals_needed - 2), SP, cout);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - 3), cout);
+  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, cout);
+  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, cout);
+  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, cout);
+  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), cout);
   emit_move(SELF, ACC, cout); //e0 if in a0
 
   Formals formals = curr_feat->get_formals();
@@ -1589,9 +1589,9 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
 
   curr_feat->get_expr()->code(cout, num_locals_needed, curr_class->envr, this);
 
-  emit_load(FP, num_locals_needed, SP, cout);
-  emit_load(SELF, (num_locals_needed - 1), SP, cout);
-  emit_load(RA, (num_locals_needed - 2), SP, cout);
+  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, cout);
+  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, cout);
+  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, cout);
   emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), cout);
   emit_return(cout);
 }
@@ -1606,7 +1606,6 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
 void CgenClassTable::code_class_methods() {
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
-    //get the features, and then for each method, code the method.
     Features feats = curr_class->features;
     for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
       Feature curr_feat = feats->nth(i);
