@@ -656,6 +656,14 @@ Symbol attr_class::get_name() { return name; };
 
 Symbol method_class::get_name() { return name; };
 
+Expression attr_class::get_expr() { return NULL; };
+
+Expression method_class::get_expr() { return expr; };
+
+int max(int num1, int num2) {
+  if (num1 > num2) return num1;
+  return num2;
+}
 
 void CgenClassTable::code_protos() {
   // nl = node list
@@ -1186,6 +1194,11 @@ void CgenClassTable::initialize_class_enviornment() {
 /////////////////////////////////////////////////////
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_init_ref(curr_class->name, str); str << LABEL;
+
+  /* first we initialize the parent class, so long as we are not Object */
+  if (strcmp(curr_class->name->get_string(), Object->get_string() != 0) {
+    // if the curr class is not object, then initialize the parent
+  }
   /* 1st needs to call the init method for the parent class */
   /* So output assembly to do this */
 
@@ -1225,6 +1238,11 @@ void CgenClassTable::code_init_methods() {
 /////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_method_ref(curr_class->name, curr_feat->get_name(), cout); cout << LABEL;
+  int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
+  if (cgen_debug) {
+    cout << "Coding method " << curr_feat->get_name()->get_string() << endl;
+    cout << "     num locals needed = " << num_locals_needed << endl;
+  }
 
   /* 1st compute the max number of locals needed */
   /* Move the stack down by that amount, and then */
@@ -1245,7 +1263,9 @@ void CgenClassTable::code_class_methods() {
     Features feats = curr_class->features;
     for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
       Feature curr_feat = feats->nth(i);
-      code_method(curr_class, curr_feat); 
+      if (curr_feat->ismethod) {
+        code_method(curr_class, curr_feat); 
+      }
     }
   }
 }
@@ -1339,112 +1359,156 @@ void assign_class::code(ostream &s) {
 }
 
 int assign_class::compute_max_locals() {
-  return 0;
+  return expr->compute_max_locals();
 }
 
 void static_dispatch_class::code(ostream &s) {
 }
 
 int static_dispatch_class::compute_max_locals() {
-  return 0;
+  int sum = 0;
+  sum += expr->compute_max_locals();
+  for (int i = actual->first(); actual->more(i); i++) {
+    Expression curr_expr = actual->nth(i);
+    sum += curr_expr->compute_max_locals();
+  }
+  return sum;
 }
 
 void dispatch_class::code(ostream &s) {
 }
 
 int dispatch_class::compute_max_locals() {
-  return 0;
+  int sum = 0;
+  sum += expr->compute_max_locals();
+  for (int i = actual->first(); actual->more(i); i++) {
+    Expression curr_expr = actual->nth(i);
+    sum += curr_expr->compute_max_locals();
+  }
+  return sum;
 }
 
 void cond_class::code(ostream &s) {
 }
 
 int cond_class::compute_max_locals() {
-  return 0;
+  int num1 = pred->compute_max_locals();
+  int num2 = then_exp->compute_max_locals();
+  int num3 = else_exp->compute_max_locals();
+  return num1 + num2 + num3;
 }
 
 void loop_class::code(ostream &s) {
 }
 
 int loop_class::compute_max_locals() {
-  return 0;
+  int num1 = pred->compute_max_locals();
+  int num2 = body->compute_max_locals();
+  return num1 + num2;
 }
 
 void typcase_class::code(ostream &s) {
 }
 
 int typcase_class::compute_max_locals() {
-  return 0;
+  int sum = 0;
+  sum += expr->compute_max_locals();
+  for (int i = cases->first(); cases->more(i); i++) {
+    Case curr_case = cases->nth(i);
+    sum += curr_case->compute_max_locals();
+  }
+  return sum;
 }
 
 void block_class::code(ostream &s) {
 }
 
 int block_class::compute_max_locals() {
-  return 0;
+  int sum = 0;
+  for (int i = body->first(); body->more(i); i++) {
+    Expression curr_expr = body->nth(i);
+    sum += curr_expr->compute_max_locals();
+  }
+  return sum;
 }
 
 void let_class::code(ostream &s) {
 }
 
 int let_class::compute_max_locals() {
-  return 0;
+  int num1 = init->compute_max_locals();
+  int num2 = body->compute_max_locals();
+  return 1 + num1 + num2;
 }
 
 void plus_class::code(ostream &s) {
 }
 
 int plus_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void sub_class::code(ostream &s) {
 }
 
 int sub_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void mul_class::code(ostream &s) {
 }
 
 int mul_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void divide_class::code(ostream &s) {
 }
 
 int divide_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void neg_class::code(ostream &s) {
 }
 
 int neg_class::compute_max_locals() {
-  return 0;
+  return e1->compute_max_locals();
 }
 
 void lt_class::code(ostream &s) {
 }
 
 int lt_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void eq_class::code(ostream &s) {
 }
 
 int eq_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void leq_class::code(ostream &s) {
 }
 
 int leq_class::compute_max_locals() {
-  return 0;
+  int num1 = e1->compute_max_locals();
+  int num2 = e2->compute_max_locals();
+  return num1 + num2;
 }
 
 void comp_class::code(ostream &s) {
@@ -1452,7 +1516,7 @@ void comp_class::code(ostream &s) {
 }
 
 int comp_class::compute_max_locals() {
-  return 0;
+  return e1->compute_max_locals();
 }
 
 void int_const_class::code(ostream& s)  
@@ -1496,7 +1560,7 @@ void isvoid_class::code(ostream &s) {
 }
 
 int isvoid_class::compute_max_locals() {
-  return 0;
+  return e1->compute_max_locals();
 }
 
 void no_expr_class::code(ostream &s) {

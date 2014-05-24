@@ -67,6 +67,7 @@ public:
    virtual Feature copy_Feature() = 0;
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
+   virtual Expression get_expr() = 0;
 
    bool ismethod;
    Symbol current_class;
@@ -211,6 +212,7 @@ public:
    void dump(ostream& stream, int n);
    Symbol get_name();
    Symbol get_type();
+   Expression get_expr();
    
 
 #ifdef Feature_SHARED_EXTRAS
@@ -239,6 +241,7 @@ public:
    void dump(ostream& stream, int n);
    Symbol get_name();
    Symbol get_type();
+   Expression get_expr();
 
 
 #ifdef Feature_SHARED_EXTRAS
