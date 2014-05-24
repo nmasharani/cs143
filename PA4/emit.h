@@ -27,6 +27,10 @@
 #define SAVE_SELF_OFFSET 1
 #define SAVE_RA_OFFSET 2
 
+#define CLASS_CONTEXT 		"CLASS"
+#define FEATURE_CONTEXT 	"FEATURE"
+#define LOCAL_CONTEXT 		"LOCAL"
+
 
 #define MAXINT  100000000    
 #define WORD_SIZE    4
@@ -49,6 +53,7 @@
 #define INTCONST_PREFIX      "int_const"
 #define STRCONST_PREFIX      "str_const"
 #define BOOLCONST_PREFIX     "bool_const"
+#define OBJECT_DOT_COPY      "Object.copy"
 
 
 #define EMPTYSLOT            0

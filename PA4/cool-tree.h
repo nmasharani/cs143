@@ -20,7 +20,7 @@ struct var_loc
   //if context = Class, offset is relative to the self object ($so)
   //if context = Method, offset is relative to the frame pointer ($fp)
   //if context = expression, offset is relative to stack pointer ($sp)
-  tree_node* context;
+  char* context;
   //offset from some location based on context
   //offset in number of words (0, 1, 2...)
   int offset;
