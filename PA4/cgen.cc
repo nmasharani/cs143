@@ -1455,14 +1455,13 @@ void CgenClassTable::initialize_class_enviornment() {
 // is passed to this function in the self register ($s0)
 // just as if the init method were defined for this object
 // as a feature method. 
+// 
+// NOTE, by convention, every call to init will expect the 
+// object to be initialized passed in ACC. 
 //
 // NOTE: Potential optimization. If the method is object,
 // there is nothing to init, so simply return (don't need
 // any assembly in this case). 
-// /* 1st needs to call the init method for the parent class */
-//  /* So output assembly to do this */
-//
-//  /* Note, we wont do this here, but be sure to check for dispatch on void */
 //
 //  /* Then after the parent is initialized, you can output the assembly */
 //  /* to initialize the attributes */
@@ -1488,34 +1487,37 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     }
   }
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), str);
-  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), str);
-  emit_move(SELF, ACC, str); //e0 is in a0
+  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+
+  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
+  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
+  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
+  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
+  emit_move(SELF, ACC, str); // Move to new context, the object being initialized is calling Parent.init
 
   /* first we initialize the parent class, so long as we are not Object */
   if (strcmp(curr_class->name->get_string(), Object->get_string()) != 0) {
     CgenNodeP parent = curr_class->get_parentnd();
     char* parent_label = parent->name->get_string();
     str << JAL << parent_label << CLASSINIT_SUFFIX << endl;
+    // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
-      curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
+      curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this); //now ACC has value of intializer expression
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       emit_store(ACC, offset, SELF, str);
     }
   }
-  emit_move(ACC, SELF, str);
-  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), str);
+  emit_move(ACC, SELF, str); // the return value, in this case, the object being initialized, gets put in ACC
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
+  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
+  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
+  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA. 
+  
   emit_return(str);
-
   curr_class->envr->exitscope();
 }
 
