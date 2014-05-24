@@ -11,6 +11,12 @@
 #define yylineno curr_lineno;
 extern int yylineno;
 
+class CgenClassTable;
+typedef CgenClassTable *CgenClassTableP;
+
+class CgenNode;
+typedef CgenNode *CgenNodeP;
+
 inline Boolean copy_Boolean(Boolean b) {return b; }
 inline void assert_Boolean(Boolean) {}
 inline void dump_Boolean(ostream& stream, int padding, Boolean b)
@@ -98,14 +104,14 @@ int compute_max_locals() {return 0;} \
 Symbol type;                                 \
 Symbol get_type() { return type; }           \
 Expression set_type(Symbol s) { type = s; return this; } \
-virtual void code(ostream&) = 0; \
+virtual void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) = 0; \
 virtual int compute_max_locals() = 0; \
 virtual void dump_with_types(ostream&,int) = 0;  \
 void dump_type(ostream&, int);               \
 Expression_class() { type = (Symbol) NULL; }
 
 #define Expression_SHARED_EXTRAS           \
-void code(ostream&); 		\
+void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table); 		\
 int compute_max_locals();	   \
 void dump_with_types(ostream&,int); 
 

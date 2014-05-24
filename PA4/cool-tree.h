@@ -20,7 +20,7 @@ struct var_loc
   //if context = Class, offset is relative to the self object ($so)
   //if context = Method, offset is relative to the frame pointer ($fp)
   //if context = expression, offset is relative to stack pointer ($sp)
-  tree_node* context;
+  char* context;
   //offset from some location based on context
   //offset in number of words (0, 1, 2...)
   int offset;
@@ -68,6 +68,7 @@ public:
    virtual Symbol get_name() = 0;
    virtual Symbol get_type() = 0;
    virtual Expression get_expr() = 0;
+   virtual Formals get_formals() = 0; 
 
    bool ismethod;
    Symbol current_class;
@@ -85,6 +86,7 @@ class Formal_class : public tree_node {
 public:
    tree_node *copy()		 { return copy_Formal(); }
    virtual Formal copy_Formal() = 0;
+   virtual Symbol get_name() = 0;
 
 #ifdef Formal_EXTRAS
    Formal_EXTRAS
@@ -213,6 +215,7 @@ public:
    Symbol get_name();
    Symbol get_type();
    Expression get_expr();
+   Formals get_formals();
    
 
 #ifdef Feature_SHARED_EXTRAS
@@ -242,6 +245,7 @@ public:
    Symbol get_name();
    Symbol get_type();
    Expression get_expr();
+   Formals get_formals();
 
 
 #ifdef Feature_SHARED_EXTRAS
@@ -265,6 +269,7 @@ public:
    }
    Formal copy_Formal();
    void dump(ostream& stream, int n);
+   Symbol get_name();
 
 #ifdef Formal_SHARED_EXTRAS
    Formal_SHARED_EXTRAS

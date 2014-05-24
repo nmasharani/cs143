@@ -30,12 +30,6 @@ private:
    SymbolTable<Symbol, int> * name_to_tag;
    SymbolTable<int, Entry> * tag_to_name; 
 
-   /* FOR TRACKING CLASS METHODS AND ATTRS */
-   SymbolTable<Symbol, Features_class> * class_methods;
-   SymbolTable<Symbol, Features_class> * class_attributes;
-
-
-
 
 // The following methods emit code for
 // constants and global declarations.
@@ -80,9 +74,16 @@ private:
    void dump_classes_attributes(ostream& s);
    void dump_class_attributes(Symbol class_name, ostream& s);
 public:
+
+   /* FOR TRACKING CLASS METHODS AND ATTRS */
+   SymbolTable<Symbol, Features_class> * class_methods;
+   SymbolTable<Symbol, Features_class> * class_attributes;
+
    CgenClassTable(Classes, ostream& str);
    void code();
    CgenNodeP root();
+   int compute_offset_in_disp_table(Symbol name, Symbol type);
+   int get_tag_for_type(Symbol type_name);
 };
 
 
@@ -114,4 +115,3 @@ class BoolConst
   void code_def(ostream&, int boolclasstag);
   void code_ref(ostream&) const;
 };
-
