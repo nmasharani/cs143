@@ -1,5 +1,5 @@
 
-//**************************************************************
+/////////////////////////////////////////////////////////////////
 //
 // Code generator SKELETON
 //
@@ -20,7 +20,7 @@
 // segments, declare globals, and emit constants.  You must
 // fill in the rest.
 //
-//**************************************************************
+/////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////
 //
@@ -77,9 +77,12 @@ Symbol
        substr,
        type_name,
        val;
+
+//////////////////////////////////////////////////////////////////////////////
 //
 // Initializing the predefined symbols.
 //
+//////////////////////////////////////////////////////////////////////////////
 static void initialize_constants(void)
 {
   arg         = idtable.add_string("arg");
@@ -123,7 +126,7 @@ static char *gc_collect_names[] =
 BoolConst falsebool(FALSE);
 BoolConst truebool(TRUE);
 
-//*********************************************************
+//////////////////////////////////////////////////////////////////////////////
 //
 // Define method for code generation
 //
@@ -134,7 +137,7 @@ BoolConst truebool(TRUE);
 // That constructor performs all of the work of the code
 // generator.
 //
-//*********************************************************
+//////////////////////////////////////////////////////////////////////////////
 
 void program_class::cgen(ostream &os) 
 {
@@ -161,109 +164,240 @@ void program_class::cgen(ostream &os)
 //  for symbolic names you can use to refer to the strings.
 //
 //////////////////////////////////////////////////////////////////////////////
-
 static void emit_load(char *dest_reg, int offset, char *source_reg, ostream& s)
 {
   s << LW << dest_reg << " " << offset * WORD_SIZE << "(" << source_reg << ")" 
     << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_store(char *source_reg, int offset, char *dest_reg, ostream& s)
 {
   s << SW << source_reg << " " << offset * WORD_SIZE << "(" << dest_reg << ")"
       << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_load_imm(char *dest_reg, int val, ostream& s)
 { s << LI << dest_reg << " " << val << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_load_address(char *dest_reg, char *address, ostream& s)
 { s << LA << dest_reg << " " << address << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_partial_load_address(char *dest_reg, ostream& s)
 { s << LA << dest_reg << " "; }
 
-static void emit_load_bool(char *dest, const BoolConst& b, ostream& s)
-{
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
+static void emit_load_bool(char *dest, const BoolConst& b, ostream& s) {
   emit_partial_load_address(dest,s);
   b.code_ref(s);
   s << endl;
 }
 
-static void emit_load_string(char *dest, StringEntry *str, ostream& s)
-{
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
+static void emit_load_string(char *dest, StringEntry *str, ostream& s) {
   emit_partial_load_address(dest,s);
   str->code_ref(s);
   s << endl;
 }
 
-static void emit_load_int(char *dest, IntEntry *i, ostream& s)
-{
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
+static void emit_load_int(char *dest, IntEntry *i, ostream& s) {
   emit_partial_load_address(dest,s);
   i->code_ref(s);
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_move(char *dest_reg, char *source_reg, ostream& s)
 { s << MOVE << dest_reg << " " << source_reg << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_neg(char *dest, char *src1, ostream& s)
 { s << NEG << dest << " " << src1 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_add(char *dest, char *src1, char *src2, ostream& s)
 { s << ADD << dest << " " << src1 << " " << src2 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_addu(char *dest, char *src1, char *src2, ostream& s)
 { s << ADDU << dest << " " << src1 << " " << src2 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_addiu(char *dest, char *src1, int imm, ostream& s)
 { s << ADDIU << dest << " " << src1 << " " << imm << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_div(char *dest, char *src1, char *src2, ostream& s)
 { s << DIV << dest << " " << src1 << " " << src2 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_mul(char *dest, char *src1, char *src2, ostream& s)
 { s << MUL << dest << " " << src1 << " " << src2 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_sub(char *dest, char *src1, char *src2, ostream& s)
 { s << SUB << dest << " " << src1 << " " << src2 << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_sll(char *dest, char *src1, int num, ostream& s)
 { s << SLL << dest << " " << src1 << " " << num << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_jalr(char *dest, ostream& s)
 { s << JALR << "\t" << dest << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_jal(char *address,ostream &s)
 { s << JAL << address << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_return(ostream& s)
 { s << RET << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_gc_assign(ostream& s)
 { s << JAL << "_GenGC_Assign" << endl; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_disptable_ref(Symbol sym, ostream& s)
 {  s << sym << DISPTAB_SUFFIX; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_init_ref(Symbol sym, ostream& s)
 { s << sym << CLASSINIT_SUFFIX; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_label_ref(int l, ostream &s)
 { s << "label" << l; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_protobj_ref(Symbol sym, ostream& s)
 { s << sym << PROTOBJ_SUFFIX; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_method_ref(Symbol classname, Symbol methodname, ostream& s)
 { s << classname << METHOD_SEP << methodname; }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_label_def(int l, ostream &s)
 {
   emit_label_ref(l,s);
   s << ":" << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_beqz(char *source, int label, ostream &s)
 {
   s << BEQZ << source << " ";
@@ -271,6 +405,11 @@ static void emit_beqz(char *source, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_beq(char *src1, char *src2, int label, ostream &s)
 {
   s << BEQ << src1 << " " << src2 << " ";
@@ -278,6 +417,11 @@ static void emit_beq(char *src1, char *src2, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_bne(char *src1, char *src2, int label, ostream &s)
 {
   s << BNE << src1 << " " << src2 << " ";
@@ -285,6 +429,11 @@ static void emit_bne(char *src1, char *src2, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_bleq(char *src1, char *src2, int label, ostream &s)
 {
   s << BLEQ << src1 << " " << src2 << " ";
@@ -292,6 +441,11 @@ static void emit_bleq(char *src1, char *src2, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_blt(char *src1, char *src2, int label, ostream &s)
 {
   s << BLT << src1 << " " << src2 << " ";
@@ -299,6 +453,11 @@ static void emit_blt(char *src1, char *src2, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_blti(char *src1, int imm, int label, ostream &s)
 {
   s << BLT << src1 << " " << imm << " ";
@@ -306,6 +465,11 @@ static void emit_blti(char *src1, int imm, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_bgti(char *src1, int imm, int label, ostream &s)
 {
   s << BGT << src1 << " " << imm << " ";
@@ -313,6 +477,11 @@ static void emit_bgti(char *src1, int imm, int label, ostream &s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_branch(int l, ostream& s)
 {
   s << BRANCH;
@@ -320,31 +489,41 @@ static void emit_branch(int l, ostream& s)
   s << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Push a register on the stack. The stack grows towards smaller addresses.
 //
+////////////////////////////////////////////////////////////////////////////////
 static void emit_push(char *reg, ostream& str)
 {
   emit_store(reg,0,SP,str);
   emit_addiu(SP,SP,-4,str);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Fetch the integer value in an Int object.
 // Emits code to fetch the integer value of the Integer object pointed
 // to by register source into the register dest
 //
+////////////////////////////////////////////////////////////////////////////////
 static void emit_fetch_int(char *dest, char *source, ostream& s)
 { emit_load(dest, DEFAULT_OBJFIELDS, source, s); }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emits code to store the integer value contained in register source
 // into the Integer object pointed to by dest.
 //
+////////////////////////////////////////////////////////////////////////////////
 static void emit_store_int(char *source, char *dest, ostream& s)
 { emit_store(source, DEFAULT_OBJFIELDS, dest, s); }
 
-
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_test_collector(ostream &s)
 {
   emit_push(ACC, s);
@@ -355,6 +534,11 @@ static void emit_test_collector(ostream &s)
   emit_load(ACC,0,SP,s);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit mips helper. 
+//
+////////////////////////////////////////////////////////////////////////////////
 static void emit_gc_check(char *source, ostream &s)
 {
   if (source != (char*)A1) emit_move(A1, source, s);
@@ -383,19 +567,22 @@ static void emit_gc_check(char *source, ostream &s)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Strings
 //
+////////////////////////////////////////////////////////////////////////////////
 void StringEntry::code_ref(ostream& s)
 {
   s << STRCONST_PREFIX << index;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emit code for a constant String.
 // You should fill in the code naming the dispatch table.
 //
-
+////////////////////////////////////////////////////////////////////////////////
 void StringEntry::code_def(ostream& s, int stringclasstag)
 {
   IntEntryP lensym = inttable.add_int(len);
@@ -408,9 +595,6 @@ void StringEntry::code_def(ostream& s, int stringclasstag)
       << WORD << (DEFAULT_OBJFIELDS + STRING_SLOTS + (len+4)/4) << endl // size
       << WORD;
 
-
- /***** Add dispatch information for class String ******/
-
       emit_disptable_ref(Str, s);
 
       s << endl;                                              // dispatch table
@@ -419,30 +603,35 @@ void StringEntry::code_def(ostream& s, int stringclasstag)
   s << ALIGN;                                                 // align to word
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // StrTable::code_string
 // Generate a string object definition for every string constant in the 
 // stringtable.
 //
+////////////////////////////////////////////////////////////////////////////////
 void StrTable::code_string_table(ostream& s, int stringclasstag)
 {  
   for (List<StringEntry> *l = tbl; l; l = l->tl())
     l->hd()->code_def(s,stringclasstag);
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Ints
 //
+////////////////////////////////////////////////////////////////////////////////
 void IntEntry::code_ref(ostream &s)
 {
   s << INTCONST_PREFIX << index;
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emit code for a constant Integer.
 // You should fill in the code naming the dispatch table.
 //
-
+////////////////////////////////////////////////////////////////////////////////
 void IntEntry::code_def(ostream &s, int intclasstag)
 {
   // Add -1 eye catcher
@@ -453,20 +642,19 @@ void IntEntry::code_def(ostream &s, int intclasstag)
       << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << endl  // object size
       << WORD; 
 
- /***** Add dispatch information for class Int ******/
-
       emit_disptable_ref(Int, s);
 
       s << endl;                                          // dispatch table
       s << WORD << str << endl;                           // integer value
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
 //
 // IntTable::code_string_table
 // Generate an Int object definition for every Int constant in the
 // inttable.
 //
+////////////////////////////////////////////////////////////////////////////////
 void IntTable::code_string_table(ostream &s, int intclasstag)
 {
   for (List<IntEntry> *l = tbl; l; l = l->tl())
@@ -474,9 +662,11 @@ void IntTable::code_string_table(ostream &s, int intclasstag)
 }
 
 
+//////////////////////////////////////////////////////////////////////////////////
 //
 // Bools
 //
+//////////////////////////////////////////////////////////////////////////////////
 BoolConst::BoolConst(int i) : val(i) { assert(i == 0 || i == 1); }
 
 void BoolConst::code_ref(ostream& s) const
@@ -484,11 +674,12 @@ void BoolConst::code_ref(ostream& s) const
   s << BOOLCONST_PREFIX << val;
 }
   
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emit code for a constant Bool.
 // You should fill in the code naming the dispatch table.
 //
-
+////////////////////////////////////////////////////////////////////////////////
 void BoolConst::code_def(ostream& s, int boolclasstag)
 {
   // Add -1 eye catcher
@@ -498,8 +689,6 @@ void BoolConst::code_def(ostream& s, int boolclasstag)
       << WORD << boolclasstag << endl                       // class tag
       << WORD << (DEFAULT_OBJFIELDS + BOOL_SLOTS) << endl   // object size
       << WORD;
-
- /***** Add dispatch information for class Bool ******/
 
       emit_disptable_ref(Bool, s);
 
@@ -513,12 +702,12 @@ void BoolConst::code_def(ostream& s, int boolclasstag)
 //
 //////////////////////////////////////////////////////////////////////////////
 
-//***************************************************
+////////////////////////////////////////////////////////////////////////////////
 //
 //  Emit code to start the .data segment and to
 //  declare the global names.
 //
-//***************************************************
+////////////////////////////////////////////////////////////////////////////////
 
 void CgenClassTable::code_global_data()
 {
@@ -555,12 +744,12 @@ void CgenClassTable::code_global_data()
 }
 
 
-//***************************************************
+////////////////////////////////////////////////////////////////////////////////
 //
 //  Emit code to start the .text segment and to
 //  declare the global names.
 //
-//***************************************************
+////////////////////////////////////////////////////////////////////////////////
 
 void CgenClassTable::code_global_text()
 {
@@ -604,7 +793,7 @@ void CgenClassTable::code_select_gc()
 }
 
 
-//********************************************************
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emit code to reserve space for and initialize all of
 // the constants.  Class names should have been added to
@@ -615,7 +804,7 @@ void CgenClassTable::code_select_gc()
 // are emmitted by running through the stringtable and inttable
 // and producing code for each entry.
 //
-//********************************************************
+////////////////////////////////////////////////////////////////////////////////
 
 void CgenClassTable::code_constants()
 {
@@ -630,14 +819,13 @@ void CgenClassTable::code_constants()
   code_bools(boolclasstag);
 }
 
-//********************************************************
+////////////////////////////////////////////////////////////////////////////////
 //
 // Outputs the string representation of the label that 
 // appears in the attrbute slot of the given type
 // within the prototype for a class's object. 
 //
-//********************************************************
-
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
   if (strcmp(type->get_string(), Int->get_string()) == 0) {
     //find the int const label associated with 0 and return that
@@ -655,6 +843,11 @@ void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
   s << WORD << "0" << endl;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Accessor methods defined for the AST nodes. 
+//
+////////////////////////////////////////////////////////////////////////////////
 Symbol attr_class::get_type() { return type_decl; };
 
 Symbol method_class::get_type() { return return_type; };
@@ -673,11 +866,22 @@ Formals method_class::get_formals() { return formals; };
 
 Symbol formal_class::get_name() { return name; };
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Max helper function. 
+//
+////////////////////////////////////////////////////////////////////////////////
 int max(int num1, int num2) {
   if (num1 > num2) return num1;
   return num2;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emits the labels and outlays space for the prototype objects of the
+// program being compiled. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_protos() {
   // nl = node list
   for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
@@ -766,7 +970,11 @@ Feature CgenClassTable::resolve_method(Feature parent_feat, Features child_feats
   return parent_feat;
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
+//
+// Builds the dispatch table for the given class. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::build_subclass_methods(CgenNodeP current, Symbol parent) {
   Symbol class_name = current->name;
   Features features = current->features;
@@ -828,6 +1036,12 @@ void CgenClassTable::build_classes_methods() {
   build_subclass_methods(rt, parent);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Prints the dispatch table of the class to the 
+// given stream. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::dump_class_methods(Symbol class_name, ostream& s) {
   s << class_name->get_string() << endl;
   Features methods = class_methods->lookup(class_name);
@@ -835,7 +1049,6 @@ void CgenClassTable::dump_class_methods(Symbol class_name, ostream& s) {
   for (int i = methods->first(); methods->more(i); i = methods->next(i)) {
     Feature method = methods->nth(i);
     s << "\t" << method->current_class << "." << method->get_name()->get_string() << endl;
-    // s << "\t" << method->get_name()->get_string() << endl;
   }
 }
 
@@ -844,6 +1057,13 @@ void CgenClassTable::dump_classes_methods(ostream& s) {
     dump_class_methods(nl->hd()->name, s);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Prints the attrbiutes of a class to stream. 
+// Used for debugging to ensure that things are
+// in proper order. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::dump_class_attributes(Symbol class_name, ostream& s) {
   s << class_name->get_string() << endl;
   Features attributes = class_attributes->lookup(class_name);
@@ -859,6 +1079,17 @@ void CgenClassTable::dump_classes_attributes(ostream& s) {
     dump_class_attributes(nl->hd()->name, s);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Builds a list of attrbiutes for each class
+// making sure to add the attributes
+// in the correct order.
+// The order of the attributes in the list is the
+// order in which the attributes will be laid out
+// in the in memory "record" for the object of this
+// given class. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::build_class_attributes(CgenNodeP current, Symbol parent) {
   Symbol class_name = current->name;
   Features features = current->features;
@@ -886,6 +1117,12 @@ void CgenClassTable::build_class_attributes(CgenNodeP current, Symbol parent) {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Dispatches to the build_class_attributes for each 
+// class. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::build_classes_attributes() {
   class_attributes->enterscope();
   Symbol parent = NULL;
@@ -893,11 +1130,11 @@ void CgenClassTable::build_classes_attributes() {
   build_class_attributes(rt, parent);
 }
 
-/////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Prints the class_nameTab to the file. 
 //
-/////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_name_table() {
   str << CLASSNAMETAB << LABEL;
   for (int i = 0; i < tagtracker; i++) {
@@ -908,11 +1145,11 @@ void CgenClassTable::code_name_table() {
   }
 }
 
-/////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Prints the class_objTab to the file. 
 //
-/////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_object_table() {
   str << CLASSOBJTAB << LABEL;
   for (int i = 0; i < tagtracker; i++) {
@@ -922,6 +1159,12 @@ void CgenClassTable::code_object_table() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Emit the labels for the dispatch table of each
+// class. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_dispatch_table() {
   for (int i = 0; i < tagtracker; i++) {
     Symbol class_name = tag_to_name->lookup(i);
@@ -934,11 +1177,18 @@ void CgenClassTable::code_dispatch_table() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// CgenTable constructor. Initializes all of the 
+// compilers data structures, and then launches
+// the code function. 
+//
+////////////////////////////////////////////////////////////////////////////////
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
-   stringclasstag = 4 /* Change to your String class tag here */;
-   intclasstag =    2 /* Change to your Int class tag here */;
-   boolclasstag =   3 /* Change to your Bool class tag here */;
+   stringclasstag = 4;
+   intclasstag =    2;
+   boolclasstag =   3;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -946,7 +1196,6 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    install_classes(classes);
    build_inheritance_tree();
 
-   /* added by NM */
    // Stores a mapping from class name to tag.
    name_to_tag = new SymbolTable<Symbol, int>(); 
    tag_to_name = new SymbolTable<int, Entry>();
@@ -973,7 +1222,6 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    tag_to_name->addid(5, Main);
 
    tagtracker = 6;
-   /* end added by NM */
 
    /* TRACKING CLASS METHODS AND ATTRIBUTES */
    class_attributes = new SymbolTable<Symbol, Features_class>();
@@ -988,8 +1236,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    exitscope();
 }
 
-void CgenClassTable::install_basic_classes()
-{
+void CgenClassTable::install_basic_classes() {
 
 // The tree package uses these globals to annotate the classes built below.
   //curr_lineno  = 0;
@@ -1110,11 +1357,14 @@ void CgenClassTable::install_basic_classes()
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
 // CgenClassTable::install_class
 // CgenClassTable::install_classes
 //
 // install_classes enters a list of classes in the symbol table.
 //
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::install_class(CgenNodeP nd)
 {
   Symbol name = nd->get_name();
@@ -1124,9 +1374,7 @@ void CgenClassTable::install_class(CgenNodeP nd)
       return;
     }
 
-  // The class name is legal, so add it to the list of classes
-  // and the symbol table.
-  nds = new List<CgenNode>(nd,nds);
+  nds = new List<CgenNode>(nd,nds); /* The class name is legal, so add it to the list of classes and the symbol table. */
   addid(name,nd);
 }
 
@@ -1136,21 +1384,25 @@ void CgenClassTable::install_classes(Classes cs)
     install_class(new CgenNode(cs->nth(i),NotBasic,this));
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // CgenClassTable::build_inheritance_tree
 //
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::build_inheritance_tree()
 {
   for(List<CgenNode> *l = nds; l; l = l->tl())
       set_relations(l->hd());
 }
 
+////////////////////////////////////////////////////////////////////////////////
 //
 // CgenClassTable::set_relations
 //
 // Takes a CgenNode and locates its, and its parent's, inheritance nodes
 // via the class table.  Parent and child pointers are added as appropriate.
 //
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::set_relations(CgenNodeP nd)
 {
   CgenNode *parent_node = probe(nd->get_parent());
@@ -1170,12 +1422,12 @@ void CgenNode::set_parentnd(CgenNodeP p)
   parentnd = p;
 }
 
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Add the attributes for each class to that class's
 // enviornemnt. 
 //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::initialize_class_enviornment() {
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
@@ -1195,7 +1447,7 @@ void CgenClassTable::initialize_class_enviornment() {
   }
 }
 
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Gnerates the Class_init method for each class
 // in the program.
@@ -1221,7 +1473,7 @@ void CgenClassTable::initialize_class_enviornment() {
 //  /* the location of the attributes is determined as the offset in the self object */
 //  /* as determined by the envr stored in the curr_class */
 //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_init_ref(curr_class->name, cout); cout << LABEL;
   /* first we set up the stack */
@@ -1263,12 +1515,12 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_return(cout);
 }
 
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Call the init method constructor for each class 
 // node. 
 //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 void CgenClassTable::code_init_methods() {
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
@@ -1277,7 +1529,7 @@ void CgenClassTable::code_init_methods() {
   }
 }
 
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Emits the code for the method curr_feat
 // defined in curr_class
@@ -1288,7 +1540,7 @@ void CgenClassTable::code_init_methods() {
 //
 // THIS IS THE CALLEE
 //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_method_ref(curr_class->name, curr_feat->get_name(), cout); cout << LABEL;
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
@@ -1323,13 +1575,13 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_return(cout);
 }
 
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // Call the code_method function for each method
 // defined for this class. This means that we are
 // defining the code for each method label defined 
 //
-/////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_class_methods() {
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
@@ -1344,6 +1596,32 @@ void CgenClassTable::code_class_methods() {
   }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Returns the offset in the disp table given
+// by type of the method named name. 
+//
+////////////////////////////////////////////////////////////////////////////////
+int CgenClassTable::compute_offset_in_disp_table(Symbol name, Symbol type) {
+  Features attrs = class_attributes->lookup(type);
+  for (int i = attrs->first(); attrs->more(i); i = attrs->next(i)) {
+    if (strcmp(name->get_string(), attrs->nth(i)->get_name()->get_string()) == 0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Code generation launcher. Consolidates
+// the functions that generate mips to str.  
+//
+// Starter code comment: prototype objects, 
+// class_nameTab, dispatch tables, object initializer
+// the class methods...
+//
+////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code()
 {
   if (cgen_debug) cout << "coding global data" << endl;
@@ -1354,14 +1632,6 @@ void CgenClassTable::code()
 
   if (cgen_debug) cout << "coding constants" << endl;
   code_constants();
-
-/* TODO(nm): protos! */
-
-//                 Add your code to emit
-//                   - prototype objects
-//                   - class_nameTab
-//                   - dispatch tables
-//
 
   if (cgen_debug) cout << "coding prototype objects" << endl;
   code_protos();
@@ -1381,18 +1651,11 @@ void CgenClassTable::code()
   if (cgen_debug) cout << "Intialize the envionment for each class" << endl;
   initialize_class_enviornment();
 
-  //Need to impliment this method
   if (cgen_debug) cout << "Code init methods" << endl;
   code_init_methods();
 
   if (cgen_debug) cout << "Code the class methods" << endl;
   code_class_methods();
-
-//                 Add your code to emit
-//                   - object initializer
-//                   - the class methods
-//                   - etc...
-
 }
 
 
@@ -1402,11 +1665,11 @@ CgenNodeP CgenClassTable::root()
 }
 
 
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
 // CgenNode methods
 //
-///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
    class__class((const class__class &) *nd),
@@ -1419,7 +1682,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 }
 
 
-//******************************************************************
+////////////////////////////////////////////////////////////////////////////////
 //
 //   Fill in the following methods to produce code for the
 //   appropriate expression.  You may add or remove parameters
@@ -1427,7 +1690,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 //   of the declarations in `cool-tree.h'  Sample code for
 //   constant integers, strings, and booleans are provided.
 //
-//*****************************************************************
+////////////////////////////////////////////////////////////////////////////////
 
 void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
 }
@@ -1449,9 +1712,9 @@ int static_dispatch_class::compute_max_locals() {
   return sum;
 }
 
-//////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 //
-//////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
@@ -1461,14 +1724,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   }
   expr->code(cout, temp_start, envr, table); //we know the value of expr is now in ACC. 
   emit_load(T1, DISPTABLE_OFFSET, ACC, cout);
-  Features attrs = class_attributes->lookup(expr->get_type());
-  int offset_in_disp_tab = 0;
-  for (int i = attrs->first(); attrs->more(i); i = attrs->next(i)) {
-    if (strcmp(name->get_string(), attrs->nth(i)->get_name()->get_string()) == 0) {
-      offset_in_disp_tab = i;
-      break;
-    }
-  }
+  int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
   emit_addiu(T2, T1, offset_in_disp_tab * WORD_SIZE, cout); //This loads the address of the function we want to dispatch to in the register T2. 
   emit_jalr(T2, cout);
 }
@@ -1672,7 +1928,6 @@ int object_class::compute_max_locals() {
   return 0;
 }
 
-
 void CgenClassTable::dump_class_enviornment() {
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
@@ -1680,5 +1935,3 @@ void CgenClassTable::dump_class_enviornment() {
     curr_class->envr->dump();
   }
 }
-
-
