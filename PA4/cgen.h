@@ -49,6 +49,7 @@ private:
    void code_init_method(CgenNodeP curr_class);
    void code_class_methods();
    void code_method(CgenNodeP curr_class, Feature curr_feat); 
+   int compute_max_locals_for_class_init(CgenNodeP curr_class);
 
    void emit_proto_attribute(ostream& s, Symbol type);
 

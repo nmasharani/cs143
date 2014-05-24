@@ -1449,6 +1449,23 @@ void CgenClassTable::initialize_class_enviornment() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Return the locals needed to evaluate the attributes of a class. 
+//
+////////////////////////////////////////////////////////////////////////////////
+int CgenClassTable::compute_max_locals_for_class_init(CgenNodeP curr_class) {
+  int num_locals_needed = 0;
+  Features feats = curr_class->features;
+  for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
+    Feature curr_feat = feats->nth(i);
+    if (curr_feat->ismethod == false) {
+      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
+    }
+  }
+  return num_locals_needed;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // Gnerates the Class_init method for each class
 // in the program.
 // NOTE: it is assumed that the object being initialized
@@ -1475,17 +1492,10 @@ void CgenClassTable::initialize_class_enviornment() {
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   curr_class->envr->enterscope();
-
   emit_init_ref(curr_class->name, str); str << LABEL;
   /* first we set up the stack */
-  int num_locals_needed = 0;
-  Features feats = curr_class->features;
-  for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
-    Feature curr_feat = feats->nth(i);
-    if (curr_feat->ismethod == false) {
-      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
-    }
-  }
+  
+  int num_locals_needed = compute_max_locals_for_class_init(curr_class);
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
 
@@ -1503,6 +1513,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     str << JAL << parent_label << CLASSINIT_SUFFIX << endl;
     // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
+  Features feats = curr_class->features;
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
@@ -1516,7 +1527,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
   emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
   emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA. 
-  
+
   emit_return(str);
   curr_class->envr->exitscope();
 }
@@ -1570,39 +1581,36 @@ void CgenClassTable::code_init_methods() {
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   curr_class->envr->enterscope();
-
   emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
+
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
-  if (cgen_debug) {
-    cout << "Coding method " << curr_feat->get_name()->get_string() << endl;
-    cout << "     num locals needed = " << num_locals_needed << endl;
-  }
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), str);
-  emit_store(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_store(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_store(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(FP, SP, (WORD_SIZE) * (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), str);
-  emit_move(SELF, ACC, str); //e0 if in a0
+  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+
+  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
+  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
+  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
+  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
+  emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
 
   Formals formals = curr_feat->get_formals();
   for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
     Formal curr_formal = formals->nth(i);
-    int offset = i + OFFSET_FROM_FP_TO_FIRST_PARAM; 
+    int offset = i; 
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
-    loc->offset = offset;
+    loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
     curr_class->envr->addid(curr_formal->get_name(), loc);
   }
+  curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this); // now the return Object of this expression is in ACC
 
-  curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
+  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
+  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
+  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA.
 
-  emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, str);
-  emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, str);
-  emit_load(RA, (num_locals_needed - SAVE_RA_OFFSET), SP, str);
-  emit_addiu(SP, SP, num_locals_needed * (WORD_SIZE), str);
   emit_return(str);
-
   curr_class->envr->exitscope();
 }
 
@@ -1757,7 +1765,7 @@ int static_dispatch_class::compute_max_locals() {
   sum += expr->compute_max_locals();
   for (int i = actual->first(); actual->more(i); i++) {
     Expression curr_expr = actual->nth(i);
-    sum += curr_expr->compute_max_locals();
+    sum += curr_expr->compute_max_locals() + 1;
   }
   return sum;
 }
@@ -1775,17 +1783,19 @@ int static_dispatch_class::compute_max_locals() {
 // visible from the caller. The callee can access values that the caller has access
 // to, but the callee defines its names for these variable via the formals list.  
 //
+// TODO, Need to handle the dispatch on void TODO
+//
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
-  cout << "Coding dispatch " << endl;
+
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
-    curr_param->code(s, temp_start, envr, table);
-    int curr_offset = i + 1;
-    emit_store(ACC, curr_offset, SP, s); //caller pushes function arguments to stack. Pushes first argument first, and adds arguments upwards. 
+    curr_param->code(s, temp_start, envr, table); // Now the return value for this argument is in ACC. 
+    int curr_offset = i;
+    emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
   }
-  expr->code(s, temp_start, envr, table); //we know the value of expr is now in ACC. 
-  emit_load(T1, DISPTABLE_OFFSET, ACC, s);
+  expr->code(s, temp_start, envr, table); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
+  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // now, we load the address of the dispatch table for this class into a temporary T1. 
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
   emit_addiu(T2, T1, offset_in_disp_tab * WORD_SIZE, s); //This loads the address of the function we want to dispatch to in the register T2. 
   emit_jalr(T2, s);
@@ -1796,7 +1806,7 @@ int dispatch_class::compute_max_locals() {
   sum += expr->compute_max_locals();
   for (int i = actual->first(); actual->more(i); i++) {
     Expression curr_expr = actual->nth(i);
-    sum += curr_expr->compute_max_locals();
+    sum += curr_expr->compute_max_locals() + 1;
   }
   return sum;
 }
@@ -1973,6 +1983,8 @@ int bool_const_class::compute_max_locals() {
 // Use that typname to generate the labels for the prototype and 
 // init methods we want the code to access. 
 //
+// TODO, need to handle SELF_TYPE TODO
+//
 // We will then need to call the copy method, passing the address of this
 // prototype object, and then call the init method, this time passing
 // the return value of the copy method. After copy and init, we will 
@@ -2018,6 +2030,7 @@ int isvoid_class::compute_max_locals() {
 }
 
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  return;
 }
 
 int no_expr_class::compute_max_locals() {

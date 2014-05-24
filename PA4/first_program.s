@@ -311,11 +311,11 @@ heap_start:
 	.globl	Bool_init
 	.globl	Main.main
 Main_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
 	la	$a0 IO_protObj
@@ -325,90 +325,90 @@ Main_init:
 	la	$a0 str_const1
 	sw	$a0 16($s0)
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 String_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
 	sw	$a0 12($s0)
 	sw	$a0 16($s0)
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 Bool_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
 	sw	$a0 12($s0)
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 Int_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
 	sw	$a0 12($s0)
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 IO_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 Object_init:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -12
 	move	$s0 $a0
 	move	$a0 $s0
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
 	addiu	$sp $sp 12
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 Main.main:
-	addiu	$sp $sp -12
-	sw	$fp 12($sp)
-	sw	$s0 8($sp)
-	sw	$ra 4($sp)
+	sw	$fp 0($sp)
+	sw	$s0 -4($sp)
+	sw	$ra -8($sp)
 	addiu	$fp $sp 0
+	addiu	$sp $sp -16
 	move	$s0 $a0
 	lw	$a0 16($s0)
 	sw	$a0 0($sp)
@@ -416,10 +416,10 @@ Main.main:
 	lw	$t1 8($a0)
 	addiu	$t2 $t1 0
 	jalr		$t2
-	lw	$fp 12($sp)
-	lw	$s0 8($sp)
-	lw	$ra 4($sp)
-	addiu	$sp $sp 12
+	addiu	$sp $sp 16
+	lw	$fp 0($sp)
+	lw	$s0 -4($sp)
+	lw	$ra -8($sp)
 	jr	$ra	
 
 # end of generated code

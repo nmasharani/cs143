@@ -21,7 +21,6 @@
 // NOTE: All offsets are given in terms of words!!
 //
 ///////////////////////////////////////////////////////////////////////
-#define OFFSET_FROM_FP_TO_FIRST_PARAM 4 
 #define NUM_REGISTERS_SAVED_BY_CALLER 3
 
 /* Ofsets are relative to SP */
