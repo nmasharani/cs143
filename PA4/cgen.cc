@@ -1225,6 +1225,10 @@ void CgenClassTable::code_init_methods() {
 /////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_method_ref(curr_class->name, curr_feat->get_name(), cout); cout << LABEL;
+
+  /* 1st compute the max number of locals needed */
+  /* Move the stack down by that amount, and then */
+  /* emit the assembly code that corresponds to the method body */
 }
 
 /////////////////////////////////////////////////////
@@ -1391,9 +1395,17 @@ void int_const_class::code(ostream& s)
   emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
 }
 
+int int_const_class::compute_max_locals() {
+
+}
+
 void string_const_class::code(ostream& s)
 {
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
+}
+
+int string_const_class::compute_max_locals() {
+
 }
 
 void bool_const_class::code(ostream& s)
@@ -1401,16 +1413,36 @@ void bool_const_class::code(ostream& s)
   emit_load_bool(ACC, BoolConst(val), s);
 }
 
+int bool_const_class::compute_max_locals() {
+  return 0;
+}
+
 void new__class::code(ostream &s) {
+}
+
+int new__class::compute_max_locals() {
+
 }
 
 void isvoid_class::code(ostream &s) {
 }
 
+int isvoid_class::compute_max_locals() {
+
+}
+
 void no_expr_class::code(ostream &s) {
 }
 
+int no_expr_class::compute_max_locals() {
+  return 0;
+}
+
 void object_class::code(ostream &s) {
+}
+
+int object_class::compute_max_locals() {
+  return 0;
 }
 
 
