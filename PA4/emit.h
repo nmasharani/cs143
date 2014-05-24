@@ -14,6 +14,9 @@
 
 #include "stringtab.h"
 
+#define OFFSET_FROM_FP_TO_FIRST_PARAM 4 
+#define NUM_REGISTERS_SAVED_BY_CALLER 3
+
 #define MAXINT  100000000    
 #define WORD_SIZE    4
 #define LOG_WORD_SIZE 2     // for logical shifts

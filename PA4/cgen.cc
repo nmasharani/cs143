@@ -1485,7 +1485,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
     }
   }
-  num_locals_needed += 3; // add 3 for the registers we will push
+  num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), cout);
   emit_store(FP, num_locals_needed, SP, cout);
   emit_store(SELF, (num_locals_needed - 1), SP, cout);
@@ -1502,7 +1502,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
-      curr_feat->get_expr()->code(cout, (num_locals_needed - 3), curr_class->envr, this);
+      curr_feat->get_expr()->code(cout, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       emit_store(ACC, offset, SELF, cout);
     }
@@ -1540,6 +1540,27 @@ void CgenClassTable::code_init_methods() {
 //
 // THIS IS THE CALLEE
 //
+// Arguments are pushed by the caller, starting from the bottom of the 
+// CALLER's stack frame, and then working upward (to higher addresses). 
+// So, if the method signature is f(x, y), then the value of x is pushed
+// by the caller to ($sp) + 4 bytes, and y is pushed at ($sp) + 8 bytes
+// where ($sp) is the value of the stack pointer as seen by the caller. 
+//
+// By our convention, the CALLEE saves and restores the caller's 
+// FP, SELF, and RA registers. These are saved in order starting from
+// the top working down. The CALLEE then moves its FP to the just below
+// the saved RA, which leaves 3 WORDS, or 12 bytes between the FP 
+// of the caller and the first argument. 
+//
+// This means that the CALLEE will reference the params via the FP. 
+// The first param will be at OFFSET_FROM_FP_TO_FIRST_PARAM + 0,
+// subsequent params will be at 
+// OFFSET_FROM_FP_TO_FIRST_PARAM + index, where index is that params
+// index number in the formal list. 
+// 
+// The CALLEE must define the names of these variables in the CALLEE's 
+// enviornment. 
+//
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_method_ref(curr_class->name, curr_feat->get_name(), cout); cout << LABEL;
@@ -1548,7 +1569,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
     cout << "Coding method " << curr_feat->get_name()->get_string() << endl;
     cout << "     num locals needed = " << num_locals_needed << endl;
   }
-  num_locals_needed += 3; // add 3 for the registers we will push
+  num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   emit_addiu(SP, SP, num_locals_needed * (-WORD_SIZE), cout);
   emit_store(FP, num_locals_needed, SP, cout);
   emit_store(SELF, (num_locals_needed - 1), SP, cout);
@@ -1559,7 +1580,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   Formals formals = curr_feat->get_formals();
   for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
     Formal curr_formal = formals->nth(i);
-    int offset = i + 4; //go in order, so that the first arg is the closest to the FP. The offest is the OFfset from FP to the arg. 
+    int offset = i + OFFSET_FROM_FP_TO_FIRST_PARAM; 
     var_loc* loc = new var_loc;
     loc->context = curr_feat;
     loc->offset = offset;
@@ -1713,6 +1734,17 @@ int static_dispatch_class::compute_max_locals() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+//
+// This the caller. Need to push arguments to function starting at stack
+// pointer and working up. We know we will have space because we computed
+// the number of locals at the start of the method def for which we called
+// this function. 
+// 
+// Also, do not need to touch the envr here, because the callee (method defintion
+// will have done that for its own envr, as the envr here is not the same. In 
+// other words, the callee should not know about any of the variables that are
+// visible from the caller. The callee can access values that the caller has access
+// to, but the callee defines its names for these variable via the formals list.  
 //
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
