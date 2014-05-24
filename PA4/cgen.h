@@ -14,6 +14,8 @@ typedef CgenClassTable *CgenClassTableP;
 class CgenNode;
 typedef CgenNode *CgenNodeP;
 
+
+
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
    List<CgenNode> *nds;
@@ -34,6 +36,7 @@ private:
 
 
 
+
 // The following methods emit code for
 // constants and global declarations.
 
@@ -46,6 +49,12 @@ private:
    void code_name_table();
    void code_object_table();
    void code_dispatch_table();
+   void initialize_class_enviornment();
+   void dump_class_enviornment(); //helper debug function
+   void code_init_methods();
+   void code_init_method(CgenNodeP curr_class);
+   void code_class_methods();
+   void code_method(CgenNodeP curr_class, Feature curr_feat); 
 
    void emit_proto_attribute(ostream& s, Symbol type);
 

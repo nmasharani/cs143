@@ -1149,7 +1149,102 @@ void CgenNode::set_parentnd(CgenNodeP p)
   parentnd = p;
 }
 
+/////////////////////////////////////////////////////
+//
+// Add the attributes for each class to that class's
+// enviornemnt. 
+//
+/////////////////////////////////////////////////////
+void CgenClassTable::initialize_class_enviornment() {
+  for(List<CgenNode> *l = nds; l; l = l->tl()) {
+    CgenNodeP curr_class = l->hd();
+    curr_class->envr = new SymbolTable<Symbol, var_loc>();
+    curr_class->envr->enterscope();
+    Symbol class_name = curr_class->name;
+    Features attrs = class_attributes->lookup(class_name);
+    if (cgen_debug) cout << "Enviornment for " << curr_class->name->get_string() << endl;
+    for (int i = attrs->first(); attrs->more(i); i = attrs->next(i)) {
+      Feature curr_attr = attrs->nth(i);
+      var_loc* loc = new var_loc;
+      loc->context = curr_class;
+      loc->offset = DEFAULT_OBJFIELDS + i;
+      curr_class->envr->addid(curr_attr->get_name(), loc);
+      if (cgen_debug) cout << "attribute " << curr_attr->get_name()->get_string() << " added with location " << DEFAULT_OBJFIELDS + i << endl;
+    }
+  }
+}
 
+/////////////////////////////////////////////////////
+//
+// Gnerates the Class_init method for each class
+// in the program.
+// NOTE: it is assumed that the object being initialized
+// is passed to this function in the self register ($s0)
+// just as if the init method were defined for this object
+// as a feature method. 
+//
+/////////////////////////////////////////////////////
+void CgenClassTable::code_init_method(CgenNodeP curr_class) {
+  emit_init_ref(curr_class->name, str); str << LABEL;
+  /* 1st needs to call the init method for the parent class */
+  /* So output assembly to do this */
+
+  /* Note, we wont do this here, but be sure to check for dispatch on void */
+
+  /* Then after the parent is initialized, you can output the assembly */
+  /* to initialize the attributes */
+  /* now generate the code to initialize each attribute */
+  /* First compute the number of locals that you need, then */
+  /* evaluate each expression, and assign the proper attribute */
+  /* in the object being initialized to the value returned by the expression */
+  /* the location of the attributes is determined as the offset in the self object */
+  /* as determined by the envr stored in the curr_class */
+
+
+}
+
+/////////////////////////////////////////////////////
+//
+// Call the init method constructor for each class 
+// node. 
+//
+/////////////////////////////////////////////////////
+
+void CgenClassTable::code_init_methods() {
+  for(List<CgenNode> *l = nds; l; l = l->tl()) {
+    CgenNodeP curr_class = l->hd();
+    code_init_method(curr_class);
+  }
+}
+
+/////////////////////////////////////////////////////
+//
+// Emits the code for the method curr_feat
+// defined in curr_class
+//
+/////////////////////////////////////////////////////
+void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
+  emit_method_ref(curr_class->name, curr_feat->get_name(), cout); cout << LABEL;
+}
+
+/////////////////////////////////////////////////////
+//
+// Call the code_method function for each method
+// defined for this class. This means that we are
+// defining the code for each method label defined 
+//
+/////////////////////////////////////////////////////
+void CgenClassTable::code_class_methods() {
+  for(List<CgenNode> *l = nds; l; l = l->tl()) {
+    CgenNodeP curr_class = l->hd();
+    //get the features, and then for each method, code the method.
+    Features feats = curr_class->features;
+    for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
+      Feature curr_feat = feats->nth(i);
+      code_method(curr_class, curr_feat); 
+    }
+  }
+}
 
 void CgenClassTable::code()
 {
@@ -1184,6 +1279,16 @@ void CgenClassTable::code()
 
   if (cgen_debug) cout << "coding global text" << endl;
   code_global_text();
+
+  if (cgen_debug) cout << "Intialize the envionment for each class" << endl;
+  initialize_class_enviornment();
+
+  //Need to impliment this method
+  if (cgen_debug) cout << "Code init methods" << endl;
+  code_init_methods();
+
+  if (cgen_debug) cout << "Code the class methods" << endl;
+  code_class_methods();
 
 //                 Add your code to emit
 //                   - object initializer
@@ -1275,6 +1380,7 @@ void leq_class::code(ostream &s) {
 }
 
 void comp_class::code(ostream &s) {
+
 }
 
 void int_const_class::code(ostream& s)  
@@ -1305,6 +1411,15 @@ void no_expr_class::code(ostream &s) {
 }
 
 void object_class::code(ostream &s) {
+}
+
+
+void CgenClassTable::dump_class_enviornment() {
+  for(List<CgenNode> *l = nds; l; l = l->tl()) {
+    CgenNodeP curr_class = l->hd();
+    cout << "Enviornment for " << curr_class->name->get_string() << endl;
+    curr_class->envr->dump();
+  }
 }
 
 

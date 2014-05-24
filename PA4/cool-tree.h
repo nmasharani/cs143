@@ -11,6 +11,20 @@
 
 #include "tree.h"
 #include "cool-tree.handcode.h"
+#include "symtab.h"
+
+
+struct var_loc
+{
+  //context in which we are declared in
+  //if context = Class, offset is relative to the self object ($so)
+  //if context = Method, offset is relative to the frame pointer ($fp)
+  //if context = expression, offset is relative to stack pointer ($sp)
+  tree_node* context;
+  //offset from some location based on context
+  //offset in number of words (0, 1, 2...)
+  int offset;
+};
 
 
 // define the class for phylum
@@ -33,6 +47,8 @@ typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
 public:
+   /* The current enviornment */
+   SymbolTable<Symbol, var_loc>* envr;
    tree_node *copy()		 { return copy_Class_(); }
    virtual Class_ copy_Class_() = 0;
 

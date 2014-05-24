@@ -283,6 +283,57 @@ class_nameTab:
 	.word	str_const10
 	.word	str_const11
 	.word	str_const12
+class_objTab:
+	.word	Object_protObj
+	.word	Object_init
+	.word	IO_protObj
+	.word	IO_init
+	.word	Int_protObj
+	.word	Int_init
+	.word	Bool_protObj
+	.word	Bool_init
+	.word	String_protObj
+	.word	String_init
+	.word	Main_protObj
+	.word	Main_init
+	.word	Aardvark_protObj
+	.word	Aardvark_init
+Object_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+IO_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+	.word	IO.out_string
+	.word	IO.out_int
+	.word	IO.in_string
+	.word	IO.in_int
+Int_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+Bool_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+String_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+	.word	String.length
+	.word	String.concat
+	.word	String.substr
+Main_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
+	.word	Main.main
+Aardvark_dispTab
+	.word	Object.abort
+	.word	Object.type_name
+	.word	Object.copy
 	.globl	heap_start
 heap_start:
 	.word	0
