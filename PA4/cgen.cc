@@ -1587,7 +1587,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
     curr_class->envr->addid(curr_formal->get_name(), loc);
   }
 
-  curr_feat->get_expr()->code(cout, num_locals_needed, curr_class->envr, this);
+  curr_feat->get_expr()->code(cout, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this);
 
   emit_load(FP, (num_locals_needed - SAVE_FP_OFFSET), SP, cout);
   emit_load(SELF, (num_locals_needed - SAVE_SELF_OFFSET), SP, cout);
@@ -1678,12 +1678,16 @@ void CgenClassTable::code()
   code_class_methods();
 }
 
-
+////////////////////////////////////////////////////////////////////////////////
+//
+// Return the CgenNode associated with Object, as Object is the root of the 
+// class inheritance tree. 
+//
+////////////////////////////////////////////////////////////////////////////////
 CgenNodeP CgenClassTable::root()
 {
    return probe(Object);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //
