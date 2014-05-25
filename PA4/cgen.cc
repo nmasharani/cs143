@@ -1984,7 +1984,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
         emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type);
-
+        
         //output the code for the current branch. 
         //use the blt and get the highest and 
         //declared vars are only visible within their branch. 
@@ -2022,12 +2022,22 @@ Symbol branch_class::get_type_decl() { return type_decl; };
 
 int CgenClassTable::get_lowest_child_tag_for_class(Symbol curr_branch_type) {
   CgenNodeP class_node = get_class_node_for_type(curr_branch_type);
-  while (false) {
+  while (true) {
+    List<CgenNode>* children = class_node->get_children();
+    if (children == NULL) {
+      return *(name_to_tag->lookup(class_node->get_name()));
+    }
+    CgenNodeP left_most_child = children->hd();
+    class_node = get_class_node_for_type(left_most_child->get_name()); //redundant, but makes the algorithm clear. 
   }
-  return NULL;
+  return -1;//should never return -1
 }
 
 CgenNodeP CgenClassTable::get_class_node_for_type(Symbol type) {
+  for (List<CgenNode>* l = nds; l != NULL; l = l->tl()) {
+    CgenNodeP curr_class = l->hd();
+    if (strcmp(curr_class->get_name()->get_string(), type->get_string()) == 0) return curr_class;
+  }
   return NULL;
 }
 

@@ -18,8 +18,7 @@ typedef CgenNode *CgenNodeP;
 
 class CgenClassTable : public SymbolTable<Symbol,CgenNode> {
 private:
-   List<CgenNode> *nds;
-   ostream& str;
+   
    int stringclasstag;
    int intclasstag;
    int boolclasstag;
@@ -71,6 +70,9 @@ private:
    void dump_classes_attributes(ostream& s);
    void dump_class_attributes(Symbol class_name, ostream& s);
 public:
+
+   List<CgenNode> *nds;
+   ostream& str;
 
    /* FOR GENERATING PROTOTYPE OBJECTS */
    int tagtracker;
