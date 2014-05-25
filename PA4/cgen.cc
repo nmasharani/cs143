@@ -1844,7 +1844,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   Symbol e0_type = expr->get_type();
-  
+
   int bypass_abort_label = table->label_id;
   table->label_id++;
 
@@ -2175,18 +2175,38 @@ int bool_const_class::compute_max_locals() {
 // { s << LA << dest_reg << " " << address << endl; }
 // { s << JAL << address << endl; }
 //
+// class_objTab:
+//  .word Object_protObj tag0
+//  .word Object_init
+//  .word IO_protObj tag1 
+//  .word IO_init
+//  .word Int_protObj tag2
+//  .word Int_init
+//  .word Bool_protObj ....
+//
+// Each prototype object is at an offset of 8 bytes from the last, or tag * 8
+//
 ////////////////////////////////////////////////////////////////////////////////
 void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code new with type " << type_name->get_string() << endl;
   if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) {
-    //handle self type here. 
+    
+    //move the address of the prototype object of the current class into ACC
+    emit_load(T1, TAG_OFFSET, SELF, s); // move the tag of class of the curent object into T1. This will be our index into the class_ObjTab
+    emit_load_imm(T2, 8, s); // load 8 into T2
+    emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
+    emit_load_address(T2, CLASSOBJTAB, s); // move the address of the object table into T2
+    emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
+    emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy. 
+    emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
+    emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
+    emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
+
+
   } else {
-    //load the address of the protoype object into ACC
-    //call object.copy
-    //call the init method. 
-    s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl;
-    emit_jal(OBJECT_DOT_COPY, s);
-    s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl;
+    s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+    emit_jal(OBJECT_DOT_COPY, s); //call object.copy
+    s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; //call the init method. 
   }
 }
 
