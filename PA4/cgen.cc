@@ -894,17 +894,7 @@ void CgenClassTable::code_protos() {
     emit_protobj_ref(class_name, str);
     str << ":" << endl;
     // Class tag
-    int * tag_ptr = name_to_tag->probe(class_name);
-    int tag;
-
-    if (tag_ptr != NULL) {
-      tag = *tag_ptr;
-    } else {
-      tag = tagtracker;
-      name_to_tag->addid(class_name, new int(tag));
-      tag_to_name->addid(tag, class_name);
-      tagtracker++;
-    }
+    int tag = *(name_to_tag->probe(class_name));
 
 
     // Attributes
@@ -1200,8 +1190,12 @@ void CgenClassTable::assign_class_tags(CgenNodeP curr_class) {
     stringclasstag = tag;
   }  
 
-  
-
+  // finally, assign tags to all children. 
+  List<CgenNode>* children = curr_class->get_children();
+  for (List<CgenNode>* l = children; l != NULL; l = l->tl()) {
+    CgenNodeP curr_child = l->hd();
+    assign_class_tags(curr_child);   
+  } 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
