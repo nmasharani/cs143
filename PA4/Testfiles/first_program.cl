@@ -1,9 +1,9 @@
 class Main {
 	a: IO <- new IO;
-	s: String <- "Hello Luke\n";
-	main() : IO {
+	--s: String <- "Hello Luke\n";
+	main() : Object {
 		{	
-			a.out_string(s);
+			a.in_int();
 		}
 	};
 };
