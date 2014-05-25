@@ -24,11 +24,6 @@ private:
    int intclasstag;
    int boolclasstag;
 
-   
-   /* FOR GENERATING PROTOTYPE OBJECTS */
-   int tagtracker;
-   SymbolTable<Symbol, int> * name_to_tag;
-   SymbolTable<int, Entry> * tag_to_name; 
 
 
 // The following methods emit code for
@@ -76,6 +71,11 @@ private:
    void dump_class_attributes(Symbol class_name, ostream& s);
 public:
 
+   /* FOR GENERATING PROTOTYPE OBJECTS */
+   int tagtracker;
+   SymbolTable<Symbol, int> * name_to_tag;
+   SymbolTable<int, Entry> * tag_to_name; 
+
    /* FOR TRACKING CLASS METHODS AND ATTRS */
    SymbolTable<Symbol, Features_class> * class_methods;
    SymbolTable<Symbol, Features_class> * class_attributes;
@@ -89,6 +89,7 @@ public:
    int compute_offset_in_disp_table(Symbol name, Symbol type);
    int get_tag_for_type(Symbol type_name);
    bool is_int_str_bool(Symbol type);
+   int* get_sorted_tags(Cases cases, CgenClassTableP table); 
 };
 
 

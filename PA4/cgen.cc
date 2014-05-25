@@ -1960,15 +1960,19 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
 
   /* check for void e0 */
+  int success_label = table->label_id; table->label_id++;
   int bypass_abort_void_label = table->label_id; table->label_id++;
   emit_bne(ACC, ZERO, bypass_abort_void_label, s); // if not void, bypass the abort call.
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // line number in T1
   emit_jal(CASE_ABORT2, s); // abort with _case_abort2
 
-  
+  emit_label_def(bypass_abort_void_label, s); // jumps to here on non void e0
+  emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
 
 
+  emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
+  emit_label_def(success_label, s); // jumps to here on successful evaluation of case. 
 
 }
 
@@ -1980,6 +1984,19 @@ int typcase_class::compute_max_locals() {
     sum += curr_case->compute_max_locals();
   }
   return sum;
+}
+
+Symbol branch_class::get_type_decl() { return type_decl; };
+
+int* CgenClassTable::get_sorted_tags(Cases cases, CgenClassTableP table) {
+  int* sorted_tags = new int[cases->len()];
+  // first, add all tags to the array
+  for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
+    Symbol case_type = cases->nth(i)->get_type_decl();
+    sorted_tags[i] = *(table->name_to_tag->lookup(case_type));
+  }
+
+  return sorted_tags;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

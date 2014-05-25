@@ -58,6 +58,7 @@
 #define OBJECT_DOT_COPY      "Object.copy"
 #define DISPATCH_ABORT 		 "_dispatch_abort"
 #define CASE_ABORT			 "_case_abort"
+#define CASE_ABORT2 		 "_case_abort2"
 
 
 #define EMPTYSLOT            0
