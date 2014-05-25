@@ -80,6 +80,9 @@ public:
    SymbolTable<Symbol, Features_class> * class_methods;
    SymbolTable<Symbol, Features_class> * class_attributes;
 
+   /* int used to generate a unique label id for branch control flow */
+   int label_id;
+
    CgenClassTable(Classes, ostream& str);
    void code();
    CgenNodeP root();

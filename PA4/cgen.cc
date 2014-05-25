@@ -1222,6 +1222,7 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    tag_to_name->addid(5, Main);
 
    tagtracker = 6;
+   label_id = 0;
 
    /* TRACKING CLASS METHODS AND ATTRIBUTES */
    class_attributes = new SymbolTable<Symbol, Features_class>();
@@ -1615,6 +1616,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
 
   emit_return(str);
   curr_class->envr->exitscope();
+  cout << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1751,10 +1753,33 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 //   of the declarations in `cool-tree.h'  Sample code for
 //   constant integers, strings, and booleans are provided.
 //
+// 1st, evalue the expression. Value will be in ACC
+// 2nd, get the location of the variable we are assigning to. 
+// 3rd, place ACC in the correct location.
+//
+//  s << SW << source_reg << " " << offset * WORD_SIZE << "(" << dest_reg << ")" << endl;
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code assign expression." << endl;
+  expr->code(s, temp_start, envr, table); // value of this expression is now in ACC. 
+
+  var_loc* loc = envr->lookup(name);
+  if (loc == NULL) {
+    cout << "Could not find identifier " << name->get_string() << ". This should never happen." << endl;
+  }
+  int offset = loc->offset;
+  if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
+    cout << "Assigning attribute object" << endl;
+    emit_store(ACC, offset, SELF, s);
+  } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
+    cout << "Assigning paramter object" << endl;
+    emit_store(ACC, offset, FP, s);
+  } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
+    cout << "Assigning local object" << endl;
+    emit_store(ACC, offset, SP, s);
+  }
 }
 
 int assign_class::compute_max_locals() {
@@ -1804,7 +1829,6 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
   cout << " loaded dispatch for class " << expr->get_type()->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
-  //emit_addiu(T2, T1, offset_in_disp_tab * WORD_SIZE, s); //This loads the address of the function we want to dispatch to in the register T2. 
   emit_jalr(T1, s);
 }
 
@@ -1829,8 +1853,33 @@ int cond_class::compute_max_locals() {
   return num1 + num2 + num3 + 2;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// 1st, generate a unique id for the control flow labels. 
+// 2nd, place the begin label at the start of the loop code. 
+// 3rd, now that we are in the loop, evalue expr. 
+//
+// If the predicate is false, the loop terminates, and void is returned,
+// page 11 in manual. 
+//
+// { s << LI << dest_reg << " " << val << endl; }
+//
+////////////////////////////////////////////////////////////////////////////////
 void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code loop expression." << endl;
+  int loop_begin_label = table->label_id;
+  table->label_id++;
+  int loop_end_label = table->label_id;
+  table->label_id++;
+
+  emit_label_def(loop_begin_label, s); // this is the start of the loop
+  pred->code(s, temp_start, envr, table); // evaluate the loop predicate. Result stored in ACC.
+  emit_beq(ACC, ZERO, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
+  body->code(s, temp_start, envr, table);
+  emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
+
+  emit_label_def(loop_end_label, s); // this is the end of the loop label
+  emit_load_imm(ACC, VOID, s); // void is returned when the loop terminates. 
 }
 
 int loop_class::compute_max_locals() {

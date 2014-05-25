@@ -22,6 +22,7 @@
 //
 ///////////////////////////////////////////////////////////////////////
 #define NUM_REGISTERS_SAVED_BY_CALLER 3
+#define VOID 0
 
 /* Ofsets are relative to SP */
 #define SAVE_FP_OFFSET 0
