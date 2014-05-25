@@ -1951,11 +1951,25 @@ int loop_class::compute_max_locals() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// 
+// 1st, evaluate e0. If it evaluates to void, this is a runtime error. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code typecase expression." << endl;
+  expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
+  emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
+
+  /* check for void e0 */
+  int bypass_abort_void_label = table->label_id; table->label_id++;
+  emit_bne(ACC, ZERO, bypass_abort_void_label, s); // if not void, bypass the abort call.
+  emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
+  emit_load_imm(T1, get_line_number(), s); // line number in T1
+  emit_jal(CASE_ABORT2, s); // abort with _case_abort2
+
+  
+
+
+
 }
 
 int typcase_class::compute_max_locals() {

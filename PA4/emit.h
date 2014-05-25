@@ -57,6 +57,7 @@
 #define BOOLCONST_PREFIX     "bool_const"
 #define OBJECT_DOT_COPY      "Object.copy"
 #define DISPATCH_ABORT 		 "_dispatch_abort"
+#define CASE_ABORT			 "_case_abort"
 
 
 #define EMPTYSLOT            0
