@@ -108,6 +108,7 @@ virtual void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, 
 virtual int compute_max_locals() = 0; \
 virtual void dump_with_types(ostream&,int) = 0;  \
 virtual char* get_type_name() = 0; \
+virtual Symbol get_name_symbol() = 0; \
 void dump_type(ostream&, int);               \
 Expression_class() { type = (Symbol) NULL; } 
 

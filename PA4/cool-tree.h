@@ -317,6 +317,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "assign"; };
+   Symbol get_name_symbol() { return name; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -344,6 +345,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "static_dispatch"; };
+   Symbol get_name_symbol() { return name; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -369,6 +371,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "dispatch"; };
+   Symbol get_name_symbol() { return name; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -394,6 +397,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "cond"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -417,6 +421,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "loop"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -440,6 +445,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "typecase"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -461,6 +467,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "block"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -488,6 +495,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "let"; };
+   Symbol get_name_symbol() { return identifier; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -511,6 +519,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "plus"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -534,6 +543,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "sub"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -557,6 +567,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "mul"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -580,6 +591,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "divide"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -601,6 +613,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "neg"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -624,6 +637,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "lt"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -647,6 +661,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "eq"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -670,6 +685,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "leq"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -691,6 +707,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "comp"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -712,6 +729,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "int_const"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -733,6 +751,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "bool_const"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -754,6 +773,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "str_const"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -775,6 +795,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "new"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -796,6 +817,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "isvoid"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -815,6 +837,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "no_expr"; };
+   Symbol get_name_symbol() { return NULL; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS
@@ -836,6 +859,7 @@ public:
    Expression copy_Expression();
    void dump(ostream& stream, int n);
    char* get_type_name() { return "object"; };
+   Symbol get_name_symbol() { return name; };
 
 #ifdef Expression_SHARED_EXTRAS
    Expression_SHARED_EXTRAS

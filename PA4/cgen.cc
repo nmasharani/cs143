@@ -1599,9 +1599,10 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
 
   Formals formals = curr_feat->get_formals();
+  int num_params = formals->len();
   for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
     Formal curr_formal = formals->nth(i);
-    int offset = i + 1; 
+    int offset = num_params - i; 
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
     loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
@@ -1648,6 +1649,7 @@ void CgenClassTable::code_class_methods() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 int CgenClassTable::compute_offset_in_disp_table(Symbol name, Symbol type) {
+
   Features methods = class_methods->lookup(type);
   for (int i = methods->first(); methods->more(i); i = methods->next(i)) {
     if (strcmp(name->get_string(), methods->nth(i)->get_name()->get_string()) == 0) {
@@ -1831,16 +1833,26 @@ int static_dispatch_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code disptach expression." << endl;
+  int num_params = actual->len();
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table); // Now the return value for this argument is in ACC. 
-    int curr_offset = i + 1;
+    int curr_offset = num_params - i;
     emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
   }
+
   expr->code(s, temp_start, envr, table); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
-  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // now, we load the address of the dispatch table for this class into a temporary T1. 
-  int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
-  cout << " loaded dispatch for class " << expr->get_type()->get_string() << "at offset " << offset_in_disp_tab << endl;
+  Symbol e0_type = expr->get_type();
+
+  if ((strcmp(expr->get_type_name(), "no_expr") == 0)) {
+    emit_load(T1, DISPTABLE_OFFSET, SELF, s); // if e0 is no expression, then e0 is shorthand for 'self' so use the DISPATABLE of SELF
+    e0_type = SELF_TYPE;
+  } else {
+    emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
+  }
+
+  int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
+  cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
 }
@@ -1924,6 +1936,11 @@ int loop_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// 
+//
+////////////////////////////////////////////////////////////////////////////////
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code typecase expression." << endl;
 }
@@ -1938,6 +1955,11 @@ int typcase_class::compute_max_locals() {
   return sum;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Blocks, simply evaluate in order. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code block epression." << endl;
   for (int i = body->first(); body->more(i); i = body->next(i)) {
