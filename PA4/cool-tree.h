@@ -116,6 +116,8 @@ public:
    tree_node *copy()		 { return copy_Case(); }
    virtual Case copy_Case() = 0;
    virtual Symbol get_type_decl() = 0;
+   virtual Symbol get_id() = 0;
+   virtual Expression get_branch_expr() = 0;
 
 #ifdef Case_EXTRAS
    Case_EXTRAS
@@ -296,6 +298,8 @@ public:
    Case copy_Case();
    void dump(ostream& stream, int n);
    Symbol get_type_decl();
+   Symbol get_id();
+   Expression get_branch_expr();
 
 #ifdef Case_SHARED_EXTRAS
    Case_SHARED_EXTRAS

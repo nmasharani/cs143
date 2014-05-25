@@ -1509,7 +1509,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
   emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
   emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
-  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_move(FP, SP, str);
   emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
   emit_move(SELF, ACC, str); // Move to new context, the object being initialized is calling Parent.init
 
@@ -1590,8 +1590,8 @@ void CgenClassTable::code_init_methods() {
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   cout << "Emitting code for method " << curr_feat->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-  emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
 
+  emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
@@ -1615,10 +1615,12 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   }
   curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
 
-  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
+  int num_param_bytes = num_params * WORD_SIZE;
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot function invoked. 
   emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
   emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
   emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA.
+  emit_addiu(SP, SP, num_param_bytes, str); // move the stack pointer back up accounting for the params. 
 
   emit_return(str);
   curr_class->envr->exitscope();
@@ -1843,8 +1845,9 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
-    int curr_offset = num_params - i;
-    emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
+    //int curr_offset = num_params - i;
+    //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
+    emit_push(ACC, s);
   }
 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
@@ -1976,36 +1979,50 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   emit_jal(CASE_ABORT2, s); // abort with _case_abort2
 
   for (int i = 0; i < cases->len(); i++) { // i is the index in the sorted_tags array
-    for (int j = cases->first(); cases->more(j); i = cases->next(j)) {
+    for (int j = cases->first(); cases->more(j); j = cases->next(j)) {
       Symbol curr_branch_type = cases->nth(j)->get_type_decl();
       int curr_tag = *(table->name_to_tag->lookup(curr_branch_type));
       if (sorted_branch_class_tags[i] == curr_tag) {
+        envr->enterscope(); // each branch gets its own scope. 
+
         emit_label_def(curr_branch_label, s); // set the label of the current branch. 
+        curr_branch_label = table->label_id++;
         emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
 
-        int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type);
+        int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
+
+        emit_blti(T2, curr_tag, curr_branch_label, s);
+        emit_bgti(T2, tag_of_lowest_child, curr_branch_label, s); 
         
-        //output the code for the current branch. 
-        //use the blt and get the highest and 
-        //declared vars are only visible within their branch. 
-        table->label_id++;
+        // if we get here in the assembly, then this is the branch we evaluate. 
+        // first, add the branch identifier to the enviornment. 
+        var_loc* loc = new var_loc;
+        loc->context = LOCAL_CONTEXT;
+        if (temp_start < 0) {
+           cout << "Out of local space. This should never happen." << endl;
+        }
+        loc->offset = temp_start;
+        envr->addid(cases->nth(j)->get_id(), loc);
+        emit_store(T3, loc->offset, SP, s); // now bind the value of e0 to the identifier of this branch
+        // finally, evaluate the epression of this branch, with the value of e0 boud to the identifier of this branch. 
+        cases->nth(j)->get_branch_expr()->code(s, temp_start - 1, envr, table, curr_class);
+
         emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success. 
+        envr->exitscope(); // leave the branch scope. 
         break;
       }
     }
   }
 
-
-
-
-
-
-
-
-
+  emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
+  emit_load_address(ACC, CLASSNAMETAB, s); // move the address of the class_nameTab into ACC.
+  emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
+  emit_load_imm(T1, WORD_SIZE, s); // load 4 into T1
+  emit_mul(T2, T2, T1, s); // T1 contains the immediate 4. T2 contains the offset in the table. Need to move forward by word size. 
+  emit_addu(ACC, ACC, T2, s); // add offset contained in T2 to the address of the class_nameTab in ACC. store result in ACC. ACC now contains the address of the string constant that contains the name of the class of e0. 
   emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
-  emit_label_def(success_label, s); // jumps to here on successful evaluation of case. 
 
+  emit_label_def(success_label, s); // jumps to here on successful evaluation of case, bypassing the _case_abort
 }
 
 int typcase_class::compute_max_locals() {
@@ -2019,6 +2036,8 @@ int typcase_class::compute_max_locals() {
 }
 
 Symbol branch_class::get_type_decl() { return type_decl; };
+Symbol branch_class::get_id() { return name; };
+Expression branch_class::get_branch_expr() { return expr; };
 
 int CgenClassTable::get_lowest_child_tag_for_class(Symbol curr_branch_type) {
   CgenNodeP class_node = get_class_node_for_type(curr_branch_type);
@@ -2027,8 +2046,11 @@ int CgenClassTable::get_lowest_child_tag_for_class(Symbol curr_branch_type) {
     if (children == NULL) {
       return *(name_to_tag->lookup(class_node->get_name()));
     }
-    CgenNodeP left_most_child = children->hd();
-    class_node = get_class_node_for_type(left_most_child->get_name()); //redundant, but makes the algorithm clear. 
+    CgenNodeP right_most_child = NULL;
+    for (List<CgenNode>* l = children; l != NULL; l = l->tl()) {
+      right_most_child = l->hd();
+    }
+    class_node = get_class_node_for_type(right_most_child->get_name()); //redundant, but makes the algorithm clear. 
   }
   return -1;//should never return -1
 }
