@@ -1995,7 +1995,17 @@ int* CgenClassTable::get_sorted_tags(Cases cases, CgenClassTableP table) {
     Symbol case_type = cases->nth(i)->get_type_decl();
     sorted_tags[i] = *(table->name_to_tag->lookup(case_type));
   }
-
+  // now sort the tags in ascending order using 
+  // sort algorithm found here: http://www.cprogramming.com/tutorial/computersciencetheory/sorting1.html
+  for (int i = 0; i < cases->len(); i++) {
+    for (int j = 0; j < cases->len() - 1; j++) {
+      if (sorted_tags[j] < sorted_tags[ j + 1 ]) {
+        int temp = sorted_tags[j + 1];
+        sorted_tags[j + 1] = sorted_tags[j];
+        sorted_tags[j] = temp;
+      }
+    }
+  }
   return sorted_tags;
 }
 
