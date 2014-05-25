@@ -412,4 +412,4 @@ Main.main:
 	addiu	$sp $sp -12
 	move	$s0 $a0
 	move	$a0 $s0
-	lw	$t1 8($a0)
+	lw	$t1 8($s0)

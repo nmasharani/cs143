@@ -104,7 +104,7 @@ int compute_max_locals() {return 0;} \
 Symbol type;                                 \
 Symbol get_type() { return type; }           \
 Expression set_type(Symbol s) { type = s; return this; } \
-virtual void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) = 0; \
+virtual void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) = 0; \
 virtual int compute_max_locals() = 0; \
 virtual void dump_with_types(ostream&,int) = 0;  \
 virtual char* get_type_name() = 0; \
@@ -113,7 +113,7 @@ void dump_type(ostream&, int);               \
 Expression_class() { type = (Symbol) NULL; } 
 
 #define Expression_SHARED_EXTRAS           \
-void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table); 		\
+void code(ostream&, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class); 		\
 int compute_max_locals();	   \
 void dump_with_types(ostream&,int); 
 
