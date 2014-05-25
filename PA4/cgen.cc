@@ -1673,6 +1673,19 @@ int CgenClassTable::get_tag_for_type(Symbol type_name) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Returns true if the type is INT, BOOL, or String
+// false otherwise. 
+//
+////////////////////////////////////////////////////////////////////////////////
+bool CgenClassTable::is_int_str_bool(Symbol type) {
+  if (strcmp(type->get_string(), Int->get_string()) == 0) return true;
+  if (strcmp(type->get_string(), Bool->get_string()) == 0) return true;
+  if (strcmp(type->get_string(), Str->get_string()) == 0) return true;
+  return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // Code generation launcher. Consolidates
 // the functions that generate mips to str.  
 //
@@ -1949,14 +1962,33 @@ int block_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
+  envr->enterscope(); // enter a new scope as we are introducing a new variable here. 
   cout << "Code let expression." << endl;
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
-    /* code */
+    if (table->is_int_str_bool(type_decl)) {
+      s << LA << ACC << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
+      emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
+    } else {
+      emit_load_imm(ACC, VOID, s);
+    }
+  } else {
+    init->code(s, temp_start, envr, table); // otherwise, the intialization of the new variable being declared is the value of the init, which is stored in ACC if we evaluate init. 
   }
 
+   var_loc* loc = new var_loc;
+   loc->context = LOCAL_CONTEXT;
+   if (temp_start < 0) {
+     cout << "Out of local space. This should never happen." << endl;
+   }
+   loc->offset = temp_start;
+   temp_start = temp_start - 1;
+   envr->addid(identifier, loc);
 
-  init->code(s, temp_start, envr, table); // result is an object, pointer to which is in ACC. 
+   emit_store(ACC, loc->offset, SP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
+   body->code(s, temp_start, envr, table); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
+
+   envr->exitscope(); // once we finish processing this let, we don't want to know about the locally declared variable anymore. 
 }
 
 int let_class::compute_max_locals() {

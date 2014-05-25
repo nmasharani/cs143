@@ -88,6 +88,7 @@ public:
    CgenNodeP root();
    int compute_offset_in_disp_table(Symbol name, Symbol type);
    int get_tag_for_type(Symbol type_name);
+   bool is_int_str_bool(Symbol type);
 };
 
 
