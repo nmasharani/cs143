@@ -1842,8 +1842,30 @@ int dispatch_class::compute_max_locals() {
   return sum;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// 
+//
+////////////////////////////////////////////////////////////////////////////////
 void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code cond expression." << endl;
+  int false_label = table->label_id;
+  table->label_id++;
+  int end_label = table->label_id;
+  table->label_id++;
+
+  pred->code(s, temp_start, envr, table); // evaluate the predicate. Branch to false if false. Otherwise fall through to true. 
+
+  emit_load(T2, BOOL_VAL_OFFSET, ACC, s); // store the value of the boolen in a temporary register. 
+  emit_beq(T2, ZERO, false_label, s); // if the boolean is false (0), jump to the false label and execute the else->expr. 
+
+  then_exp->code(s, temp_start, envr, table); // if the pred is true, evaluate the then expression. Result now stored in ACC
+  emit_branch(end_label, s); // jump over the false branch and return with the value of then_expr in ACC. 
+
+  emit_label_def(false_label, s); // output the false label. 
+  else_exp->code(s, temp_start, envr, table); // if the predicate is false, evaluate the else expression. Result now stored in ACC. 
+
+  emit_label_def(end_label, s); // the end of the expression. Result is in ACC. 
 }
 
 int cond_class::compute_max_locals() {
@@ -1873,8 +1895,9 @@ void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   table->label_id++;
 
   emit_label_def(loop_begin_label, s); // this is the start of the loop
-  pred->code(s, temp_start, envr, table); // evaluate the loop predicate. Result stored in ACC.
-  emit_beq(ACC, ZERO, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
+  pred->code(s, temp_start, envr, table); // evaluate the loop predicate. Result stored in ACC. Note, result is a BOOL object. Need to get the value of the bool. 
+  emit_load(T1, BOOL_VAL_OFFSET, ACC, s); // load the value of the Bool object returned by the predicate into T1. 
+  emit_beq(T1, ZERO, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
   body->code(s, temp_start, envr, table);
   emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
 
@@ -1919,8 +1942,21 @@ int block_class::compute_max_locals() {
   return sum;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// 1st, evaluate the initialization without introducing the new variable. 
+// check for no inializer statement.  
+//
+////////////////////////////////////////////////////////////////////////////////
 void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table) {
   cout << "Code let expression." << endl;
+
+  if (strcmp(init->get_type_name(), "no_expr") == 0) {
+    /* code */
+  }
+
+
+  init->code(s, temp_start, envr, table); // result is an object, pointer to which is in ACC. 
 }
 
 int let_class::compute_max_locals() {

@@ -73,6 +73,7 @@
 #define TAG_OFFSET 0
 #define SIZE_OFFSET 1
 #define DISPTABLE_OFFSET 2
+#define BOOL_VAL_OFFSET 3
 
 #define STRING_SLOTS      1
 #define INT_SLOTS         1
