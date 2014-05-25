@@ -2174,8 +2174,22 @@ int plus_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Same as plus, only we use emit_sub instead of emit_add. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code sub expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
+  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
 }
 
 int sub_class::compute_max_locals() {
@@ -2184,8 +2198,22 @@ int sub_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Same as plus, only we do emit_mul instead of add. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code mul expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
+  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
 }
 
 int mul_class::compute_max_locals() {
@@ -2194,8 +2222,22 @@ int mul_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Same as plus, only we do emit_div instead of add. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code divide expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
+  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
 }
 
 int divide_class::compute_max_locals() {
@@ -2204,14 +2246,31 @@ int divide_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Neg code gen. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code neg expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
+  emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
+  emit_neg(T1, T1, s); // perform the neg operation on the value. 
+  emit_store(T1, temp_start, SP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
+  emit_jal(OBJECT_DOT_COPY, s); // copy the int obect in ACC as a result of evaluating e1. 
+  emit_load(T1, temp_start, SP, s); // load the neg'd value saved on stack back into T1
+  emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
 }
 
 int neg_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Lt code gen. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code lt expression." << endl;
 }
