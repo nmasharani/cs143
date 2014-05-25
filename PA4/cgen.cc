@@ -2148,8 +2148,24 @@ int let_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// 1st evaluate e1. 
+// 2nd evaluate e2. 
+// 3rd, add their values and make the outcome a new object and return that. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code plus expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
+  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value. 
 }
 
 int plus_class::compute_max_locals() {
