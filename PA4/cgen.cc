@@ -2295,6 +2295,11 @@ int lt_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Eq code gen
+//
+////////////////////////////////////////////////////////////////////////////////
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code eq expression." << endl;
 }
@@ -2305,8 +2310,27 @@ int eq_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Leq code gen. Just like lt, except with leq replacing lt. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code leq expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
+  emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+  int true_label = table->label_id; table->label_id++;
+  int return_label = table->label_id; table->label_id++;
+  emit_bleq(T1, ACC, true_label, s); // if (T1 = e1) <= (ACC = e2), then branch to true label. else fall through
+  emit_load_bool(ACC, falsebool, s); // load the false Bool object into ACC. 
+  emit_branch(return_label, s); // jump to the return label. 
+  emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
+  emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
+  emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
 }
 
 int leq_class::compute_max_locals() {
