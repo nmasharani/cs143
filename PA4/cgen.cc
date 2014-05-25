@@ -1803,8 +1803,8 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   emit_load(T1, DISPTABLE_OFFSET, ACC, s); // now, we load the address of the dispatch table for this class into a temporary T1. 
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, expr->get_type());
   cout << " loaded dispatch for class " << expr->get_type()->get_string() << "at offset " << offset_in_disp_tab << endl;
-  emit_addiu(T2, T1, offset_in_disp_tab * WORD_SIZE, s); //This loads the address of the function we want to dispatch to in the register T2. 
-  emit_jalr(T2, s);
+  emit_load(T1, offset_in_disp_tab, T1, s); //This loads the address of the function we want to dispatch to in the register T2. 
+  emit_jalr(T1, s);
 }
 
 int dispatch_class::compute_max_locals() {
