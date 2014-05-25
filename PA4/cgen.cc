@@ -2351,8 +2351,24 @@ int leq_class::compute_max_locals() {
   return num1 + num2 + 1;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Comp code gen
+// Return the Bool object opposite in value to to the one in e1. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code comp expression." << endl;
+   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
+   emit_fetch_int(T2, ACC, s); // get the int value out of the bool. 
+   int bool_is_false = table->label_id; table->label_id++;
+   int return_label = table->label_id; table->label_id++;
+   emit_beqz(T2, bool_is_false, s); // jump to the bool_is_false label if the value in T2 is equal to 0. The value in T2 is the value of the e1 Bool. 0 indicates a false Bool. 
+   emit_load_bool(ACC, truebool, s); // if we fall through the beqz, then the e1 Bool value is not 0, so it is a true Bool. so we load the false Bool into ACC, and jump to the return label. 
+   emit_branch(return_label, s); // jump to the return label, with the true Bool loaded in ACC. 
+   emit_label_def(bool_is_false, s); // jump to this label if e1 is a false bool. 
+   emit_load_bool(ACC, truebool, s); // load the opposite of false, so the true Bool into ACC. 
+   emit_label_def(return_label, s);  // return label. 
 }
 
 int comp_class::compute_max_locals() {
