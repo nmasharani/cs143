@@ -13,3 +13,7 @@ class Main {
 class Andy inherits IO {
 
 };
+
+class Mike inherits Andy {
+
+};

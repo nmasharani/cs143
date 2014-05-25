@@ -57,6 +57,7 @@ private:
    void install_class(CgenNodeP nd);
    void install_classes(Classes cs);
    void build_inheritance_tree();
+   void assign_class_tags(CgenNodeP curr_class);
    void set_relations(CgenNodeP nd);
 
    void build_class_attributes(CgenNodeP current, Symbol parent);
@@ -90,6 +91,8 @@ public:
    int get_tag_for_type(Symbol type_name);
    bool is_int_str_bool(Symbol type);
    int* get_sorted_tags(Cases cases, CgenClassTableP table); 
+   int get_lowest_child_tag_for_class(Symbol curr_branch_type);
+   CgenNodeP get_class_node_for_type(Symbol type);
 };
 
 

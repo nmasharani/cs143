@@ -1179,6 +1179,33 @@ void CgenClassTable::code_dispatch_table() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Assigns tags to classes such that the tags indicate the inheritance ordering
+// of the inhertance graph. Object will start with tag 0. 
+//
+////////////////////////////////////////////////////////////////////////////////
+void CgenClassTable::assign_class_tags(CgenNodeP curr_class) {
+  Symbol class_name = curr_class->get_name();
+  int tag = tagtracker;
+  name_to_tag->addid(class_name, new int(tag));
+  tag_to_name->addid(tag, class_name);
+  tagtracker++;
+
+  if (strcmp(class_name->get_string(), Int->get_string()) == 0) {
+    intclasstag = tag;
+  } 
+  if (strcmp(class_name->get_string(), Bool->get_string()) == 0) {
+    boolclasstag = tag;
+  } 
+  if (strcmp(class_name->get_string(), Str->get_string()) == 0) {
+    stringclasstag = tag;
+  }  
+
+  
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // CgenTable constructor. Initializes all of the 
 // compilers data structures, and then launches
 // the code function. 
@@ -1186,9 +1213,9 @@ void CgenClassTable::code_dispatch_table() {
 ////////////////////////////////////////////////////////////////////////////////
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
-   stringclasstag = 4;
-   intclasstag =    2;
-   boolclasstag =   3;
+   //stringclasstag = 4;
+   //intclasstag =    2; // see the assign_class_tags function
+   //boolclasstag =   3;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -1203,25 +1230,9 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    name_to_tag->enterscope();
    tag_to_name->enterscope();
 
-   name_to_tag->addid(Object, new int(0));
-   tag_to_name->addid(0, Object);
+   tagtracker = 0;
+   assign_class_tags(root());
 
-   name_to_tag->addid(IO, new int(1));
-   tag_to_name->addid(1, IO);
-
-   name_to_tag->addid(Int, new int(intclasstag));
-   tag_to_name->addid(intclasstag, Int);
-
-   name_to_tag->addid(Bool, new int(boolclasstag));
-   tag_to_name->addid(boolclasstag, Bool);
-
-   name_to_tag->addid(Str, new int(stringclasstag));
-   tag_to_name->addid(stringclasstag, Str);
-
-   name_to_tag->addid(Main, new int(5));
-   tag_to_name->addid(5, Main);
-
-   tagtracker = 6;
    label_id = 0;
 
    /* TRACKING CLASS METHODS AND ATTRIBUTES */
@@ -1959,16 +1970,43 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
   emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
 
-  /* check for void e0 */
   int success_label = table->label_id; table->label_id++;
-  int bypass_abort_void_label = table->label_id; table->label_id++;
-  emit_bne(ACC, ZERO, bypass_abort_void_label, s); // if not void, bypass the abort call.
+  int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
+
+  int curr_branch_label = table->label_id; table->label_id++; // a current label in the case struct. 
+
+  /* check for void e0 */
+  emit_bne(ACC, ZERO, curr_branch_label, s); // if not void, bypass the abort call.
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // line number in T1
   emit_jal(CASE_ABORT2, s); // abort with _case_abort2
 
-  emit_label_def(bypass_abort_void_label, s); // jumps to here on non void e0
-  emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
+  for (int i = 0; i < cases->len(); i++) { // i is the index in the sorted_tags array
+    for (int j = cases->first(); cases->more(j); i = cases->next(j)) {
+      Symbol curr_branch_type = cases->nth(j)->get_type_decl();
+      int curr_tag = *(table->name_to_tag->lookup(curr_branch_type));
+      if (sorted_branch_class_tags[i] == curr_tag) {
+        emit_label_def(curr_branch_label, s); // set the label of the current branch. 
+        emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
+
+        int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type);
+
+        //output the code for the current branch. 
+        //use the blt and get the highest and 
+        //declared vars are only visible within their branch. 
+        table->label_id++;
+        emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success. 
+        break;
+      }
+    }
+  }
+
+
+
+
+
+
+
 
 
   emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
@@ -1987,6 +2025,17 @@ int typcase_class::compute_max_locals() {
 }
 
 Symbol branch_class::get_type_decl() { return type_decl; };
+
+int CgenClassTable::get_lowest_child_tag_for_class(Symbol curr_branch_type) {
+  CgenNodeP class_node = get_class_node_for_type(curr_branch_type);
+  while (false) {
+  }
+  return NULL;
+}
+
+CgenNodeP CgenClassTable::get_class_node_for_type(Symbol type) {
+  return NULL;
+}
 
 int* CgenClassTable::get_sorted_tags(Cases cases, CgenClassTableP table) {
   int* sorted_tags = new int[cases->len()];
