@@ -1632,7 +1632,7 @@ void CgenClassTable::code_class_methods() {
       for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
         Feature curr_feat = feats->nth(i);
         if (curr_feat->ismethod) {
-         code_method(curr_class, curr_feat); 
+          code_method(curr_class, curr_feat); 
         }
       }
     }

@@ -1,9 +1,10 @@
 class Main {
 	a: IO <- new IO;
-	--s: String <- "Hello Luke\n";
+	x: Int <- 42;
+	z: Bravo <- new Bravo;
 	main() : Object {
 		{	
-			a.in_int();
+			z.test(a);
 		}
 	};
 };
@@ -22,3 +23,9 @@ class Main {
 };
 
 *)
+
+class Bravo {
+	test(x: IO) : Object {
+		x.in_string()
+	};
+};
