@@ -2298,10 +2298,22 @@ int lt_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Eq code gen
+// Equality test on primitives handled for us in trap-handler. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code eq expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Result stored in ACC
+  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_move(T2, ACC, s); // now e2 is in T2. e1 in T1, e2 in T2
+  int return_label = table->label_id; table->label_id++;
+  emit_load_bool(ACC, truebool, s); // load the true Bool object into ACC
+  emit_beq(T1, T2, return_label, s); // if the pointers in T1 and T2 are the same, then the objects are equal. We loaded the true Bool in ACC, so we simply return. 
+  emit_load_bool(A1, falsebool, s); // if T1 and T2 are not equal, then we need to run the equality test. This method in the trap-handler expects the true Bool in ACC and false Bool in A1
+  emit_jal(EQUALITY_TEST, s); // jump to the equality test. This will return the true Bool in ACC if T1 and T2 are equal according to semanctics of COOL, or the false Bool in ACC if they are not. 
+  emit_label_def(return_label, s); // the return label if the objects have same pointer. 
 }
 
 int eq_class::compute_max_locals() {
