@@ -1828,7 +1828,8 @@ int static_dispatch_class::compute_max_locals() {
 // visible from the caller. The callee can access values that the caller has access
 // to, but the callee defines its names for these variable via the formals list.  
 //
-// TODO, Need to handle the dispatch on void TODO
+// For dispatch abort in void, expect the filename in ACC and line number in T1
+// according to the trap-handler. 
 //
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
@@ -1842,34 +1843,28 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   }
 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
-
+  Symbol e0_type = expr->get_type();
+  
   int bypass_abort_label = table->label_id;
   table->label_id++;
 
   emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
 
-  //here we output the abort routine
+  /* here we output the abort routine. Good dispatch will jump over this */
+  emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
+  emit_load_imm(T1, get_line_number(), s); // load the immediate value of the line number into T1;
+  emit_jal(DISPATCH_ABORT, s);
 
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
 
+  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
 
+  if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) e0_type = curr_class->name;
 
-
-
-
-  Symbol e0_type = expr->get_type();
-
-  if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) {
-    cout << "load SELF_TYPE expression" << endl;
-    emit_load(T1, DISPTABLE_OFFSET, SELF, s); // if e0 is no expression, then e0 is shorthand for 'self' so use the DISPATABLE of SELF
-  } else {
-    cout << "load regular " << endl;
-    emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
-  }
-
-  cout << e0_type->get_string() << endl;
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
+
+
   cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);

@@ -56,6 +56,7 @@
 #define STRCONST_PREFIX      "str_const"
 #define BOOLCONST_PREFIX     "bool_const"
 #define OBJECT_DOT_COPY      "Object.copy"
+#define DISPATCH_ABORT 		 "_dispatch_abort"
 
 
 #define EMPTYSLOT            0

@@ -129,7 +129,7 @@ str_const1:
 	.word	8
 	.word	String_dispTab
 	.word	int_const8
-	.ascii	"Hi Sundaram\n"
+	.ascii	"io is void!\n"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -138,7 +138,7 @@ str_const0:
 	.word	12
 	.word	String_dispTab
 	.word	int_const9
-	.ascii	"./Testfiles/dispatch_self.cl"
+	.ascii	"./Testfiles/dispatch_on_void.cl"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -146,7 +146,7 @@ int_const9:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	28
+	.word	31
 	.word	-1
 int_const8:
 	.word	2
@@ -219,7 +219,7 @@ Main_protObj:
 	.word	5
 	.word	Main_dispTab
 	.word	0
-	.word	str_const12
+	.word	0
 	.word	-1
 String_protObj:
 	.word	4
@@ -301,7 +301,6 @@ Main_dispTab:
 	.word	Object.type_name
 	.word	Object.copy
 	.word	Main.main
-	.word	Main.test
 	.globl	heap_start
 heap_start:
 	.word	0
@@ -319,11 +318,10 @@ Main_init:
 	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
+	sw	$a0 12($s0)
 	la	$a0 IO_protObj
 	jal	Object.copy
 	jal	IO_init
-	sw	$a0 12($s0)
-	la	$a0 str_const1
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 12
@@ -409,37 +407,16 @@ Main.main:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	addiu	$fp $sp 0
-	addiu	$sp $sp -12
-	move	$s0 $a0
-	move	$a0 $s0
-	bne	$a0 $zero label0
-	li	$t1 3
-	la	$a0 str_const0
-	jal	_dispatch_abort
-label0:
-	lw	$t1 8($a0)
-	lw	$t1 16($t1)
-	jalr		$t1
-	addiu	$sp $sp 12
-	lw	$fp 0($sp)
-	lw	$s0 -4($sp)
-	lw	$ra -8($sp)
-	jr	$ra	
-Main.test:
-	sw	$fp 0($sp)
-	sw	$s0 -4($sp)
-	sw	$ra -8($sp)
-	addiu	$fp $sp 0
 	addiu	$sp $sp -16
 	move	$s0 $a0
-	lw	$a0 16($s0)
+	la	$a0 str_const1
 	sw	$a0 4($sp)
 	lw	$a0 12($s0)
-	bne	$a0 $zero label1
-	li	$t1 8
+	bne	$a0 $zero label0
 	la	$a0 str_const0
+	li	$t1 9
 	jal	_dispatch_abort
-label1:
+label0:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
