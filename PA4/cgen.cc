@@ -1600,7 +1600,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   Formals formals = curr_feat->get_formals();
   for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
     Formal curr_formal = formals->nth(i);
-    int offset = i; 
+    int offset = i + 1; 
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
     loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
@@ -1632,7 +1632,7 @@ void CgenClassTable::code_class_methods() {
       for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
         Feature curr_feat = feats->nth(i);
         if (curr_feat->ismethod) {
-         code_method(curr_class, curr_feat); 
+          code_method(curr_class, curr_feat); 
         }
       }
     }
@@ -1796,7 +1796,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table); // Now the return value for this argument is in ACC. 
-    int curr_offset = i;
+    int curr_offset = i + 1;
     emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
   }
   expr->code(s, temp_start, envr, table); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
