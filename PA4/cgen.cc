@@ -1445,7 +1445,7 @@ int CgenClassTable::compute_max_locals_for_class_init(CgenNodeP curr_class) {
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
     Feature curr_feat = feats->nth(i);
     if (curr_feat->ismethod == false) {
-      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals();
+      num_locals_needed +=  curr_feat->get_expr()->compute_max_locals() + 1;
     }
   }
   return num_locals_needed;
@@ -2504,11 +2504,12 @@ int isvoid_class::compute_max_locals() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// No expression code gen is no op
+// No expression code gen puts zero in ACC
 //
 ////////////////////////////////////////////////////////////////////////////////
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code no_epression expression." << endl;
+  emit_move(ACC, ZERO, s); 
   return;
 }
 

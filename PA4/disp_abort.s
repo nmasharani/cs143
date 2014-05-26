@@ -314,12 +314,13 @@ Main_init:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -12
+	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
-	addiu	$sp $sp 12
+	addiu	$sp $sp 16
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
@@ -329,13 +330,15 @@ String_init:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -12
+	addiu	$sp $sp -20
 	move	$s0 $a0
 	jal	Object_init
+	move	$a0 $zero
 	sw	$a0 12($s0)
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
-	addiu	$sp $sp 12
+	addiu	$sp $sp 20
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
@@ -345,12 +348,13 @@ Bool_init:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -12
+	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
-	addiu	$sp $sp 12
+	addiu	$sp $sp 16
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
@@ -360,12 +364,13 @@ Int_init:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -12
+	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
-	addiu	$sp $sp 12
+	addiu	$sp $sp 16
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
