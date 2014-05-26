@@ -888,35 +888,16 @@ void CgenClassTable::code_protos() {
     str << WORD << "-1" << endl;
     CgenNode * nd = nl->hd();
     Symbol class_name = nd->get_name();
-
-    // get tags from name_to_tag
-    
-    emit_protobj_ref(class_name, str);
+    emit_protobj_ref(class_name, str); // get tags from name_to_tag
     str << ":" << endl;
-    // Class tag
-    int tag = *(name_to_tag->probe(class_name));
-
-
-    // Attributes
-
-    Features attributes = class_attributes->lookup(class_name);
-
-    // Object size
-
-    // 1 for tag, 1 for size, 1 for dispatch pointer, 1 for each attr
-    int size = 1 + 1 + 1 + attributes->len();
-
-    // emit class tag
-    str << WORD << tag << endl;
-
-    // emit size
-    str << WORD << size << endl;
-
-    // emit dispatch table
-     str << WORD;
+    int tag = *(name_to_tag->probe(class_name)); // Class tag
+    Features attributes = class_attributes->lookup(class_name); // Attributes
+    int size = 1 + 1 + 1 + attributes->len(); // 1 for tag, 1 for size, 1 for dispatch pointer, 1 for each attr
+    str << WORD << tag << endl; // emit class tag
+    str << WORD << size << endl;  // emit size
+    str << WORD; // emit dispatch table
     emit_disptable_ref(class_name, str);
     str << endl;
-
     // emit attributes
     for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
       Symbol type = attributes->nth(i)->get_type();
