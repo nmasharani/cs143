@@ -1808,8 +1808,39 @@ int assign_class::compute_max_locals() {
   return expr->compute_max_locals();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Static disaptch code gen. Very similiar to dispatch code gen, only now
+// we know the type to dispatch to at compile time. 
+//
+////////////////////////////////////////////////////////////////////////////////
 void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code static dispatch expression." << endl;
+  cout << "Code disptach expression." << endl;
+  int num_params = actual->len();
+  for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
+    Expression curr_param = actual->nth(i);
+    curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
+    //int curr_offset = num_params - i;
+    //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
+    emit_push(ACC, s);
+  }
+  expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
+  int bypass_abort_label = table->label_id;
+  table->label_id++;
+  emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
+  /* here we output the abort routine. Good dispatch will jump over this */
+  emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
+  emit_load_imm(T1, get_line_number(), s); // load the immediate value of the line number into T1;
+  emit_jal(DISPATCH_ABORT, s);
+  /* if we get to here in the code, then the dispatch is valid */
+  emit_label_def(bypass_abort_label, s);
+  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
+  if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) type_name = curr_class->name;
+  int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
+  cout << " loaded dispatch for class " << type_name->get_string() << "at offset " << offset_in_disp_tab << endl;
+  emit_load(T1, offset_in_disp_tab, T1, s);
+  emit_jalr(T1, s);
 }
 
 int static_dispatch_class::compute_max_locals() {
@@ -1849,30 +1880,20 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
     //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
     emit_push(ACC, s);
   }
-
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   Symbol e0_type = expr->get_type();
-
   int bypass_abort_label = table->label_id;
   table->label_id++;
-
   emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
-
   /* here we output the abort routine. Good dispatch will jump over this */
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // load the immediate value of the line number into T1;
   emit_jal(DISPATCH_ABORT, s);
-
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
-
   emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
-
   if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) e0_type = curr_class->name;
-
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
-
-
   cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
@@ -1899,18 +1920,13 @@ void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   table->label_id++;
   int end_label = table->label_id;
   table->label_id++;
-
   pred->code(s, temp_start, envr, table, curr_class); // evaluate the predicate. Branch to false if false. Otherwise fall through to true. 
-
   emit_load(T2, BOOL_VAL_OFFSET, ACC, s); // store the value of the boolen in a temporary register. 
   emit_beq(T2, ZERO, false_label, s); // if the boolean is false (0), jump to the false label and execute the else->expr. 
-
   then_exp->code(s, temp_start, envr, table, curr_class); // if the pred is true, evaluate the then expression. Result now stored in ACC
   emit_branch(end_label, s); // jump over the false branch and return with the value of then_expr in ACC. 
-
   emit_label_def(false_label, s); // output the false label. 
   else_exp->code(s, temp_start, envr, table, curr_class); // if the predicate is false, evaluate the else expression. Result now stored in ACC. 
-
   emit_label_def(end_label, s); // the end of the expression. Result is in ACC. 
 }
 
@@ -1939,14 +1955,12 @@ void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   table->label_id++;
   int loop_end_label = table->label_id;
   table->label_id++;
-
   emit_label_def(loop_begin_label, s); // this is the start of the loop
   pred->code(s, temp_start, envr, table, curr_class); // evaluate the loop predicate. Result stored in ACC. Note, result is a BOOL object. Need to get the value of the bool. 
   emit_load(T1, BOOL_VAL_OFFSET, ACC, s); // load the value of the Bool object returned by the predicate into T1. 
   emit_beq(T1, ZERO, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
   body->code(s, temp_start, envr, table, curr_class);
   emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
-
   emit_label_def(loop_end_label, s); // this is the end of the loop label
   emit_load_imm(ACC, VOID, s); // void is returned when the loop terminates. 
 }
@@ -2013,7 +2027,6 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
       }
     }
   }
-
   emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
   emit_load_address(ACC, CLASSNAMETAB, s); // move the address of the class_nameTab into ACC.
   emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
@@ -2508,6 +2521,11 @@ int isvoid_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// No expression code gen is no op
+//
+////////////////////////////////////////////////////////////////////////////////
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code no_epression expression." << endl;
   return;
