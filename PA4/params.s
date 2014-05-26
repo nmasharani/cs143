@@ -460,6 +460,7 @@ heap_start:
 	.globl	String_init
 	.globl	Bool_init
 	.globl	Main.main
+# Begin Emmitting code to generate initializer method for Bravo
 Bravo_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -468,9 +469,11 @@ Bravo_init:
 	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+# Begin Code new with type at line number 32
 	la	$a0 IO_protObj
 	jal	Object.copy
 	jal	IO_init
+# End Code new with type IO
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -478,6 +481,8 @@ Bravo_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for Bravo
+# Begin Emmitting code to generate initializer method for Main
 Main_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -486,45 +491,83 @@ Main_init:
 	addiu	$sp $sp -88
 	move	$s0 $a0
 	jal	Object_init
+# Begin Code new with type at line number 2
 	la	$a0 Bravo_protObj
 	jal	Object.copy
 	jal	Bravo_init
+# End Code new with type Bravo
 	sw	$a0 12($s0)
+# Begin Code string const expression at line number 3
 	la	$a0 str_const1
+# End Code string const expression.
 	sw	$a0 16($s0)
+# Begin Code string const expression at line number 4
 	la	$a0 str_const2
+# End Code string const expression.
 	sw	$a0 20($s0)
+# Begin Code string const expression at line number 5
 	la	$a0 str_const3
+# End Code string const expression.
 	sw	$a0 24($s0)
+# Begin Code string const expression at line number 6
 	la	$a0 str_const4
+# End Code string const expression.
 	sw	$a0 28($s0)
+# Begin Code string const expression at line number 7
 	la	$a0 str_const5
+# End Code string const expression.
 	sw	$a0 32($s0)
+# Begin Code string const expression at line number 8
 	la	$a0 str_const6
+# End Code string const expression.
 	sw	$a0 36($s0)
+# Begin Code string const expression at line number 9
 	la	$a0 str_const7
+# End Code string const expression.
 	sw	$a0 40($s0)
+# Begin Code string const expression at line number 10
 	la	$a0 str_const8
+# End Code string const expression.
 	sw	$a0 44($s0)
+# Begin Code string const expression at line number 11
 	la	$a0 str_const9
+# End Code string const expression.
 	sw	$a0 48($s0)
+# Begin Code int const expression at line number 12
 	la	$a0 int_const0
+# End Code int const expression.
 	sw	$a0 52($s0)
+# Begin Code int const expression at line number 13
 	la	$a0 int_const1
+# End Code int const expression.
 	sw	$a0 56($s0)
+# Begin Code int const expression at line number 14
 	la	$a0 int_const2
+# End Code int const expression.
 	sw	$a0 60($s0)
+# Begin Code int const expression at line number 15
 	la	$a0 int_const3
+# End Code int const expression.
 	sw	$a0 64($s0)
+# Begin Code int const expression at line number 16
 	la	$a0 int_const4
+# End Code int const expression.
 	sw	$a0 68($s0)
+# Begin Code int const expression at line number 17
 	la	$a0 int_const5
+# End Code int const expression.
 	sw	$a0 72($s0)
+# Begin Code int const expression at line number 18
 	la	$a0 int_const6
+# End Code int const expression.
 	sw	$a0 76($s0)
+# Begin Code int const expression at line number 19
 	la	$a0 int_const7
+# End Code int const expression.
 	sw	$a0 80($s0)
+# Begin Code int const expression at line number 20
 	la	$a0 int_const8
+# End Code int const expression.
 	sw	$a0 84($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 88
@@ -532,6 +575,8 @@ Main_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for Main
+# Begin Emmitting code to generate initializer method for String
 String_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -540,9 +585,12 @@ String_init:
 	addiu	$sp $sp -20
 	move	$s0 $a0
 	jal	Object_init
+# Begin Code no_epression expression at line number 1
 	move	$a0 $zero
-	sw	$a0 12($s0)
+# End Code no_epression expression.
+# Begin Code no_epression expression at line number 1
 	move	$a0 $zero
+# End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -550,6 +598,8 @@ String_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for String
+# Begin Emmitting code to generate initializer method for Bool
 Bool_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -558,7 +608,9 @@ Bool_init:
 	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+# Begin Code no_epression expression at line number 1
 	move	$a0 $zero
+# End Code no_epression expression.
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -566,6 +618,8 @@ Bool_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for Bool
+# Begin Emmitting code to generate initializer method for Int
 Int_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -574,7 +628,9 @@ Int_init:
 	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
+# Begin Code no_epression expression at line number 1
 	move	$a0 $zero
+# End Code no_epression expression.
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -582,6 +638,8 @@ Int_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for Int
+# Begin Emmitting code to generate initializer method for IO
 IO_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -596,6 +654,8 @@ IO_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for IO
+# Begin Emmitting code to generate initializer method for Object
 Object_init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -609,17 +669,27 @@ Object_init:
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	jr	$ra	
+# End Emmitting code to generate initializer method for Object
+# Begin Emitting code for method print_order
 Bravo.print_order:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -48
 	move	$s0 $a0
+# Begin Code block epression at line number 34
+# Begin Code disptach expression at line number 35
+# Begin Code objectID expression at line number 35
+# Loading paramter object into ACC
 	lw	$a0 36($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 35
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label0
 	la	$a0 str_const0
 	li	$t1 35
@@ -628,10 +698,18 @@ label0:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 36
+# Begin Code objectID expression at line number 36
+# Loading paramter object into ACC
 	lw	$a0 32($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 36
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label1
 	la	$a0 str_const0
 	li	$t1 36
@@ -640,10 +718,18 @@ label1:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 37
+# Begin Code objectID expression at line number 37
+# Loading paramter object into ACC
 	lw	$a0 28($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 37
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label2
 	la	$a0 str_const0
 	li	$t1 37
@@ -652,10 +738,18 @@ label2:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 38
+# Begin Code objectID expression at line number 38
+# Loading paramter object into ACC
 	lw	$a0 24($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 38
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label3
 	la	$a0 str_const0
 	li	$t1 38
@@ -664,10 +758,18 @@ label3:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 39
+# Begin Code objectID expression at line number 39
+# Loading paramter object into ACC
 	lw	$a0 20($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 39
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label4
 	la	$a0 str_const0
 	li	$t1 39
@@ -676,10 +778,18 @@ label4:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 40
+# Begin Code objectID expression at line number 40
+# Loading paramter object into ACC
 	lw	$a0 16($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 40
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label5
 	la	$a0 str_const0
 	li	$t1 40
@@ -688,10 +798,18 @@ label5:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 41
+# Begin Code objectID expression at line number 41
+# Loading paramter object into ACC
 	lw	$a0 12($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 41
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label6
 	la	$a0 str_const0
 	li	$t1 41
@@ -700,10 +818,18 @@ label6:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 42
+# Begin Code objectID expression at line number 42
+# Loading paramter object into ACC
 	lw	$a0 8($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 42
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label7
 	la	$a0 str_const0
 	li	$t1 42
@@ -712,10 +838,18 @@ label7:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 43
+# Begin Code objectID expression at line number 43
+# Loading paramter object into ACC
 	lw	$a0 4($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 43
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label8
 	la	$a0 str_const0
 	li	$t1 43
@@ -724,23 +858,35 @@ label8:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# End Code block epression.
 	addiu	$sp $sp 48
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	addiu	$sp $sp 36
 	jr	$ra	
+# End Emitting code for method print_order
+# Begin Emitting code for method print_reverse
 Bravo.print_reverse:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -48
 	move	$s0 $a0
+# Begin Code block epression at line number 47
+# Begin Code disptach expression at line number 48
+# Begin Code objectID expression at line number 48
+# Loading paramter object into ACC
 	lw	$a0 4($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 48
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label9
 	la	$a0 str_const0
 	li	$t1 48
@@ -749,10 +895,18 @@ label9:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 49
+# Begin Code objectID expression at line number 49
+# Loading paramter object into ACC
 	lw	$a0 8($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 49
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label10
 	la	$a0 str_const0
 	li	$t1 49
@@ -761,10 +915,18 @@ label10:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 50
+# Begin Code objectID expression at line number 50
+# Loading paramter object into ACC
 	lw	$a0 12($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 50
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label11
 	la	$a0 str_const0
 	li	$t1 50
@@ -773,10 +935,18 @@ label11:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 51
+# Begin Code objectID expression at line number 51
+# Loading paramter object into ACC
 	lw	$a0 16($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 51
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label12
 	la	$a0 str_const0
 	li	$t1 51
@@ -785,10 +955,18 @@ label12:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 52
+# Begin Code objectID expression at line number 52
+# Loading paramter object into ACC
 	lw	$a0 20($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 52
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label13
 	la	$a0 str_const0
 	li	$t1 52
@@ -797,10 +975,18 @@ label13:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 53
+# Begin Code objectID expression at line number 53
+# Loading paramter object into ACC
 	lw	$a0 24($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 53
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label14
 	la	$a0 str_const0
 	li	$t1 53
@@ -809,10 +995,18 @@ label14:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 54
+# Begin Code objectID expression at line number 54
+# Loading paramter object into ACC
 	lw	$a0 28($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 54
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label15
 	la	$a0 str_const0
 	li	$t1 54
@@ -821,10 +1015,18 @@ label15:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 55
+# Begin Code objectID expression at line number 55
+# Loading paramter object into ACC
 	lw	$a0 32($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 55
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label16
 	la	$a0 str_const0
 	li	$t1 55
@@ -833,10 +1035,18 @@ label16:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 56
+# Begin Code objectID expression at line number 56
+# Loading paramter object into ACC
 	lw	$a0 36($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 56
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label17
 	la	$a0 str_const0
 	li	$t1 56
@@ -845,23 +1055,35 @@ label17:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# End Code block epression.
 	addiu	$sp $sp 48
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	addiu	$sp $sp 36
 	jr	$ra	
+# End Emitting code for method print_reverse
+# Begin Emitting code for method print_nums
 Bravo.print_nums:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -100
 	move	$s0 $a0
+# Begin Code block epression at line number 60
+# Begin Code disptach expression at line number 61
+# Begin Code objectID expression at line number 61
+# Loading paramter object into ACC
 	lw	$a0 36($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 61
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label18
 	la	$a0 str_const0
 	li	$t1 61
@@ -870,10 +1092,18 @@ label18:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 62
+# Begin Code objectID expression at line number 62
+# Loading paramter object into ACC
 	lw	$a0 32($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 62
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label19
 	la	$a0 str_const0
 	li	$t1 62
@@ -882,10 +1112,18 @@ label19:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 63
+# Begin Code objectID expression at line number 63
+# Loading paramter object into ACC
 	lw	$a0 28($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 63
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label20
 	la	$a0 str_const0
 	li	$t1 63
@@ -894,10 +1132,18 @@ label20:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 64
+# Begin Code objectID expression at line number 64
+# Loading paramter object into ACC
 	lw	$a0 24($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 64
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label21
 	la	$a0 str_const0
 	li	$t1 64
@@ -906,10 +1152,18 @@ label21:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 65
+# Begin Code objectID expression at line number 65
+# Loading paramter object into ACC
 	lw	$a0 20($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 65
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label22
 	la	$a0 str_const0
 	li	$t1 65
@@ -918,10 +1172,18 @@ label22:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 66
+# Begin Code objectID expression at line number 66
+# Loading paramter object into ACC
 	lw	$a0 16($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 66
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label23
 	la	$a0 str_const0
 	li	$t1 66
@@ -930,10 +1192,18 @@ label23:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 67
+# Begin Code objectID expression at line number 67
+# Loading paramter object into ACC
 	lw	$a0 12($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 67
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label24
 	la	$a0 str_const0
 	li	$t1 67
@@ -942,10 +1212,18 @@ label24:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 68
+# Begin Code objectID expression at line number 68
+# Loading paramter object into ACC
 	lw	$a0 8($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 68
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label25
 	la	$a0 str_const0
 	li	$t1 68
@@ -954,10 +1232,18 @@ label25:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 69
+# Begin Code objectID expression at line number 69
+# Loading paramter object into ACC
 	lw	$a0 4($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 69
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label26
 	la	$a0 str_const0
 	li	$t1 69
@@ -966,102 +1252,203 @@ label26:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code let expression at line number 70
+# Begin Code int const expression at line number 70
 	la	$a0 int_const9
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code int const expression.
+	sw	$a0 -12($fp)
+# Begin Code block epression at line number 71
+# Begin Code assign expression at line number 72
+# Begin Code plus expression at line number 72
+# Begin Code objectID expression at line number 72
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 72
+# Loading paramter object into ACC
 	lw	$a0 36($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 73
+# Begin Code plus expression at line number 73
+# Begin Code objectID expression at line number 73
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 73
+# Loading paramter object into ACC
 	lw	$a0 32($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 74
+# Begin Code plus expression at line number 74
+# Begin Code objectID expression at line number 74
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 74
+# Loading paramter object into ACC
 	lw	$a0 28($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 75
+# Begin Code plus expression at line number 75
+# Begin Code objectID expression at line number 75
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 75
+# Loading paramter object into ACC
 	lw	$a0 24($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 76
+# Begin Code plus expression at line number 76
+# Begin Code objectID expression at line number 76
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 76
+# Loading paramter object into ACC
 	lw	$a0 20($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 77
+# Begin Code plus expression at line number 77
+# Begin Code objectID expression at line number 77
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 77
+# Loading paramter object into ACC
 	lw	$a0 16($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 78
+# Begin Code plus expression at line number 78
+# Begin Code objectID expression at line number 78
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 78
+# Loading paramter object into ACC
 	lw	$a0 12($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 79
+# Begin Code plus expression at line number 79
+# Begin Code objectID expression at line number 79
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 79
+# Loading paramter object into ACC
 	lw	$a0 8($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
-	lw	$a0 88($sp)
-	sw	$a0 84($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code assign expression at line number 80
+# Begin Code plus expression at line number 80
+# Begin Code objectID expression at line number 80
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
+	sw	$a0 16($sp)
+# Begin Code objectID expression at line number 80
+# Loading paramter object into ACC
 	lw	$a0 4($fp)
-	lw	$t1 84($sp)
+# End Code objectID expression.
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
-	sw	$a0 88($sp)
+# End Code plus expression.
+	sw	$a0 -12($fp)
+# End Code assign expression.
+# Begin Code disptach expression at line number 81
+# Begin Code string const expression at line number 81
 	la	$a0 str_const10
+# End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 81
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label27
 	la	$a0 str_const0
 	li	$t1 81
@@ -1070,10 +1457,17 @@ label27:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 82
+# Begin Code string const expression at line number 82
 	la	$a0 str_const11
+# End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 82
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label28
 	la	$a0 str_const0
 	li	$t1 82
@@ -1082,10 +1476,18 @@ label28:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
-	lw	$a0 88($sp)
+# End Code disptach expression.
+# Begin Code disptach expression at line number 83
+# Begin Code objectID expression at line number 83
+# Loading local object into ACC
+	lw	$a0 -12($fp)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 83
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label29
 	la	$a0 str_const0
 	li	$t1 83
@@ -1094,47 +1496,85 @@ label29:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# End Code block epression.
+# End Code let expression.
+# End Code block epression.
 	addiu	$sp $sp 100
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	addiu	$sp $sp 36
 	jr	$ra	
+# End Emitting code for method print_nums
+# Begin Emitting code for method main
 Main.main:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -120
 	move	$s0 $a0
+# Begin Code block epression at line number 22
+# Begin Code disptach expression at line number 23
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 16($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 20($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 24($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 28($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 32($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 36($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 40($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 44($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 48($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 23
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label30
 	la	$a0 str_const0
 	li	$t1 23
@@ -1143,34 +1583,66 @@ label30:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 24
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 16($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 20($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 24($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 28($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 32($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 36($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 40($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 44($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 48($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 24
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label31
 	la	$a0 str_const0
 	li	$t1 24
@@ -1179,34 +1651,66 @@ label31:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 25
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 52($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 56($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 60($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 64($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 68($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 72($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 76($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 80($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 84($s0)
+# End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 25
+# Loading attribute object into ACC
 	lw	$a0 12($s0)
+# End Code objectID expression.
 	bne	$a0 $zero label32
 	la	$a0 str_const0
 	li	$t1 25
@@ -1215,11 +1719,14 @@ label32:
 	lw	$t1 8($a0)
 	lw	$t1 20($t1)
 	jalr		$t1
+# End Code disptach expression.
+# End Code block epression.
 	addiu	$sp $sp 120
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
 	addiu	$sp $sp 0
 	jr	$ra	
+# End Emitting code for method main
 
 # end of generated code

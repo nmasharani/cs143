@@ -2173,9 +2173,9 @@ int let_class::compute_max_locals() {
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code plus expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
@@ -2198,9 +2198,9 @@ int plus_class::compute_max_locals() {
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code sub expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
@@ -2223,9 +2223,9 @@ int sub_class::compute_max_locals() {
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code mul expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
@@ -2248,9 +2248,9 @@ int mul_class::compute_max_locals() {
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code divide expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
@@ -2275,9 +2275,9 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
-  emit_store(T1, temp_start, SP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
+  emit_store(T1, (-1)*temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
   emit_jal(OBJECT_DOT_COPY, s); // copy the int obect in ACC as a result of evaluating e1. 
-  emit_load(T1, temp_start, SP, s); // load the neg'd value saved on stack back into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the neg'd value saved on stack back into T1
   emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
   s << "# End Code neg expression." << endl;
 }
@@ -2294,9 +2294,9 @@ int neg_class::compute_max_locals() {
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code lt expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
   int true_label = table->label_id; table->label_id++;
@@ -2325,9 +2325,9 @@ int lt_class::compute_max_locals() {
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code eq expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Result stored in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_move(T2, ACC, s); // now e2 is in T2. e1 in T1, e2 in T2
   int return_label = table->label_id; table->label_id++;
   emit_load_bool(ACC, truebool, s); // load the true Bool object into ACC
@@ -2352,9 +2352,9 @@ int eq_class::compute_max_locals() {
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code leq expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
-  emit_store(ACC, temp_start, SP, s); // store e1 on stack
+  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
   e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
   int true_label = table->label_id; table->label_id++;

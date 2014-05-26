@@ -572,12 +572,12 @@ label2:
 # Begin Code int const expression at line number 86
 	la	$a0 int_const1
 # End Code int const expression.
-	sw	$a0 16($sp)
+	sw	$a0 -16($fp)
 # Begin Code objectID expression at line number 86
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 16($sp)
+	lw	$t1 -16($fp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label4
@@ -624,11 +624,11 @@ label7:
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 16($sp)
+	sw	$a0 -16($fp)
 # Begin Code int const expression at line number 90
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 16($sp)
+	lw	$t1 -16($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -814,11 +814,11 @@ CellularAutomaton.cell_left_neighbor:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code int const expression at line number 31
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label14
@@ -842,11 +842,11 @@ label15:
 	lw	$t1 36($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code int const expression at line number 32
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -874,11 +874,11 @@ label12:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code int const expression at line number 34
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -921,7 +921,7 @@ CellularAutomaton.cell_right_neighbor:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code sub expression at line number 39
 # Begin Code disptach expression at line number 39
 # Begin Code objectID expression at line number 39
@@ -935,18 +935,18 @@ label20:
 	lw	$t1 36($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 16($sp)
+	sw	$a0 -16($fp)
 # Begin Code int const expression at line number 39
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 16($sp)
+	lw	$t1 -16($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code sub expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label21
@@ -981,11 +981,11 @@ label18:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code int const expression at line number 42
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
@@ -1046,11 +1046,11 @@ label28:
 	lw	$t1 40($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code string const expression at line number 49
 	la	$a0 str_const2
 # End Code string const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label29
@@ -1070,7 +1070,7 @@ label26:
 # End Code int const expression.
 label27:
 # End Code cond expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code cond expression at line number 50
 # Begin Code eq expression at line number 50
 # Begin Code disptach expression at line number 50
@@ -1091,11 +1091,11 @@ label32:
 	lw	$t1 44($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 16($sp)
+	sw	$a0 -16($fp)
 # Begin Code string const expression at line number 50
 	la	$a0 str_const2
 # End Code string const expression.
-	lw	$t1 16($sp)
+	lw	$t1 -16($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label33
@@ -1115,14 +1115,14 @@ label30:
 # End Code int const expression.
 label31:
 # End Code cond expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code plus expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code cond expression at line number 51
 # Begin Code eq expression at line number 51
 # Begin Code disptach expression at line number 51
@@ -1143,11 +1143,11 @@ label36:
 	lw	$t1 48($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 16($sp)
+	sw	$a0 -16($fp)
 # Begin Code string const expression at line number 51
 	la	$a0 str_const2
 # End Code string const expression.
-	lw	$t1 16($sp)
+	lw	$t1 -16($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label37
@@ -1167,18 +1167,18 @@ label34:
 # End Code int const expression.
 label35:
 # End Code cond expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code plus expression.
-	sw	$a0 12($sp)
+	sw	$a0 -12($fp)
 # Begin Code int const expression at line number 52
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 12($sp)
+	lw	$t1 -12($fp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label38
@@ -1243,12 +1243,12 @@ label40:
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 24($sp)
+	sw	$a0 -24($fp)
 # Begin Code objectID expression at line number 65
 # Loading local object into ACC
 	lw	$a0 -16($fp)
 # End Code objectID expression.
-	lw	$t1 24($sp)
+	lw	$t1 -24($fp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label42
@@ -1304,11 +1304,11 @@ label45:
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 24($sp)
+	sw	$a0 -24($fp)
 # Begin Code int const expression at line number 68
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 24($sp)
+	lw	$t1 -24($fp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
