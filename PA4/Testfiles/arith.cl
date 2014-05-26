@@ -111,7 +111,7 @@ class C inherits B {
 };
 
 class D inherits B {  
-
+		
    method7(num : Int) : Bool {  -- divisible by 3
       (let x : Int <- num in
             if x < 0 then method7(~x) else
@@ -235,7 +235,7 @@ overflow.
           "-".concat(i2a_aux(i * ~1)) 
         fi fi
     };
-
+	
 (* i2a_aux is an example using recursion.  *)		
 
     i2a_aux(i : Int) : String {
@@ -427,3 +427,4 @@ class Main inherits IO {
    };
 
 };
+

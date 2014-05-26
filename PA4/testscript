@@ -1,17 +1,19 @@
-for file in /usr/class/cs143/examples/*.cl
-	do
-		echo $file
-		\rm mine_console
-		\rm reference_console
-		\rm mine_runtime.s
-		\rm reference_runtime.s
-		./mycoolc -k $file &> mine_console.txt
-		/usr/class/cs143/bin/spim -file $file &> mine_runtime.s
-		/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
-		/usr/class/cs143/bin/spim -file $file &> reference_runtime.s
-		diff mine_runtime.txt reference_runtime.txt
-		cat mine_runtime.txt
-		echo ""
-		echo "################################"
-		echo ""
-	done
+echo $1
+t=${1%%.*}
+s=${t##*/}
+echo $s.s
+\rm mine_console.txt
+\rm reference_console.txt
+./mycoolc -k $file &> mine_console.txt
+/usr/class/cs143/bin/spim -file $s.s &> mine_runtime.txt
+/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
+/usr/class/cs143/bin/spim -file $s.s &> reference_runtime.txt
+diff mine_runtime.txt reference_runtime.txt
+echo ""
+cat mine_runtime.txt
+echo ""
+
+
+echo ""
+echo "***********************************************************************"
+echo ""
