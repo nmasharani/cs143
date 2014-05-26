@@ -9,11 +9,6 @@ class Main inherits IO {
     };
 };
 
-class Test {
-	func() : Object {
-		3
-	};
-};
 
 class Complex inherits IO {
     x : Int;

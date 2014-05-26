@@ -1478,7 +1478,7 @@ int CgenClassTable::compute_max_locals_for_class_init(CgenNodeP curr_class) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
-  cout << "Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
+  str << "# Begin Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
   curr_class->envr->enterscope();
   emit_init_ref(curr_class->name, str); str << LABEL;
   /* first we set up the stack */
@@ -1508,6 +1508,9 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
       curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
+      if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") == 0) {
+        if (is_int_str_bool(curr_feat->get_type()) == true) continue;
+      }
       emit_store(ACC, offset, SELF, str);
     }
   }
@@ -1519,6 +1522,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
 
   emit_return(str);
   curr_class->envr->exitscope();
+  str << "# End Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1569,7 +1573,7 @@ void CgenClassTable::code_init_methods() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
-  cout << "Emitting code for method " << curr_feat->get_name()->get_string() << endl;
+  str << "# Begin Emitting code for method " << curr_feat->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
 
   emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
@@ -1605,7 +1609,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
 
   emit_return(str);
   curr_class->envr->exitscope();
-  cout << endl;
+  str << "# End Emitting code for method " << curr_feat->get_name()->get_string() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1765,7 +1769,7 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 ////////////////////////////////////////////////////////////////////////////////
 
 void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code assign expression." << endl;
+  s << "# Begin Code assign expression at line number " << get_line_number() << endl;
   expr->code(s, temp_start, envr, table, curr_class); // value of this expression is now in ACC. 
 
   var_loc* loc = envr->lookup(name);
@@ -1781,8 +1785,9 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
     emit_store(ACC, offset, FP, s);
   } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
     cout << "Assigning local object" << endl;
-    emit_store(ACC, offset, SP, s);
+    emit_store(ACC, (-1)*offset, FP, s);
   }
+  s << "# End Code assign expression." << endl;
 }
 
 int assign_class::compute_max_locals() {
@@ -1796,8 +1801,7 @@ int assign_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code static dispatch expression." << endl;
-  cout << "Code disptach expression." << endl;
+  s << "# Begin Code static dispatch expression at line number " << get_line_number() <<  endl;
   int num_params = actual->len();
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
@@ -1806,6 +1810,7 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
     //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
     emit_push(ACC, s);
   }
+  //emit_addiu(SP, SP, num_params*WORD_SIZE, s); // 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   int bypass_abort_label = table->label_id;
   table->label_id++;
@@ -1821,7 +1826,9 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
   cout << " loaded dispatch for class " << type_name->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
+  //emit_addiu(SP, SP, (-1)*num_params*WORD_SIZE, s); // move stack down by number of arguments we pushed, as the callee will move it back up. 
   emit_jalr(T1, s);
+  s << "# End Code static dispatch expression." << endl;
 }
 
 int static_dispatch_class::compute_max_locals() {
@@ -1852,7 +1859,7 @@ int static_dispatch_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code disptach expression." << endl;
+  s << "# Begin Code disptach expression at line number " << get_line_number() <<  endl;
 
   /* ** STORING PARAMETERS ** */
 
@@ -1862,6 +1869,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
     emit_push(ACC, s);
   }
+  //emit_addiu(SP, SP, num_params*WORD_SIZE, s); // 
 
   /* ** GETTING THE OBJECT UPON WHICH WE DISPATCH ** */
 
@@ -1889,7 +1897,10 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   
   cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
+  //before the jump here, move the stack pointer down by the amount of the arguments we pushed, as these will get poped later. 
+  //emit_addiu(SP, SP, (-1)*num_params*WORD_SIZE, s); // move stack down by number of arguments we pushed, as the callee will move it back up. 
   emit_jalr(T1, s);
+  s << "# End Code disptach expression." << endl;
 }
 
 int dispatch_class::compute_max_locals() {
@@ -1908,7 +1919,7 @@ int dispatch_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code cond expression." << endl;
+  s << "# Begin Code cond expression at line number " << get_line_number() <<  endl;
   int false_label = table->label_id;
   table->label_id++;
   int end_label = table->label_id;
@@ -1921,6 +1932,7 @@ void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_label_def(false_label, s); // output the false label. 
   else_exp->code(s, temp_start, envr, table, curr_class); // if the predicate is false, evaluate the else expression. Result now stored in ACC. 
   emit_label_def(end_label, s); // the end of the expression. Result is in ACC. 
+  s << "# End Code cond expression." << endl;
 }
 
 int cond_class::compute_max_locals() {
@@ -1943,7 +1955,7 @@ int cond_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code loop expression." << endl;
+  s << "# Begin Code loop expression at line number " << get_line_number() << endl;
   int loop_begin_label = table->label_id;
   table->label_id++;
   int loop_end_label = table->label_id;
@@ -1956,6 +1968,7 @@ void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
   emit_label_def(loop_end_label, s); // this is the end of the loop label
   emit_load_imm(ACC, VOID, s); // void is returned when the loop terminates. 
+  s << "# End Code loop expression." << endl;
 }
 
 int loop_class::compute_max_locals() {
@@ -1970,7 +1983,7 @@ int loop_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code typecase expression." << endl;
+  s << "# Begin Code typecase expression at line number " << get_line_number() <<  endl;
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
   emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
 
@@ -2010,7 +2023,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
         }
         loc->offset = temp_start;
         envr->addid(cases->nth(j)->get_id(), loc);
-        emit_store(T3, loc->offset, SP, s); // now bind the value of e0 to the identifier of this branch
+        emit_store(T3, (-1)*loc->offset, FP, s); // now bind the value of e0 to the identifier of this branch
         // finally, evaluate the epression of this branch, with the value of e0 boud to the identifier of this branch. 
         cases->nth(j)->get_branch_expr()->code(s, temp_start - 1, envr, table, curr_class);
 
@@ -2029,6 +2042,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
 
   emit_label_def(success_label, s); // jumps to here on successful evaluation of case, bypassing the _case_abort
+  s << "# End Code typecase expression." << endl;
 }
 
 int typcase_class::compute_max_locals() {
@@ -2096,11 +2110,12 @@ int* CgenClassTable::get_sorted_tags(Cases cases, CgenClassTableP table) {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code block epression." << endl;
+  s << "# Begin Code block epression at line number " << get_line_number() <<  endl;
   for (int i = body->first(); body->more(i); i = body->next(i)) {
     Expression curr_exp = body->nth(i);
     curr_exp->code(s, temp_start, envr, table, curr_class);
   }
+  s << "# End Code block epression." << endl;
 }
 
 int block_class::compute_max_locals() {
@@ -2120,11 +2135,11 @@ int block_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   envr->enterscope(); // enter a new scope as we are introducing a new variable here. 
-  cout << "Code let expression." << endl;
+  s << "# Begin Code let expression at line number " << get_line_number() <<  endl;
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
     if (table->is_int_str_bool(type_decl)) {
-      s << LA << " " << ACC << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
+      s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
       emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
     } else {
       emit_move(ACC, ZERO, s);
@@ -2139,13 +2154,13 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
      cout << "Out of local space. This should never happen." << endl;
    }
    loc->offset = temp_start;
-   temp_start = temp_start - 1;
    envr->addid(identifier, loc);
 
-   emit_store(ACC, loc->offset, SP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
-   body->code(s, temp_start, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
+   emit_store(ACC, (-1)*loc->offset, FP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
+   body->code(s, temp_start - 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
 
    envr->exitscope(); // once we finish processing this let, we don't want to know about the locally declared variable anymore. 
+    s << "# End Code let expression." << endl;
 }
 
 int let_class::compute_max_locals() {
@@ -2162,7 +2177,7 @@ int let_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code plus expression." << endl;
+  s << "# Begin Code plus expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
@@ -2172,6 +2187,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value. 
+  s << "# End Code plus expression." << endl;
 }
 
 int plus_class::compute_max_locals() {
@@ -2186,7 +2202,7 @@ int plus_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code sub expression." << endl;
+  s << "# Begin Code sub expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
@@ -2196,6 +2212,7 @@ void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  s << "# End Code sub expression." << endl;
 }
 
 int sub_class::compute_max_locals() {
@@ -2210,7 +2227,7 @@ int sub_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code mul expression." << endl;
+  s << "# Begin Code mul expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
@@ -2220,6 +2237,7 @@ void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  s << "# End Code mul expression." << endl;
 }
 
 int mul_class::compute_max_locals() {
@@ -2234,7 +2252,7 @@ int mul_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code divide expression." << endl;
+  s << "# Begin Code divide expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
@@ -2244,6 +2262,7 @@ void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  s << "# End Code divide expression." << endl;
 }
 
 int divide_class::compute_max_locals() {
@@ -2258,7 +2277,7 @@ int divide_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code neg expression." << endl;
+  s << "# Begin Code neg expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
@@ -2266,6 +2285,7 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_jal(OBJECT_DOT_COPY, s); // copy the int obect in ACC as a result of evaluating e1. 
   emit_load(T1, temp_start, SP, s); // load the neg'd value saved on stack back into T1
   emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
+  s << "# End Code neg expression." << endl;
 }
 
 int neg_class::compute_max_locals() {
@@ -2278,7 +2298,7 @@ int neg_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code lt expression." << endl;
+  s << "# Begin Code lt expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
@@ -2293,6 +2313,7 @@ void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
   emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
+  s << "# End Code lt expression." << endl;
 }
 
 int lt_class::compute_max_locals() {
@@ -2308,7 +2329,7 @@ int lt_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code eq expression." << endl;
+  s << "# Begin Code eq expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Result stored in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
@@ -2320,6 +2341,7 @@ void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   emit_load_bool(A1, falsebool, s); // if T1 and T2 are not equal, then we need to run the equality test. This method in the trap-handler expects the true Bool in ACC and false Bool in A1
   emit_jal(EQUALITY_TEST, s); // jump to the equality test. This will return the true Bool in ACC if T1 and T2 are equal according to semanctics of COOL, or the false Bool in ACC if they are not. 
   emit_label_def(return_label, s); // the return label if the objects have same pointer. 
+  s << "# End Code eq expression." << endl;
 }
 
 int eq_class::compute_max_locals() {
@@ -2334,7 +2356,7 @@ int eq_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code leq expression." << endl;
+  s << "# Begin Code leq expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
@@ -2349,6 +2371,7 @@ void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
   emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
+  s << "# End Code leq expression." << endl;
 }
 
 int leq_class::compute_max_locals() {
@@ -2364,7 +2387,7 @@ int leq_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code comp expression." << endl;
+  s << "# Begin Code comp expression at line number " << get_line_number() << endl;
    e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
    emit_fetch_int(T2, ACC, s); // get the int value out of the bool. 
    int bool_is_false = table->label_id; table->label_id++;
@@ -2375,6 +2398,7 @@ void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
    emit_label_def(bool_is_false, s); // jump to this label if e1 is a false bool. 
    emit_load_bool(ACC, truebool, s); // load the opposite of false, so the true Bool into ACC. 
    emit_label_def(return_label, s);  // return label. 
+   s << "# End Code comp expression." << endl;
 }
 
 int comp_class::compute_max_locals() {
@@ -2387,11 +2411,12 @@ int comp_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code int const expression." << endl;
+  s << "# Begin Code int const expression at line number " << get_line_number() << endl;
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
   emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
+  s << "# End Code int const expression." << endl;
 }
 
 int int_const_class::compute_max_locals() {
@@ -2404,8 +2429,9 @@ int int_const_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code string const expression." << endl;
+  s << "# Begin Code string const expression at line number " << get_line_number() << endl;
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
+  s << "# End Code string const expression." << endl;
 }
 
 int string_const_class::compute_max_locals() {
@@ -2418,8 +2444,9 @@ int string_const_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code bool expression." << endl;
+  s << "# Begin Code bool expression at line number " << get_line_number() << endl;
   emit_load_bool(ACC, BoolConst(val), s);
+  s << "# End Code bool expression." << endl;
 }
 
 int bool_const_class::compute_max_locals() {
@@ -2466,7 +2493,7 @@ int bool_const_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code new with type " << type_name->get_string() << endl;
+  s << "# Begin Code new with type at line number " << get_line_number() << endl;
   if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) {
     
     //move the address of the prototype object of the current class into ACC
@@ -2486,6 +2513,7 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_jal(OBJECT_DOT_COPY, s); //call object.copy
     s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; //call the init method. 
   }
+  s << "# End Code new with type " << type_name->get_string() << endl;
 }
 
 int new__class::compute_max_locals() {
@@ -2498,7 +2526,7 @@ int new__class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code isvoid expression." << endl;
+  s << "# Begin Code isvoid expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class);
   int void_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
@@ -2508,6 +2536,7 @@ void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   emit_label_def(void_label, s); // if the expression in e1 is void, then we jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true Bool into ACC so it can be returned. 
   emit_label_def(return_label, s); // the return label 
+  s << "# Begin Code isvoid expression." << endl;
 }
 
 int isvoid_class::compute_max_locals() {
@@ -2520,8 +2549,9 @@ int isvoid_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code no_epression expression." << endl;
+  s << "# Begin Code no_epression expression at line number " << get_line_number() << endl;
   emit_move(ACC, ZERO, s); 
+  s << "# End Code no_epression expression." << endl;
   return;
 }
 
@@ -2548,7 +2578,7 @@ int no_expr_class::compute_max_locals() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
-  cout << "Code objectID expression." << endl;
+  s << "# Begin Code objectID expression at line number " << get_line_number() << endl;
   if (strcmp(name->get_string(), self->get_string()) == 0) {
     emit_move(ACC, SELF, s);
     return;
@@ -2560,15 +2590,16 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   }
   int offset = loc->offset;
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
-    cout << "Coding attribute object" << endl;
+    s << "# Loading attribute object into ACC" << endl;
     emit_load(ACC, offset, SELF, s);
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
-    cout << "Coding paramter object" << endl;
+    s << "# Loading paramter object into ACC" << endl;
     emit_load(ACC, offset, FP, s);
   } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
-    cout << "Coding local object" << endl;
-    emit_load(ACC, offset, SP, s);
+    s << "# Loading local object into ACC" << endl;
+    emit_load(ACC, (-1)*offset, FP, s);
   }
+  s << "# End Code objectID expression." << endl;
 }
 
 int object_class::compute_max_locals() {
