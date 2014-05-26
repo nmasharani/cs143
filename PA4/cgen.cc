@@ -1857,9 +1857,9 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
-    //int curr_offset = num_params - i;
-    //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
-    emit_push(ACC, s);
+    int curr_offset = num_params - i;
+    emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
+    //emit_push(ACC, s);
   }
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   Symbol e0_type = expr->get_type();
@@ -2112,10 +2112,10 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
     if (table->is_int_str_bool(type_decl)) {
-      s << LA << ACC << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
+      s << LA << " " << ACC << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
       emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
     } else {
-      emit_load_imm(ACC, VOID, s);
+      emit_move(ACC, ZERO, s);
     }
   } else {
     init->code(s, temp_start, envr, table, curr_class); // otherwise, the intialization of the new variable being declared is the value of the init, which is stored in ACC if we evaluate init. 
