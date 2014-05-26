@@ -1302,7 +1302,7 @@ Main.menu:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -116
 	move	$s0 $a0
 # Begin Code block epression at line number 260
@@ -1781,7 +1781,7 @@ Main.prompt:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code block epression at line number 292
@@ -1844,7 +1844,7 @@ Main.get_int:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -24
 	move	$s0 $a0
 # Begin Code block epression at line number 300
@@ -1868,11 +1868,11 @@ label30:
 	lw	$t1 32($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 -8($fp)
+	sw	$a0 -16($fp)
 # Begin Code disptach expression at line number 303
 # Begin Code objectID expression at line number 303
 # Loading local object into ACC
-	lw	$a0 -8($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -1904,7 +1904,7 @@ Main.is_even:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -64
 	move	$s0 $a0
 # Begin Code let expression at line number 310
@@ -1912,18 +1912,18 @@ Main.is_even:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 -52($fp)
+	sw	$a0 -12($fp)
 # Begin Code cond expression at line number 311
 # Begin Code lt expression at line number 311
 # Begin Code objectID expression at line number 311
 # Loading local object into ACC
-	lw	$a0 -52($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 48($sp)
+	sw	$a0 16($sp)
 # Begin Code int const expression at line number 311
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 48($sp)
+	lw	$t1 16($sp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label34
@@ -1939,13 +1939,13 @@ label35:
 # Begin Code neg expression at line number 311
 # Begin Code objectID expression at line number 311
 # Loading local object into ACC
-	lw	$a0 -52($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 48($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 48($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
 	sw	$a0 0($sp)
@@ -1968,12 +1968,12 @@ label32:
 # Begin Code int const expression at line number 312
 	la	$a0 int_const0
 # End Code int const expression.
-	sw	$a0 48($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 312
 # Loading local object into ACC
-	lw	$a0 -52($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 48($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label39
@@ -1993,12 +1993,12 @@ label37:
 # Begin Code int const expression at line number 313
 	la	$a0 int_const1
 # End Code int const expression.
-	sw	$a0 48($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 313
 # Loading local object into ACC
-	lw	$a0 -52($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 48($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label42
@@ -2017,13 +2017,13 @@ label40:
 # Begin Code sub expression at line number 314
 # Begin Code objectID expression at line number 314
 # Loading local object into ACC
-	lw	$a0 -52($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 48($sp)
+	sw	$a0 16($sp)
 # Begin Code int const expression at line number 314
 	la	$a0 int_const2
 # End Code int const expression.
-	lw	$t1 48($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -2062,7 +2062,7 @@ Main.class_type:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -12
 	move	$s0 $a0
 # Begin Code typecase expression at line number 320
@@ -2079,7 +2079,7 @@ label45:
 	lw	$t2 0($t3)
 	blt	$t2 10 label46
 	bgt	$t2 10 label46
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 325
 # Begin Code string const expression at line number 325
 	la	$a0 str_const38
@@ -2102,7 +2102,7 @@ label46:
 	lw	$t2 0($t3)
 	blt	$t2 9 label48
 	bgt	$t2 10 label48
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 324
 # Begin Code string const expression at line number 324
 	la	$a0 str_const37
@@ -2125,7 +2125,7 @@ label48:
 	lw	$t2 0($t3)
 	blt	$t2 8 label50
 	bgt	$t2 8 label50
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 323
 # Begin Code string const expression at line number 323
 	la	$a0 str_const36
@@ -2148,7 +2148,7 @@ label50:
 	lw	$t2 0($t3)
 	blt	$t2 7 label52
 	bgt	$t2 10 label52
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 322
 # Begin Code string const expression at line number 322
 	la	$a0 str_const35
@@ -2171,7 +2171,7 @@ label52:
 	lw	$t2 0($t3)
 	blt	$t2 6 label54
 	bgt	$t2 10 label54
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 321
 # Begin Code string const expression at line number 321
 	la	$a0 str_const34
@@ -2194,7 +2194,7 @@ label54:
 	lw	$t2 0($t3)
 	blt	$t2 0 label56
 	bgt	$t2 11 label56
-	sw	$t3 0($fp)
+	sw	$t3 -12($fp)
 # Begin Code disptach expression at line number 326
 # Begin Code string const expression at line number 326
 	la	$a0 str_const39
@@ -2234,7 +2234,7 @@ Main.print:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -28
 	move	$s0 $a0
 # Begin Code let expression at line number 331
@@ -2243,7 +2243,7 @@ Main.print:
 	jal	Object.copy
 	jal	A2I_init
 # End Code new with type A2I
-	sw	$a0 -16($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 332
 # Begin Code disptach expression at line number 333
 # Begin Code disptach expression at line number 333
@@ -2265,7 +2265,7 @@ label58:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 333
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label59
 	la	$a0 str_const0
@@ -2320,7 +2320,7 @@ Main.main:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -300
 	move	$s0 $a0
 # Begin Code block epression at line number 340
@@ -2484,11 +2484,11 @@ label73:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 355
 	la	$a0 str_const44
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label76
@@ -2590,11 +2590,11 @@ label74:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 360
 	la	$a0 str_const45
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label84
@@ -2618,13 +2618,13 @@ label86:
 	lw	$t2 0($t3)
 	blt	$t2 8 label87
 	bgt	$t2 8 label87
-	sw	$t3 -288($fp)
+	sw	$t3 -12($fp)
 # Begin Code assign expression at line number 362
 # Begin Code disptach expression at line number 362
 # Begin Code disptach expression at line number 362
 # Begin Code objectID expression at line number 362
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label88
 	la	$a0 str_const0
@@ -2639,7 +2639,7 @@ label88:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 362
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label89
 	la	$a0 str_const0
@@ -2657,13 +2657,13 @@ label87:
 	lw	$t2 0($t3)
 	blt	$t2 6 label90
 	bgt	$t2 10 label90
-	sw	$t3 -288($fp)
+	sw	$t3 -12($fp)
 # Begin Code assign expression at line number 363
 # Begin Code disptach expression at line number 363
 # Begin Code disptach expression at line number 363
 # Begin Code objectID expression at line number 363
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label91
 	la	$a0 str_const0
@@ -2678,7 +2678,7 @@ label91:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 363
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label92
 	la	$a0 str_const0
@@ -2696,7 +2696,7 @@ label90:
 	lw	$t2 0($t3)
 	blt	$t2 0 label93
 	bgt	$t2 11 label93
-	sw	$t3 -288($fp)
+	sw	$t3 -12($fp)
 # Begin Code block epression at line number 364
 # Begin Code disptach expression at line number 365
 # Begin Code string const expression at line number 365
@@ -2749,11 +2749,11 @@ label82:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 369
 	la	$a0 str_const46
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label98
@@ -2855,11 +2855,11 @@ label96:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 374
 	la	$a0 str_const47
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label106
@@ -2911,11 +2911,11 @@ label104:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 376
 	la	$a0 str_const48
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label111
@@ -2967,11 +2967,11 @@ label109:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 378
 	la	$a0 str_const49
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label116
@@ -3023,11 +3023,11 @@ label114:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 380
 	la	$a0 str_const50
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label121
@@ -3191,11 +3191,11 @@ label119:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 395
 	la	$a0 str_const53
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label134
@@ -3207,7 +3207,7 @@ label134:
 	beq	$t2 $zero label132
 # Begin Code let expression at line number 396
 	move	$a0 $zero
-	sw	$a0 -288($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 397
 # Begin Code assign expression at line number 398
 # Begin Code disptach expression at line number 398
@@ -3241,7 +3241,7 @@ label136:
 	lw	$t1 44($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 -288($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code let expression at line number 399
 # Begin Code sub expression at line number 399
@@ -3259,12 +3259,12 @@ label137:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 284($sp)
+	sw	$a0 16($sp)
 # Begin Code mul expression at line number 399
 # Begin Code disptach expression at line number 399
 # Begin Code objectID expression at line number 399
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label138
 	la	$a0 str_const0
@@ -3275,25 +3275,25 @@ label138:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 280($sp)
+	sw	$a0 20($sp)
 # Begin Code int const expression at line number 399
 	la	$a0 int_const4
 # End Code int const expression.
-	lw	$t1 280($sp)
+	lw	$t1 20($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	lw	$t1 284($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code sub expression.
-	sw	$a0 -284($fp)
+	sw	$a0 -16($fp)
 # Begin Code block epression at line number 400
 # Begin Code disptach expression at line number 401
 # Begin Code string const expression at line number 401
@@ -3350,7 +3350,7 @@ label141:
 # Begin Code disptach expression at line number 404
 # Begin Code objectID expression at line number 404
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -3388,19 +3388,19 @@ label143:
 	jal	Object.copy
 	jal	A2I_init
 # End Code new with type A2I
-	sw	$a0 -280($fp)
+	sw	$a0 -20($fp)
 # Begin Code block epression at line number 407
 # Begin Code disptach expression at line number 408
 # Begin Code disptach expression at line number 408
 # Begin Code objectID expression at line number 408
 # Loading local object into ACC
-	lw	$a0 -284($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 408
 # Loading local object into ACC
-	lw	$a0 -280($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label144
 	la	$a0 str_const0
@@ -3448,7 +3448,7 @@ label146:
 # Begin Code assign expression at line number 414
 # Begin Code objectID expression at line number 414
 # Loading local object into ACC
-	lw	$a0 -288($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 16($s0)
 # End Code assign expression.
@@ -3462,11 +3462,11 @@ label132:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 418
 	la	$a0 str_const56
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label149
@@ -3492,11 +3492,11 @@ label147:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 288($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 420
 	la	$a0 str_const57
 # End Code string const expression.
-	lw	$t1 288($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label152
@@ -3586,7 +3586,7 @@ A2I.c2i:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -132
 	move	$s0 $a0
 # Begin Code cond expression at line number 158
@@ -3595,11 +3595,11 @@ A2I.c2i:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 158
 	la	$a0 str_const1
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label157
@@ -3620,11 +3620,11 @@ label155:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 159
 	la	$a0 str_const2
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label160
@@ -3645,11 +3645,11 @@ label158:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 160
 	la	$a0 str_const3
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label163
@@ -3670,11 +3670,11 @@ label161:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 161
 	la	$a0 str_const4
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label166
@@ -3695,11 +3695,11 @@ label164:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 162
 	la	$a0 str_const5
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label169
@@ -3720,11 +3720,11 @@ label167:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 163
 	la	$a0 str_const6
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label172
@@ -3745,11 +3745,11 @@ label170:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 164
 	la	$a0 str_const7
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label175
@@ -3770,11 +3770,11 @@ label173:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 165
 	la	$a0 str_const8
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label178
@@ -3795,11 +3795,11 @@ label176:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 166
 	la	$a0 str_const9
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label181
@@ -3820,11 +3820,11 @@ label179:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 167
 	la	$a0 str_const10
 # End Code string const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label184
@@ -3888,7 +3888,7 @@ A2I.i2c:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -132
 	move	$s0 $a0
 # Begin Code cond expression at line number 177
@@ -3897,11 +3897,11 @@ A2I.i2c:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 177
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label188
@@ -3922,11 +3922,11 @@ label186:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 178
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label191
@@ -3947,11 +3947,11 @@ label189:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 179
 	la	$a0 int_const2
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label194
@@ -3972,11 +3972,11 @@ label192:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 180
 	la	$a0 int_const3
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label197
@@ -3997,11 +3997,11 @@ label195:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 181
 	la	$a0 int_const5
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label200
@@ -4022,11 +4022,11 @@ label198:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 182
 	la	$a0 int_const6
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label203
@@ -4047,11 +4047,11 @@ label201:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 183
 	la	$a0 int_const7
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label206
@@ -4072,11 +4072,11 @@ label204:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 184
 	la	$a0 int_const8
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label209
@@ -4097,11 +4097,11 @@ label207:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 185
 	la	$a0 int_const4
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label212
@@ -4122,11 +4122,11 @@ label210:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 120($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 186
 	la	$a0 int_const9
 # End Code int const expression.
-	lw	$t1 120($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label215
@@ -4190,7 +4190,7 @@ A2I.a2i:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -100
 	move	$s0 $a0
 # Begin Code cond expression at line number 200
@@ -4209,11 +4209,11 @@ label219:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 88($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 200
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label220
@@ -4254,11 +4254,11 @@ label223:
 	lw	$t1 20($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 88($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 201
 	la	$a0 str_const12
 # End Code string const expression.
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label224
@@ -4291,11 +4291,11 @@ label225:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 88($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 201
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -4332,9 +4332,9 @@ label227:
 # End Code disptach expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 88($sp)
+	sw	$t1 12($sp)
 	jal	Object.copy
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
 	b	label222
@@ -4365,11 +4365,11 @@ label230:
 	lw	$t1 20($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 88($sp)
+	sw	$a0 12($sp)
 # Begin Code string const expression at line number 202
 	la	$a0 str_const13
 # End Code string const expression.
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label231
@@ -4401,11 +4401,11 @@ label232:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 88($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 202
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 88($sp)
+	lw	$t1 12($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -4478,14 +4478,14 @@ A2I.a2i_aux:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -56
 	move	$s0 $a0
 # Begin Code let expression at line number 212
 # Begin Code int const expression at line number 212
 	la	$a0 int_const0
 # End Code int const expression.
-	sw	$a0 -44($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 213
 # Begin Code let expression at line number 214
 # Begin Code disptach expression at line number 214
@@ -4502,25 +4502,25 @@ label236:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 -40($fp)
+	sw	$a0 -16($fp)
 # Begin Code let expression at line number 215
 # Begin Code int const expression at line number 215
 	la	$a0 int_const0
 # End Code int const expression.
-	sw	$a0 -36($fp)
+	sw	$a0 -20($fp)
 # Begin Code loop expression at line number 216
 label237:
 # Begin Code lt expression at line number 216
 # Begin Code objectID expression at line number 216
 # Loading local object into ACC
-	lw	$a0 -36($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 24($sp)
 # Begin Code objectID expression at line number 216
 # Loading local object into ACC
-	lw	$a0 -40($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
-	lw	$t1 32($sp)
+	lw	$t1 24($sp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label239
@@ -4538,25 +4538,25 @@ label240:
 # Begin Code mul expression at line number 218
 # Begin Code objectID expression at line number 218
 # Loading local object into ACC
-	lw	$a0 -44($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 24($sp)
 # Begin Code int const expression at line number 218
 	la	$a0 int_const10
 # End Code int const expression.
-	lw	$t1 32($sp)
+	lw	$t1 24($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	sw	$a0 32($sp)
+	sw	$a0 24($sp)
 # Begin Code disptach expression at line number 218
 # Begin Code disptach expression at line number 218
 # Begin Code objectID expression at line number 218
 # Loading local object into ACC
-	lw	$a0 -36($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -4591,33 +4591,33 @@ label242:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	lw	$t1 32($sp)
+	lw	$t1 24($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code plus expression.
-	sw	$a0 -44($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code assign expression at line number 219
 # Begin Code plus expression at line number 219
 # Begin Code objectID expression at line number 219
 # Loading local object into ACC
-	lw	$a0 -36($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 24($sp)
 # Begin Code int const expression at line number 219
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 32($sp)
+	lw	$t1 24($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code plus expression.
-	sw	$a0 -36($fp)
+	sw	$a0 -20($fp)
 # End Code assign expression.
 # End Code block epression.
 	b	label237
@@ -4628,7 +4628,7 @@ label238:
 # End Code let expression.
 # Begin Code objectID expression at line number 224
 # Loading local object into ACC
-	lw	$a0 -44($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 # End Code block epression.
 # End Code let expression.
@@ -4644,7 +4644,7 @@ A2I.i2a:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -52
 	move	$s0 $a0
 # Begin Code cond expression at line number 233
@@ -4653,11 +4653,11 @@ A2I.i2a:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 40($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 233
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 40($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label245
@@ -4677,12 +4677,12 @@ label243:
 # Begin Code int const expression at line number 234
 	la	$a0 int_const0
 # End Code int const expression.
-	sw	$a0 40($sp)
+	sw	$a0 12($sp)
 # Begin Code objectID expression at line number 234
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 40($sp)
+	lw	$t1 12($sp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label248
@@ -4721,19 +4721,19 @@ label246:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 40($sp)
+	sw	$a0 12($sp)
 # Begin Code neg expression at line number 235
 # Begin Code int const expression at line number 235
 	la	$a0 int_const1
 # End Code int const expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 36($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 36($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	lw	$t1 40($sp)
+	lw	$t1 12($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
@@ -4783,7 +4783,7 @@ A2I.i2a_aux:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -52
 	move	$s0 $a0
 # Begin Code cond expression at line number 242
@@ -4792,11 +4792,11 @@ A2I.i2a_aux:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 40($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 242
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 40($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label255
@@ -4817,18 +4817,18 @@ label253:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 40($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 243
 	la	$a0 int_const10
 # End Code int const expression.
-	lw	$t1 40($sp)
+	lw	$t1 12($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	div	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code divide expression.
-	sw	$a0 -40($fp)
+	sw	$a0 -12($fp)
 # Begin Code disptach expression at line number 244
 # Begin Code disptach expression at line number 244
 # Begin Code sub expression at line number 244
@@ -4836,24 +4836,24 @@ label253:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 36($sp)
+	sw	$a0 16($sp)
 # Begin Code mul expression at line number 244
 # Begin Code objectID expression at line number 244
 # Loading local object into ACC
-	lw	$a0 -40($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 20($sp)
 # Begin Code int const expression at line number 244
 	la	$a0 int_const10
 # End Code int const expression.
-	lw	$t1 32($sp)
+	lw	$t1 20($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	lw	$t1 36($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -4878,7 +4878,7 @@ label256:
 # Begin Code disptach expression at line number 244
 # Begin Code objectID expression at line number 244
 # Loading local object into ACC
-	lw	$a0 -40($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -4917,7 +4917,7 @@ E.method6:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -24
 	move	$s0 $a0
 # Begin Code let expression at line number 131
@@ -4931,11 +4931,11 @@ E.method6:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 16($sp)
 # Begin Code int const expression at line number 133
 	la	$a0 int_const4
 # End Code int const expression.
-	lw	$t1 8($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	div	$t2 $t2 $t3
@@ -4979,7 +4979,7 @@ D.method7:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -76
 	move	$s0 $a0
 # Begin Code let expression at line number 116
@@ -4987,18 +4987,18 @@ D.method7:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 -64($fp)
+	sw	$a0 -12($fp)
 # Begin Code cond expression at line number 117
 # Begin Code lt expression at line number 117
 # Begin Code objectID expression at line number 117
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 60($sp)
+	sw	$a0 16($sp)
 # Begin Code int const expression at line number 117
 	la	$a0 int_const0
 # End Code int const expression.
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label262
@@ -5014,13 +5014,13 @@ label263:
 # Begin Code neg expression at line number 117
 # Begin Code objectID expression at line number 117
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 60($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
 	sw	$a0 0($sp)
@@ -5043,12 +5043,12 @@ label260:
 # Begin Code int const expression at line number 118
 	la	$a0 int_const0
 # End Code int const expression.
-	sw	$a0 60($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 118
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label267
@@ -5068,12 +5068,12 @@ label265:
 # Begin Code int const expression at line number 119
 	la	$a0 int_const1
 # End Code int const expression.
-	sw	$a0 60($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 119
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label270
@@ -5093,12 +5093,12 @@ label268:
 # Begin Code int const expression at line number 120
 	la	$a0 int_const2
 # End Code int const expression.
-	sw	$a0 60($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 120
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label273
@@ -5117,13 +5117,13 @@ label271:
 # Begin Code sub expression at line number 121
 # Begin Code objectID expression at line number 121
 # Loading local object into ACC
-	lw	$a0 -64($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
-	sw	$a0 60($sp)
+	sw	$a0 16($sp)
 # Begin Code int const expression at line number 121
 	la	$a0 int_const3
 # End Code int const expression.
-	lw	$t1 60($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
@@ -5164,13 +5164,13 @@ C.method6:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code let expression at line number 94
 	la	$a0 Int_protObj
 	jal	Object.copy
-	sw	$a0 -8($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 95
 # Begin Code assign expression at line number 96
 # Begin Code neg expression at line number 96
@@ -5180,17 +5180,17 @@ C.method6:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 4($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 4($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	sw	$a0 -8($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code disptach expression at line number 97
 # Begin Code objectID expression at line number 97
 # Loading local object into ACC
-	lw	$a0 -8($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -5222,13 +5222,13 @@ C.method5:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -28
 	move	$s0 $a0
 # Begin Code let expression at line number 103
 	la	$a0 Int_protObj
 	jal	Object.copy
-	sw	$a0 -16($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 104
 # Begin Code assign expression at line number 105
 # Begin Code mul expression at line number 105
@@ -5237,36 +5237,36 @@ C.method5:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 12($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 105
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 12($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	sw	$a0 12($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 105
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 12($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	sw	$a0 -16($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code disptach expression at line number 106
 # Begin Code objectID expression at line number 106
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -5298,7 +5298,7 @@ B.method5:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -24
 	move	$s0 $a0
 # Begin Code let expression at line number 81
@@ -5312,12 +5312,12 @@ B.method5:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 83
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 8($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	mul	$t2 $t2 $t3
@@ -5361,7 +5361,7 @@ A.value:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -12
 	move	$s0 $a0
 # Begin Code objectID expression at line number 11
@@ -5380,7 +5380,7 @@ A.set_var:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -12
 	move	$s0 $a0
 # Begin Code block epression at line number 14
@@ -5406,7 +5406,7 @@ A.method1:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -12
 	move	$s0 $a0
 # Begin Code objectID expression at line number 21
@@ -5423,7 +5423,7 @@ A.method2:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -24
 	move	$s0 $a0
 # Begin Code let expression at line number 25
@@ -5437,12 +5437,12 @@ A.method2:
 # Loading paramter object into ACC
 	lw	$a0 8($fp)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 27
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 8($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	add	$t2 $t2 $t3
@@ -5486,13 +5486,13 @@ A.method3:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code let expression at line number 34
 	la	$a0 Int_protObj
 	jal	Object.copy
-	sw	$a0 -8($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 35
 # Begin Code assign expression at line number 36
 # Begin Code neg expression at line number 36
@@ -5502,17 +5502,17 @@ A.method3:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 4($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 4($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	sw	$a0 -8($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code disptach expression at line number 37
 # Begin Code objectID expression at line number 37
 # Loading local object into ACC
-	lw	$a0 -8($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -5544,7 +5544,7 @@ A.method4:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -48
 	move	$s0 $a0
 # Begin Code cond expression at line number 43
@@ -5553,12 +5553,12 @@ A.method4:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 36($sp)
+	sw	$a0 12($sp)
 # Begin Code objectID expression at line number 43
 # Loading paramter object into ACC
 	lw	$a0 8($fp)
 # End Code objectID expression.
-	lw	$t1 36($sp)
+	lw	$t1 12($sp)
 	lw	$a0 12($a0)
 	lw	$t1 12($t1)
 	blt	$t1 $a0 label282
@@ -5573,7 +5573,7 @@ label283:
 # Begin Code let expression at line number 44
 	la	$a0 Int_protObj
 	jal	Object.copy
-	sw	$a0 -36($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 45
 # Begin Code assign expression at line number 46
 # Begin Code sub expression at line number 46
@@ -5581,24 +5581,24 @@ label283:
 # Loading paramter object into ACC
 	lw	$a0 8($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 46
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 32($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code sub expression.
-	sw	$a0 -36($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code disptach expression at line number 47
 # Begin Code objectID expression at line number 47
 # Loading local object into ACC
-	lw	$a0 -36($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -5623,7 +5623,7 @@ label280:
 # Begin Code let expression at line number 51
 	la	$a0 Int_protObj
 	jal	Object.copy
-	sw	$a0 -36($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 52
 # Begin Code assign expression at line number 53
 # Begin Code sub expression at line number 53
@@ -5631,24 +5631,24 @@ label280:
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 16($sp)
 # Begin Code objectID expression at line number 53
 # Loading paramter object into ACC
 	lw	$a0 8($fp)
 # End Code objectID expression.
-	lw	$t1 32($sp)
+	lw	$t1 16($sp)
 	lw	$t2 12($t1)
 	lw	$t3 12($a0)
 	sub	$t2 $t2 $t3
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code sub expression.
-	sw	$a0 -36($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code disptach expression at line number 54
 # Begin Code objectID expression at line number 54
 # Loading local object into ACC
-	lw	$a0 -36($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -5682,26 +5682,26 @@ A.method5:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -40
 	move	$s0 $a0
 # Begin Code let expression at line number 61
 # Begin Code int const expression at line number 61
 	la	$a0 int_const1
 # End Code int const expression.
-	sw	$a0 -28($fp)
+	sw	$a0 -12($fp)
 # Begin Code block epression at line number 62
 # Begin Code let expression at line number 63
 # Begin Code int const expression at line number 63
 	la	$a0 int_const1
 # End Code int const expression.
-	sw	$a0 -24($fp)
+	sw	$a0 -16($fp)
 # Begin Code loop expression at line number 64
 label286:
 # Begin Code leq expression at line number 64
 # Begin Code objectID expression at line number 64
 # Loading local object into ACC
-	lw	$a0 -24($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 20($sp)
 # Begin Code objectID expression at line number 64
@@ -5725,12 +5725,12 @@ label289:
 # Begin Code mul expression at line number 66
 # Begin Code objectID expression at line number 66
 # Loading local object into ACC
-	lw	$a0 -28($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 20($sp)
 # Begin Code objectID expression at line number 66
 # Loading local object into ACC
-	lw	$a0 -24($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	lw	$t1 20($sp)
 	lw	$t2 12($t1)
@@ -5739,13 +5739,13 @@ label289:
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code mul expression.
-	sw	$a0 -28($fp)
+	sw	$a0 -12($fp)
 # End Code assign expression.
 # Begin Code assign expression at line number 67
 # Begin Code plus expression at line number 67
 # Begin Code objectID expression at line number 67
 # Loading local object into ACC
-	lw	$a0 -24($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 20($sp)
 # Begin Code int const expression at line number 67
@@ -5758,7 +5758,7 @@ label289:
 	jal	Object.copy
 	sw	$t2 12($a0)
 # End Code plus expression.
-	sw	$a0 -24($fp)
+	sw	$a0 -16($fp)
 # End Code assign expression.
 # End Code block epression.
 	b	label286
@@ -5769,7 +5769,7 @@ label287:
 # Begin Code disptach expression at line number 71
 # Begin Code objectID expression at line number 71
 # Loading local object into ACC
-	lw	$a0 -28($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4

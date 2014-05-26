@@ -1507,7 +1507,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     if (curr_feat->ismethod == false) {
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
-      curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
+      curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
       if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") == 0) {
         if (is_int_str_bool(curr_feat->get_type()) == true) continue;
       }
@@ -1584,7 +1584,8 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
   emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
   emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
-  emit_addiu(FP, SP, 0, str); // move FP down to SP
+  //emit_addiu(FP, SP, 0, str); // move FP down to SP
+  emit_move(FP, SP, str); // move the frame pointer down. 
   emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
   emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
 
@@ -1598,7 +1599,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
     loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
     curr_class->envr->addid(curr_formal->get_name(), loc);
   }
-  curr_feat->get_expr()->code(str, (num_locals_needed - NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
+  curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
 
   int num_param_bytes = num_params * WORD_SIZE;
   emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot function invoked. 
@@ -1806,11 +1807,8 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
-    //int curr_offset = num_params - i;
-    //emit_store(ACC, curr_offset, SP, s); // pass method arguments to callee via the stack. 
     emit_push(ACC, s);
   }
-  //emit_addiu(SP, SP, num_params*WORD_SIZE, s); // 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   int bypass_abort_label = table->label_id;
   table->label_id++;
@@ -1826,7 +1824,6 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
   cout << " loaded dispatch for class " << type_name->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
-  //emit_addiu(SP, SP, (-1)*num_params*WORD_SIZE, s); // move stack down by number of arguments we pushed, as the callee will move it back up. 
   emit_jalr(T1, s);
   s << "# End Code static dispatch expression." << endl;
 }
@@ -1869,7 +1866,6 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
     emit_push(ACC, s);
   }
-  //emit_addiu(SP, SP, num_params*WORD_SIZE, s); // 
 
   /* ** GETTING THE OBJECT UPON WHICH WE DISPATCH ** */
 
@@ -1897,8 +1893,6 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   
   cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
-  //before the jump here, move the stack pointer down by the amount of the arguments we pushed, as these will get poped later. 
-  //emit_addiu(SP, SP, (-1)*num_params*WORD_SIZE, s); // move stack down by number of arguments we pushed, as the callee will move it back up. 
   emit_jalr(T1, s);
   s << "# End Code disptach expression." << endl;
 }
@@ -2025,7 +2019,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
         envr->addid(cases->nth(j)->get_id(), loc);
         emit_store(T3, (-1)*loc->offset, FP, s); // now bind the value of e0 to the identifier of this branch
         // finally, evaluate the epression of this branch, with the value of e0 boud to the identifier of this branch. 
-        cases->nth(j)->get_branch_expr()->code(s, temp_start - 1, envr, table, curr_class);
+        cases->nth(j)->get_branch_expr()->code(s, temp_start + 1, envr, table, curr_class);
 
         emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success. 
         envr->exitscope(); // leave the branch scope. 
@@ -2157,7 +2151,7 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
    envr->addid(identifier, loc);
 
    emit_store(ACC, (-1)*loc->offset, FP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
-   body->code(s, temp_start - 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
+   body->code(s, temp_start + 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
 
    envr->exitscope(); // once we finish processing this let, we don't want to know about the locally declared variable anymore. 
     s << "# End Code let expression." << endl;
@@ -2180,7 +2174,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   s << "# Begin Code plus expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
@@ -2205,7 +2199,7 @@ void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code sub expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
@@ -2230,7 +2224,7 @@ void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code mul expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
@@ -2255,7 +2249,7 @@ void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   s << "# Begin Code divide expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
@@ -2301,7 +2295,7 @@ void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   s << "# Begin Code lt expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
@@ -2332,7 +2326,7 @@ void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   s << "# Begin Code eq expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Result stored in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_move(T2, ACC, s); // now e2 is in T2. e1 in T1, e2 in T2
   int return_label = table->label_id; table->label_id++;
@@ -2359,7 +2353,7 @@ void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code leq expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
-  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1

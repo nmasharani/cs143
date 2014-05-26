@@ -514,7 +514,7 @@ Complex.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code block epression at line number 18
@@ -523,12 +523,12 @@ Complex.init:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 12($sp)
 # Begin Code objectID expression at line number 19
 # Loading paramter object into ACC
 	lw	$a0 8($fp)
 # End Code objectID expression.
-	lw	$t1 8($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label0
@@ -541,12 +541,12 @@ label0:
 # Loading attribute object into ACC
 	lw	$a0 16($s0)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 12($sp)
 # Begin Code objectID expression at line number 20
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
-	lw	$t1 8($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label1
@@ -569,7 +569,7 @@ Complex.print:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -44
 	move	$s0 $a0
 # Begin Code cond expression at line number 26
@@ -578,11 +578,11 @@ Complex.print:
 # Loading attribute object into ACC
 	lw	$a0 16($s0)
 # End Code objectID expression.
-	sw	$a0 32($sp)
+	sw	$a0 12($sp)
 # Begin Code int const expression at line number 26
 	la	$a0 int_const1
 # End Code int const expression.
-	lw	$t1 32($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label4
@@ -690,7 +690,7 @@ Complex.reflect_0:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code block epression at line number 33
@@ -699,7 +699,7 @@ Complex.reflect_0:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 12($sp)
 # Begin Code neg expression at line number 34
 # Begin Code objectID expression at line number 34
 # Loading attribute object into ACC
@@ -707,12 +707,12 @@ Complex.reflect_0:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 4($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 4($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	lw	$t1 8($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label10
@@ -725,7 +725,7 @@ label10:
 # Loading attribute object into ACC
 	lw	$a0 16($s0)
 # End Code objectID expression.
-	sw	$a0 8($sp)
+	sw	$a0 12($sp)
 # Begin Code neg expression at line number 35
 # Begin Code objectID expression at line number 35
 # Loading attribute object into ACC
@@ -733,12 +733,12 @@ label10:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 4($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 4($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	lw	$t1 8($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label11
@@ -761,7 +761,7 @@ Complex.reflect_X:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -16
 	move	$s0 $a0
 # Begin Code block epression at line number 41
@@ -770,7 +770,7 @@ Complex.reflect_X:
 # Loading attribute object into ACC
 	lw	$a0 16($s0)
 # End Code objectID expression.
-	sw	$a0 4($sp)
+	sw	$a0 12($sp)
 # Begin Code neg expression at line number 42
 # Begin Code objectID expression at line number 42
 # Loading attribute object into ACC
@@ -778,12 +778,12 @@ Complex.reflect_X:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 0($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 0($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	lw	$t1 4($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label12
@@ -806,7 +806,7 @@ Complex.reflect_Y:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -16
 	move	$s0 $a0
 # Begin Code block epression at line number 48
@@ -815,7 +815,7 @@ Complex.reflect_Y:
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 4($sp)
+	sw	$a0 12($sp)
 # Begin Code neg expression at line number 49
 # Begin Code objectID expression at line number 49
 # Loading attribute object into ACC
@@ -823,12 +823,12 @@ Complex.reflect_Y:
 # End Code objectID expression.
 	lw	$t1 12($a0)
 	neg	$t1 $t1
-	sw	$t1 0($sp)
+	sw	$t1 16($sp)
 	jal	Object.copy
-	lw	$t1 0($sp)
+	lw	$t1 16($sp)
 	sw	$t1 12($a0)
 # End Code neg expression.
-	lw	$t1 4($sp)
+	lw	$t1 12($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label13
@@ -851,7 +851,7 @@ Main.main:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
-	addiu	$fp $sp 0
+	move	$fp $sp
 	addiu	$sp $sp -44
 	move	$s0 $a0
 # Begin Code let expression at line number 3
@@ -880,14 +880,14 @@ label14:
 	lw	$t1 28($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 -32($fp)
+	sw	$a0 -12($fp)
 # Begin Code cond expression at line number 4
 # Begin Code eq expression at line number 4
 # Begin Code disptach expression at line number 4
 # Begin Code disptach expression at line number 4
 # Begin Code objectID expression at line number 4
 # Loading local object into ACC
-	lw	$a0 -32($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label17
 	la	$a0 str_const0
@@ -907,11 +907,11 @@ label18:
 	lw	$t1 44($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 28($sp)
+	sw	$a0 16($sp)
 # Begin Code disptach expression at line number 4
 # Begin Code objectID expression at line number 4
 # Loading local object into ACC
-	lw	$a0 -32($fp)
+	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label19
 	la	$a0 str_const0
@@ -922,7 +922,7 @@ label19:
 	lw	$t1 36($t1)
 	jalr		$t1
 # End Code disptach expression.
-	lw	$t1 28($sp)
+	lw	$t1 16($sp)
 	move	$t2 $a0
 	la	$a0 bool_const1
 	beq	$t1 $t2 label20
