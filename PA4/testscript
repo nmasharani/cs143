@@ -4,14 +4,20 @@ s=${t##*/}
 echo $s.s
 \rm mine_console.txt
 \rm reference_console.txt
+echo ""
+echo "********************"
+echo ""
+echo "compiling: ours"
 ./mycoolc -k $file &> mine_console.txt
-/usr/class/cs143/bin/spim -file $s.s &> mine_runtime.txt
+echo "running: ours"
+/usr/class/cs143/bin/spim -file $s.s
+echo ""
+echo "********************"
+echo ""
+echo "compiling: ref"
 /usr/class/cs143/bin/coolc -k $file &> reference_console.txt
-/usr/class/cs143/bin/spim -file $s.s &> reference_runtime.txt
-diff mine_runtime.txt reference_runtime.txt
-echo ""
-cat mine_runtime.txt
-echo ""
+echo "running: ref"
+/usr/class/cs143/bin/spim -file $s.s
 
 
 echo ""
