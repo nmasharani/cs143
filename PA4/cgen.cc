@@ -2124,7 +2124,7 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
     if (table->is_int_str_bool(type_decl)) {
-      s << LA << " " << ACC << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
+      s << LA << ACC << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
       emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
     } else {
       emit_move(ACC, ZERO, s);
@@ -2279,17 +2279,35 @@ int neg_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code lt expression." << endl;
+
+  /* ** EVALUATE e1 ** */
+
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
   emit_store(ACC, temp_start, SP, s); // store e1 on stack
+
+  /* ** EVALUATE e2 ** */
+
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+
   emit_load(T1, temp_start, SP, s); // load the value of e1 saved on stack into T1
+
+  /* ** e1 in $t1, e2 in $a0 ** */
+
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
+
   emit_blt(T1, ACC, true_label, s); // if (T1 = e1) < (ACC = e2), then branch to true label. else fall through
+
+  /* ** CASE 1: e1 >= e2 ** */
+
   emit_load_bool(ACC, falsebool, s); // load the false Bool object into ACC. 
   emit_branch(return_label, s); // jump to the return label. 
+
+  /* ** CASE 2: e1 < e2 ** */
+
   emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
   emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
