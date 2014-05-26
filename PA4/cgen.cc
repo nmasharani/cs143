@@ -2375,6 +2375,11 @@ int comp_class::compute_max_locals() {
   return e1->compute_max_locals();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Int const code gen
+//
+////////////////////////////////////////////////////////////////////////////////
 void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code int const expression." << endl;
   //
@@ -2387,6 +2392,11 @@ int int_const_class::compute_max_locals() {
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// String const code gen
+//
+////////////////////////////////////////////////////////////////////////////////
 void string_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code string const expression." << endl;
   emit_load_string(ACC,stringtable.lookup_string(token->get_string()),s);
@@ -2396,6 +2406,11 @@ int string_const_class::compute_max_locals() {
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Bool const code gen
+//
+////////////////////////////////////////////////////////////////////////////////
 void bool_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code bool expression." << endl;
   emit_load_bool(ACC, BoolConst(val), s);
@@ -2471,8 +2486,22 @@ int new__class::compute_max_locals() {
   return 0;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// Isvoid code gen
+//
+////////////////////////////////////////////////////////////////////////////////
 void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   cout << "Code isvoid expression." << endl;
+  e1->code(s, temp_start, envr, table, curr_class);
+  int void_label = table->label_id; table->label_id++;
+  int return_label = table->label_id; table->label_id++;
+  emit_beqz(ACC, void_label, s); // jump to the void label if the value of e1 is void. 
+  emit_load_bool(ACC, falsebool, s); // fall through the jump, so we load in the false Bool. 
+  emit_branch(return_label, s); // jump to the return label. 
+  emit_label_def(void_label, s); // if the expression in e1 is void, then we jump to here. 
+  emit_load_bool(ACC, truebool, s); // load the true Bool into ACC so it can be returned. 
+  emit_label_def(return_label, s); // the return label 
 }
 
 int isvoid_class::compute_max_locals() {
