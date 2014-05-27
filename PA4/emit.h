@@ -60,6 +60,7 @@
 #define CASE_ABORT			 "_case_abort"
 #define CASE_ABORT2 		 "_case_abort2"
 #define EQUALITY_TEST 		 "equality_test"
+#define GEN_GC_ASSIGN 		 "_GenGC_Assign"
 
 
 #define EMPTYSLOT            0

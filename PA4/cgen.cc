@@ -25,7 +25,21 @@
 /////////////////////////////////////////////////////////////////
 //
 // Stack Convention:
-// - Callee saves the FP, SELF, and RA
+// - FP points to the top of a frame. 
+// - SP points to the bottom of the stack. 
+// 
+// Callee saves and restores the registers FP, SELF, RA in that order 
+// 
+// Arguments are pushed to the bottom of the stack in reverse order.
+// The callee will pop these arguments. 
+// 
+// There are three types of variables:
+// - attributes offset are relative to SELF
+// - formal offsets are positive offset to FP
+// - local variables (case and let), are negative offset relative to FP
+//
+// The stack moves down on each function call by the number of 
+// local variables needed to evaluate the method body. 
 //
 /////////////////////////////////////////////////////////////////
 
@@ -35,7 +49,7 @@
 extern void emit_string_constant(ostream& str, char *s);
 extern int cgen_debug;
 
-//
+////////////////////////////////////////////////////////////////////////
 // Three symbols from the semantic analyzer (semant.cc) are used.
 // If e : No_type, then no code is generated for e.
 // Special code is generated for new SELF_TYPE.
@@ -974,12 +988,9 @@ void CgenClassTable::build_subclass_methods(CgenNodeP current, Symbol parent) {
   Features features = current->features;
   Features methods = nil_Features();
 
-  // cout << "Assigning current class to all features in class " << class_name->get_string() << endl;
   for (int i = features->first(); features->more(i); i = features->next(i)) {
     features->nth(i)->current_class = current->name;
-    // cout << features->nth(i)->current_class->get_string() << endl;
   }
-  // cout << "done" << endl;
 
   if (!parent) {
     for (int i = features->first(); features->more(i); i = features->next(i)) {
@@ -1553,8 +1564,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   if (strcmp(curr_class->name->get_string(), Object->get_string()) != 0) {
     CgenNodeP parent = curr_class->get_parentnd();
     char* parent_label = parent->name->get_string();
-    str << JAL << parent_label << CLASSINIT_SUFFIX << endl;
-    // note the parent init will place the object back into ACC. it is the same object as SELF. 
+    str << JAL << parent_label << CLASSINIT_SUFFIX << endl; // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
   Features feats = curr_class->features;
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
@@ -1563,10 +1573,15 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
       curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
+      
       if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") == 0) {
-        if (is_int_str_bool(curr_feat->get_type()) == true) continue;
+        if (is_int_str_bool(curr_feat->get_type()) == true) {
+          continue;
+        } else {
+          emit_move(ACC, ZERO, str);
+        }
       }
-      emit_store(ACC, offset, SELF, str);
+       emit_store(ACC, offset, SELF, str);
     }
   }
   emit_move(ACC, SELF, str); // the return value, in this case, the object being initialized, gets put in ACC
@@ -1630,7 +1645,7 @@ void CgenClassTable::code_init_methods() {
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   str << "# Begin Emitting code for method " << curr_feat->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-
+  str << GLOBAL << curr_class->name << "." <<  curr_feat->get_name() << endl;
   emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
@@ -1639,7 +1654,6 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
   emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
   emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
-  //emit_addiu(FP, SP, 0, str); // move FP down to SP
   emit_move(FP, SP, str); // move the frame pointer down. 
   emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
   emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
@@ -1657,7 +1671,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
 
   int num_param_bytes = num_params * WORD_SIZE;
-  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot function invoked. 
+  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot when function invoked. 
   emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
   emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
   emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA.
@@ -1822,6 +1836,8 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 //
 //  s << SW << source_reg << " " << offset * WORD_SIZE << "(" << dest_reg << ")" << endl;
 //
+// value of expression is the return object in ACC
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
@@ -1845,6 +1861,8 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
 
   // NM: If this is the case, we must be looking at a parameter to a method
   // NM: method parameters are stored at positive offsets off of the $fp
+    emit_addiu(A1, SELF, offset, s); //for the garbage collector interface
+    emit_jal(GEN_GC_ASSIGN, s); //notify the garbage collector about assignment. 
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
     cout << "Assigning paramter object" << endl;
     emit_store(ACC, offset, FP, s);
@@ -2096,7 +2114,7 @@ void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
 int loop_class::compute_max_locals() {
   int num1 = pred->compute_max_locals();
   int num2 = body->compute_max_locals();
-  return num1 + num2 + 1;
+  return num1 + num2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2107,7 +2125,9 @@ int loop_class::compute_max_locals() {
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code typecase expression at line number " << get_line_number() <<  endl;
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
-  emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
+  int local_offset_to_e0 = temp_start; temp_start++; 
+  emit_store(ACC, (-1)*local_offset_to_e0, FP, s); // store value of e0 on the stack. 
+  //emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
 
   int success_label = table->label_id; table->label_id++;
   int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
@@ -2129,6 +2149,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         emit_label_def(curr_branch_label, s); // set the label of the current branch. 
         curr_branch_label = table->label_id++;
+        emit_load(T3, (-1)*local_offset_to_e0, FP, s); // move value of e0 saved on stack into T3.
         emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
@@ -2168,9 +2189,9 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 }
 
 int typcase_class::compute_max_locals() {
-  int sum = 0;
+  int sum = 2; // Need two tempporaries by default. 
   sum += expr->compute_max_locals();
-  for (int i = cases->first(); cases->more(i); i++) {
+  for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
     Case curr_case = cases->nth(i);
     sum += curr_case->compute_max_locals();
   }
@@ -2242,7 +2263,7 @@ void block_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>*
 
 int block_class::compute_max_locals() {
   int sum = 0;
-  for (int i = body->first(); body->more(i); i++) {
+  for (int i = body->first(); body->more(i); i = body->next(i)) {
     Expression curr_expr = body->nth(i);
     sum += curr_expr->compute_max_locals();
   }
@@ -2308,7 +2329,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value. 
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now the correct return value. 
   s << "# End Code plus expression." << endl;
 }
 
@@ -2411,7 +2432,7 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 }
 
 int neg_class::compute_max_locals() {
-  return e1->compute_max_locals();
+  return e1->compute_max_locals() + 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2537,7 +2558,7 @@ void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_l
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
-  emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
+  emit_load_int(ACC,inttable.lookup_string(token->get_string()), s);
   s << "# End Code int const expression." << endl;
 }
 
@@ -2672,7 +2693,7 @@ int isvoid_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code no_epression expression at line number " << get_line_number() << endl;
-  emit_move(ACC, ZERO, s); 
+  //emit_move(ACC, ZERO, s); 
   s << "# End Code no_epression expression." << endl;
   return;
 }
