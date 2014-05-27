@@ -17,3 +17,7 @@ class C inherits B {
 	d : Int;
 	four(): Int{5};
 };
+
+class D {};
+class E inherits D{};
+class F inherits D{};

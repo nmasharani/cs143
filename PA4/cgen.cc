@@ -827,6 +827,8 @@ void CgenClassTable::code_constants()
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
+
+
   if (strcmp(type->get_string(), Int->get_string()) == 0) {
     //find the int const label associated with 0 and return that
     s << WORD; inttable.lookup_string("0")->code_ref(s); s << endl;
@@ -839,6 +841,7 @@ void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
   }
   if (strcmp(type->get_string(), Bool->get_string()) == 0) {
     s << WORD; falsebool.code_ref(s);  s << endl; 
+    return;
   }
   s << WORD << "0" << endl;
 }
@@ -884,20 +887,40 @@ int max(int num1, int num2) {
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_protos() {
   // nl = node list
+
+  // Iterate through classes. For each class
   for (List<CgenNode> * nl = nds; nl != NULL; nl = nl->tl()) {
+
+    // Put a -1 at -4 off the class proto def-> garbage collector tag
     str << WORD << "-1" << endl;
+
     CgenNode * nd = nl->hd();
     Symbol class_name = nd->get_name();
+
+    // ClassName_protObj:
     emit_protobj_ref(class_name, str); // get tags from name_to_tag
     str << ":" << endl;
+
+    // Get the tag from the pre-generated tags stored in name_to_tag
     int tag = *(name_to_tag->probe(class_name)); // Class tag
+
+    // Get a list of attributes
     Features attributes = class_attributes->lookup(class_name); // Attributes
+    
+    // Allocate space for attributes when calculating size
     int size = 1 + 1 + 1 + attributes->len(); // 1 for tag, 1 for size, 1 for dispatch pointer, 1 for each attr
+    
+    // .word X
+    // .word Y
+    // ClassName_dispTab
     str << WORD << tag << endl; // emit class tag
     str << WORD << size << endl;  // emit size
     str << WORD; // emit dispatch table
     emit_disptable_ref(class_name, str);
     str << endl;
+
+    // For each attribute in the attribute list, emit an attribute
+
     // emit attributes
     for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
       Symbol type = attributes->nth(i)->get_type();
@@ -1107,7 +1130,10 @@ void CgenClassTable::build_classes_attributes() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_name_table() {
+  // class_nameTab:
   str << CLASSNAMETAB << LABEL;
+
+
   for (int i = 0; i < tagtracker; i++) {
     Symbol curr_class = tag_to_name->lookup(i);
     str << WORD;
@@ -1137,9 +1163,12 @@ void CgenClassTable::code_object_table() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::code_dispatch_table() {
+  // for each class in order of tags
   for (int i = 0; i < tagtracker; i++) {
     Symbol class_name = tag_to_name->lookup(i);
     Features methods = class_methods->lookup(class_name);
+
+    // ClassName_dispTab:
     emit_disptable_ref(class_name, str); str << LABEL;
     for (int j = methods->first(); methods->more(j); j = methods->next(j)) {
       Feature method = methods->nth(j);
@@ -1216,8 +1245,16 @@ CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
    build_classes_attributes();
    build_classes_methods();
 
-   if (cgen_debug) dump_classes_methods(cout);
-   if (cgen_debug) dump_classes_attributes(cout);
+
+   if (cgen_debug) {
+    cout << "Methods";
+    dump_classes_methods(cout);
+  }
+   if (cgen_debug) {
+    "Attributes";
+    dump_classes_attributes(cout);
+
+   } 
 
    code();
    exitscope();
@@ -1416,17 +1453,27 @@ void CgenNode::set_parentnd(CgenNodeP p)
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::initialize_class_enviornment() {
+  cout << "INITIALIZE CLASS ENVIRONMENT\n";
+  // For each class
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
+
+    // Initialize the environment
     curr_class->envr = new SymbolTable<Symbol, var_loc>();
     curr_class->envr->enterscope();
     Symbol class_name = curr_class->name;
+
+    // Lookup the initialized attribute list
     Features attrs = class_attributes->lookup(class_name);
     if (cgen_debug) cout << "Enviornment for " << curr_class->name->get_string() << endl;
+    
+    // For each attribute
     for (int i = attrs->first(); attrs->more(i); i = attrs->next(i)) {
       Feature curr_attr = attrs->nth(i);
       var_loc* loc = new var_loc;
       loc->context = CLASS_CONTEXT;
+
+      // DEFAULT_OBJFIELDS = 3 (type + size + dispTab ref)
       loc->offset = DEFAULT_OBJFIELDS + i;
       curr_class->envr->addid(curr_attr->get_name(), loc);
       if (cgen_debug) cout << "attribute " << curr_attr->get_name()->get_string() << " added with location " << DEFAULT_OBJFIELDS + i << endl;
@@ -1480,16 +1527,24 @@ int CgenClassTable::compute_max_locals_for_class_init(CgenNodeP curr_class) {
 void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   str << "# Begin Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
   curr_class->envr->enterscope();
+
+  // NM: First, we output the label for the init method:
+  // NM: 
+  // NM: ClassName_init:
+
   emit_init_ref(curr_class->name, str); str << LABEL;
   /* first we set up the stack */
+
+  // NM: 
   
   int num_locals_needed = compute_max_locals_for_class_init(curr_class);
-  num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
+  // num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
   int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
 
   emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
   emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
   emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
+
   emit_move(FP, SP, str);
   emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
   emit_move(SELF, ACC, str); // Move to new context, the object being initialized is calling Parent.init
@@ -1773,21 +1828,56 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   s << "# Begin Code assign expression at line number " << get_line_number() << endl;
   expr->code(s, temp_start, envr, table, curr_class); // value of this expression is now in ACC. 
 
+  // NM: value of the expression being assigned to an object is in $a0
+
   var_loc* loc = envr->lookup(name);
   if (loc == NULL) {
     cout << "Could not find identifier " << name->get_string() << ". This should never happen." << endl;
   }
+
   int offset = loc->offset;
+
+  // NM: If this is the case, we must be looking at an attribute
+  // NM: attributes are stored at POSTIIVE INDICES off of $s0
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     cout << "Assigning attribute object" << endl;
     emit_store(ACC, offset, SELF, s);
+
+  // NM: If this is the case, we must be looking at a parameter to a method
+  // NM: method parameters are stored at positive offsets off of the $fp
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
     cout << "Assigning paramter object" << endl;
     emit_store(ACC, offset, FP, s);
+
+  // NM: If this is the case, we are looking at a parameter declared in a 
+  // NM: let statement or case statement. This means we're looking at objects
+  // NM: in the temporary region, which is below $fp (at a negative offset)
   } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
     cout << "Assigning local object" << endl;
     emit_store(ACC, (-1)*offset, FP, s);
   }
+
+  // NM: Stack diagram
+  // NM: 
+  // NM: |       |     <- { vars in this region are parameters }
+  // NM: |-------|  <- fp
+  // NM: |-------|     <- saved stuff
+  // NM: |       |     <- { vars in this region are locals / created in exprs }
+  // NM: |-------|  <- sp
+  // NM: |       |
+
+
+  // NM: code out of this method should look something like this:
+  // NM: 
+  // NM: <code for expression>
+  // NM: sw $a0 offset($sp)
+  // NM: 
+  // NM: 
+  // NM: or something like this:
+  // NM: 
+  // NM: <code for expression>
+  // NM: sw $a0 offset($fp)
+
   s << "# End Code assign expression." << endl;
 }
 
@@ -1804,22 +1894,59 @@ int assign_class::compute_max_locals() {
 void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code static dispatch expression at line number " << get_line_number() <<  endl;
   int num_params = actual->len();
+  
+
+  // NM: for each parameter, push that parameter on the stack after evaluating it
+  // NM: 
+  // NM: should look something like this for each expression:
+  // NM: 
+  // NM: <code for expression>      # result stored in $a0
+  // NM: sw $a0 0($sp)              # put the result at $sp
+  // NM: addiu $sp $sp -4           # move $sp
+
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
     emit_push(ACC, s);
   }
+
+  // NM: Evaluate e0 -> the result is stored in $a0
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   int bypass_abort_label = table->label_id;
   table->label_id++;
+  
+  // NM: If $a0 is null, keep going and go into the abort code
+
   emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
+  
+  // NM: Here, the object is void. :(
+  // NM: 
+  // NM: Code should look something like this:
+  // NM: 
+  // NM: lw $a0 str_constX
+  // NM: li $T1 Y
+  // NM: jal _dispatch_abort
+
   /* here we output the abort routine. Good dispatch will jump over this */
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // load the immediate value of the line number into T1;
   emit_jal(DISPATCH_ABORT, s);
+
+  // NM: Here, the object is not void. Yay!
+  // NM: 
+  // NM: Code should look something like this:
+  // NM: 
+  // NM: labelZ:
+  // NM: lw $t1 8($a0)    # read in the dispatch table from e0
+  // NM: lw $t1 B($t1)    # read in the correct method from the dispatch table
+  // NM: jalr $t1         # jump to method def
+
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
   emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
+  
+  // NM: Here, type_name is the type given statically for the dispatch. 
+
   if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) type_name = curr_class->name;
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
   cout << " loaded dispatch for class " << type_name->get_string() << "at offset " << offset_in_disp_tab << endl;
@@ -1831,7 +1958,7 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
 int static_dispatch_class::compute_max_locals() {
   int sum = 0;
   sum += expr->compute_max_locals();
-  for (int i = actual->first(); actual->more(i); i++) {
+  for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_expr = actual->nth(i);
     sum += curr_expr->compute_max_locals() + 1;
   }
@@ -1900,7 +2027,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
 int dispatch_class::compute_max_locals() {
   int sum = 0;
   sum += expr->compute_max_locals();
-  for (int i = actual->first(); actual->more(i); i++) {
+  for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_expr = actual->nth(i);
     sum += curr_expr->compute_max_locals() + 1;
   }
@@ -1933,6 +2060,7 @@ int cond_class::compute_max_locals() {
   int num1 = pred->compute_max_locals();
   int num2 = then_exp->compute_max_locals();
   int num3 = else_exp->compute_max_locals();
+  // 2 extra to store results of pred and then exp when evaling else exp
   return num1 + num2 + num3 + 2;
 }
 
