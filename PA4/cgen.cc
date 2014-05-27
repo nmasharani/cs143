@@ -1997,7 +1997,9 @@ int loop_class::compute_max_locals() {
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code typecase expression at line number " << get_line_number() <<  endl;
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
-  emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
+  int local_offset_to_e0 = temp_start; temp_start++; 
+  emit_store(ACC, (-1)*local_offset_to_e0, FP, s); // store value of e0 on the stack. 
+  //emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
 
   int success_label = table->label_id; table->label_id++;
   int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
@@ -2019,6 +2021,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         emit_label_def(curr_branch_label, s); // set the label of the current branch. 
         curr_branch_label = table->label_id++;
+        emit_load(T3, (-1)*local_offset_to_e0, FP, s); // move value of e0 saved on stack into T3.
         emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
@@ -2058,7 +2061,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 }
 
 int typcase_class::compute_max_locals() {
-  int sum = 1;
+  int sum = 2; // Need two tempporaries by default. 
   sum += expr->compute_max_locals();
   for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
     Case curr_case = cases->nth(i);

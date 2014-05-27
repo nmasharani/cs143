@@ -482,11 +482,10 @@ String_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 1
-	move	$a0 $zero
 # End Code no_epression expression.
 # Begin Code no_epression expression at line number 1
-	move	$a0 $zero
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -505,8 +504,8 @@ Bool_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 1
-	move	$a0 $zero
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -525,8 +524,8 @@ Int_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 1
-	move	$a0 $zero
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -594,7 +593,7 @@ Main.main:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -24
+	addiu	$sp $sp -36
 	move	$s0 $a0
 # Begin Code block epression at line number 6
 # Begin Code typecase expression at line number 7
@@ -609,16 +608,17 @@ Main.main:
 	lw	$t2 4($t2)
 	jalr		$t2
 # End Code new with type SELF_TYPE
-	move	$t3 $a0
+	sw	$a0 -12($fp)
 	bne	$a0 $zero label1
 	la	$a0 str_const0
 	li	$t1 7
 	jal	_case_abort2
 label1:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 5 label2
 	bgt	$t2 5 label2
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 15
 # Begin Code string const expression at line number 15
 	la	$a0 str_const5
@@ -640,10 +640,11 @@ label3:
 # End Code disptach expression.
 	b	label0
 label2:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 4 label4
 	bgt	$t2 4 label4
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 8
 # Begin Code string const expression at line number 8
 	la	$a0 str_const2
@@ -665,10 +666,11 @@ label5:
 # End Code disptach expression.
 	b	label0
 label4:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 3 label6
 	bgt	$t2 3 label6
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 14
 # Begin Code string const expression at line number 14
 	la	$a0 str_const4
@@ -690,21 +692,22 @@ label7:
 # End Code disptach expression.
 	b	label0
 label6:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 2 label8
 	bgt	$t2 2 label8
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code block epression at line number 9
 # Begin Code let expression at line number 10
 # Begin Code string const expression at line number 10
 	la	$a0 str_const3
 # End Code string const expression.
-	sw	$a0 -16($fp)
+	sw	$a0 -20($fp)
 # Begin Code block epression at line number 10
 # Begin Code disptach expression at line number 11
 # Begin Code objectID expression at line number 11
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -750,16 +753,17 @@ label10:
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-	move	$t3 $a0
+	sw	$a0 -12($fp)
 	bne	$a0 $zero label12
 	la	$a0 str_const0
 	li	$t1 18
 	jal	_case_abort2
 label12:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 7 label13
 	bgt	$t2 7 label13
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 19
 # Begin Code string const expression at line number 19
 	la	$a0 str_const6
@@ -781,10 +785,11 @@ label14:
 # End Code disptach expression.
 	b	label11
 label13:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 6 label15
 	bgt	$t2 6 label15
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 25
 # Begin Code string const expression at line number 25
 	la	$a0 str_const7
@@ -806,10 +811,11 @@ label16:
 # End Code disptach expression.
 	b	label11
 label15:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 5 label17
 	bgt	$t2 5 label17
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 26
 # Begin Code string const expression at line number 26
 	la	$a0 str_const5
@@ -831,21 +837,22 @@ label18:
 # End Code disptach expression.
 	b	label11
 label17:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 2 label19
 	bgt	$t2 2 label19
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code block epression at line number 20
 # Begin Code let expression at line number 21
 # Begin Code string const expression at line number 21
 	la	$a0 str_const3
 # End Code string const expression.
-	sw	$a0 -16($fp)
+	sw	$a0 -20($fp)
 # Begin Code block epression at line number 21
 # Begin Code disptach expression at line number 22
 # Begin Code objectID expression at line number 22
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -881,16 +888,17 @@ label11:
 	jal	Object.copy
 	jal	Bravo_init
 # End Code new with type Bravo
-	move	$t3 $a0
+	sw	$a0 -12($fp)
 	bne	$a0 $zero label22
 	la	$a0 str_const0
 	li	$t1 29
 	jal	_case_abort2
 label22:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 7 label23
 	bgt	$t2 7 label23
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 30
 # Begin Code string const expression at line number 30
 	la	$a0 str_const6
@@ -912,10 +920,11 @@ label24:
 # End Code disptach expression.
 	b	label21
 label23:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 6 label25
 	bgt	$t2 6 label25
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 36
 # Begin Code string const expression at line number 36
 	la	$a0 str_const7
@@ -937,10 +946,11 @@ label26:
 # End Code disptach expression.
 	b	label21
 label25:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 5 label27
 	bgt	$t2 5 label27
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 37
 # Begin Code string const expression at line number 37
 	la	$a0 str_const5
@@ -962,21 +972,22 @@ label28:
 # End Code disptach expression.
 	b	label21
 label27:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 2 label29
 	bgt	$t2 2 label29
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code block epression at line number 31
 # Begin Code let expression at line number 32
 # Begin Code string const expression at line number 32
 	la	$a0 str_const3
 # End Code string const expression.
-	sw	$a0 -16($fp)
+	sw	$a0 -20($fp)
 # Begin Code block epression at line number 32
 # Begin Code disptach expression at line number 33
 # Begin Code objectID expression at line number 33
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -1007,7 +1018,7 @@ label29:
 label21:
 # End Code typecase expression.
 # End Code block epression.
-	addiu	$sp $sp 24
+	addiu	$sp $sp 36
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)

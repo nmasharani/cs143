@@ -1284,9 +1284,11 @@ App_init:
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -1306,9 +1308,11 @@ Lambda_init:
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -1328,9 +1332,6 @@ Variable_init:
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
-	la	$a0 String_protObj
-	jal	Object.copy
-	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
 	lw	$fp 0($sp)
@@ -1366,10 +1367,10 @@ LambdaListRef_init:
 # Begin Code int const expression at line number 77
 	la	$a0 int_const1
 # End Code int const expression.
-	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -1389,17 +1390,17 @@ LambdaListNE_init:
 	jal	LambdaList_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
-	la	$a0 Int_protObj
-	jal	Object.copy
-	sw	$a0 16($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 20($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 24($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 28
@@ -1435,9 +1436,11 @@ VarListNE_init:
 	jal	VarList_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -1473,11 +1476,9 @@ String_init:
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
-	la	$a0 Int_protObj
-	jal	Object.copy
-	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 16($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 20
@@ -1497,6 +1498,7 @@ Bool_init:
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -1516,6 +1518,7 @@ Int_init:
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -3879,23 +3882,24 @@ App.beta:
 	sw	$s0 -4($sp)
 	sw	$ra -8($sp)
 	move	$fp $sp
-	addiu	$sp $sp -16
+	addiu	$sp $sp -20
 	move	$s0 $a0
 # Begin Code typecase expression at line number 298
 # Begin Code objectID expression at line number 298
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	move	$t3 $a0
+	sw	$a0 -12($fp)
 	bne	$a0 $zero label135
 	la	$a0 str_const0
 	li	$t1 298
 	jal	_case_abort2
 label135:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 6 label136
 	bgt	$t2 6 label136
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code disptach expression at line number 299
 # Begin Code objectID expression at line number 299
 # Loading attribute object into ACC
@@ -3905,7 +3909,7 @@ label135:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 299
 # Loading local object into ACC
-	lw	$a0 -12($fp)
+	lw	$a0 -16($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label137
 	la	$a0 str_const0
@@ -3918,10 +3922,11 @@ label137:
 # End Code disptach expression.
 	b	label134
 label136:
+	lw	$t3 -12($fp)
 	lw	$t2 0($t3)
 	blt	$t2 4 label138
 	bgt	$t2 7 label138
-	sw	$t3 -12($fp)
+	sw	$t3 -16($fp)
 # Begin Code let expression at line number 301
 # Begin Code disptach expression at line number 301
 # Begin Code objectID expression at line number 301
@@ -3937,18 +3942,18 @@ label139:
 	lw	$t1 32($t1)
 	jalr		$t1
 # End Code disptach expression.
-	sw	$a0 -16($fp)
+	sw	$a0 -20($fp)
 # Begin Code let expression at line number 302
 # Begin Code new with type at line number 302
 	la	$a0 App_protObj
 	jal	Object.copy
 	jal	App_init
 # End Code new with type App
-	sw	$a0 -20($fp)
+	sw	$a0 -24($fp)
 # Begin Code disptach expression at line number 303
 # Begin Code objectID expression at line number 303
 # Loading local object into ACC
-	lw	$a0 -16($fp)
+	lw	$a0 -20($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
@@ -3960,7 +3965,7 @@ label139:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 303
 # Loading local object into ACC
-	lw	$a0 -20($fp)
+	lw	$a0 -24($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label140
 	la	$a0 str_const0
@@ -3983,7 +3988,7 @@ label138:
 	jal	_case_abort
 label134:
 # End Code typecase expression.
-	addiu	$sp $sp 16
+	addiu	$sp $sp 20
 	lw	$fp 0($sp)
 	lw	$s0 -4($sp)
 	lw	$ra -8($sp)
