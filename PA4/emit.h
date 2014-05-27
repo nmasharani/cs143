@@ -22,12 +22,13 @@
 //
 ///////////////////////////////////////////////////////////////////////
 #define NUM_REGISTERS_SAVED_BY_CALLER 3
+#define OFFSET_OF_TEMP_START_FROM_FP -1
 #define VOID 0
 
 /* Ofsets are relative to SP */
-#define SAVE_FP_OFFSET 0
-#define SAVE_SELF_OFFSET -1
-#define SAVE_RA_OFFSET -2
+#define RESTORE_FP_OFFSET 3
+#define RESTORE_SELF_OFFSET 2
+#define RESTORE_RA_OFFSET 1
 
 #define CLASS_CONTEXT 		"CLASS"
 #define FEATURE_CONTEXT 	"FEATURE"

@@ -1545,54 +1545,53 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
 
   emit_init_ref(curr_class->name, str); str << LABEL;
   /* first we set up the stack */
-
-  // NM: 
   
   int num_locals_needed = compute_max_locals_for_class_init(curr_class);
   // num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+  int bytes_for_locals = num_locals_needed * WORD_SIZE;
 
-  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
-  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
-  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
-
-  emit_move(FP, SP, str);
-  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
-  emit_move(SELF, ACC, str); // Move to new context, the object being initialized is calling Parent.init
+  emit_push(FP, str); //push the old FP on the stack, move the SP down by 4
+  emit_push(SELF, str); //push the old SEFL on the stack, move the SP down by 4
+  emit_move(FP, SP, str); //move FP down to SP
+  emit_push(RA, str); //push the old RA on the stack, just below the new FP. Move SP down by 4
+  emit_addiu(SP, SP, -1*bytes_for_locals, str); //move the SP down by the number of locals we need. This sets up the frame for this method.
+  emit_move(SELF, ACC, str); // move SELF into ACC. this completes the settup of the frame for this init method 
 
   /* first we initialize the parent class, so long as we are not Object */
   if (strcmp(curr_class->name->get_string(), Object->get_string()) != 0) {
     CgenNodeP parent = curr_class->get_parentnd();
-    char* parent_label = parent->name->get_string();
-    str << JAL << parent_label << CLASSINIT_SUFFIX << endl; // note the parent init will place the object back into ACC. it is the same object as SELF. 
+    char* parent_init_label = generate_init_label_for_class(parent);
+    emit_jal(parent_init_label, str); // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
-  Features feats = curr_class->features;
+
+  Features attributes = class_attributes->lookup(curr_class->name);
   for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
-    Feature curr_feat = feats->nth(i);
-    if (curr_feat->ismethod == false) {
-      int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
-      cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
-      curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
-      
-      if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") == 0) {
-        if (is_int_str_bool(curr_feat->get_type()) == true) {
-          continue;
-        } else {
-          emit_move(ACC, ZERO, str);
-        }
-      }
-       emit_store(ACC, offset, SELF, str);
+    Feature curr_attr = attributes->nth(i);
+    int offset = curr_class->envr->lookup(curr_attr->get_name())->offset;
+    if (offset != i + DEFAULT_OBJFIELDS) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
+    if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") != 0) {
+      curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
+      emit_store(ACC, offset, SELF, str);
     }
   }
-  emit_move(ACC, SELF, str); // the return value, in this case, the object being initialized, gets put in ACC
-  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot before init method called/
-  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
-  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
-  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA. 
 
-  emit_return(str);
+  emit_addiu(SP, SP, bytes_for_locals, str); //move SP up over bytes for locals. 
+  emit_load(RA, RESTORE_RA_OFFSET, SP, str); //Restore the value of RA from the stack
+  emit_load(SELF, RESTORE_SELF_OFFSET, SP, STR); //Restore the value of SELF
+  emit_load(FP, RESTORE_FP_OFFSET, SP, str); //Restore the value of FP
+  emit_addiu(SP, SP, NUM_REGISTERS_SAVED_BY_CALLER * WORD_SIZE, str); //Move SP up by the number of saved registers. There are no params to init, so that is all we move SP by.
+  emit_return(str); 
+
   curr_class->envr->exitscope();
   str << "# End Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
+}
+
+char* generate_init_label_for_class(Symbol curr_class) {
+  char* class_name = curr_class->name->get_string();
+  char *result = malloc(strlen(class_name)+strlen(CLASSINIT_SUFFIX)+1);//+1 for the zero-terminator
+  strcpy(result, class_name);
+  strcat(result, CLASSINIT_SUFFIX);
+  return result;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1611,7 +1610,7 @@ void CgenClassTable::code_init_methods() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Emits the code for the method curr_feat
+// Emits the code for the method method
 // defined in curr_class
 //
 // /* 1st compute the max number of locals needed */
@@ -1642,44 +1641,47 @@ void CgenClassTable::code_init_methods() {
 // enviornment. 
 //
 ////////////////////////////////////////////////////////////////////////////////
-void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
-  str << "# Begin Emitting code for method " << curr_feat->get_name()->get_string() << endl;
+void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
+  str << "# Begin Emitting code for method " << method->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-  str << GLOBAL << curr_class->name << "." <<  curr_feat->get_name() << endl;
-  emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
-  int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
-  num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
-  int bytes_to_move_SP = num_locals_needed * WORD_SIZE;
+  if(cgen_debug) str << GLOBAL << curr_class->name << "." <<  method->get_name() << endl; //for debugging purposes so that we can see the 
+  emit_method_ref(curr_class->name, method->get_name(), str); str << LABEL;
 
-  emit_store(FP, SAVE_FP_OFFSET, SP, str); // save callers FP register
-  emit_store(SELF, SAVE_SELF_OFFSET, SP, str); // save the callers SELF register
-  emit_store(RA, SAVE_RA_OFFSET, SP, str); // save the caller's RA register
-  emit_move(FP, SP, str); // move the frame pointer down. 
-  emit_addiu(SP, SP, (bytes_to_move_SP * (-1)), str); // move the stack pointer down
-  emit_move(SELF, ACC, str); // Move to new context, the object calling this method is the new self. 
+  int num_locals_needed = method->get_expr()->compute_max_locals();
+  int bytes_for_locals = num_locals_needed * WORD_SIZE;
 
-  Formals formals = curr_feat->get_formals();
-  int num_params = formals->len();
-  for (int i = formals->first(); formals->more(i); i = formals->next(i)) {
-    Formal curr_formal = formals->nth(i);
-    int offset = num_params - i; 
+  emit_push(FP, str);
+  emit_push(SELF, str);
+  emit_move(FP, SP, str);
+  emit_push(RA, str);
+  emit_addiu(SP, SP, -1*bytes_for_locals, str); 
+  emit_move(SELF, ACC, str); 
+
+  Formals params = method->get_formals();
+  int num_params = params->len();
+  for (int i = params->first(); params->more(i); i = params->next(i)) {
+    Formal curr_param = params->nth(i);
+    int normalized_index = i - params->first();
+    int offset_from_FP = num_params - normalized_index + NUM_SAVED_REGS_ABOVE_FP;
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
-    loc->offset = offset; // This offset will be relative to the FP in the callee's frame. Simply add offset to FP to get the adress of these params. 
-    curr_class->envr->addid(curr_formal->get_name(), loc);
+    loc->offset = offset_from_FP;
+    curr_class->envr->addid(curr_param->get_name(), loc);
   }
-  curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
 
+  method->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
+
+  emit_addiu(SP, SP, bytes_for_locals, str);
+  emit_load(RA, RESTORE_RA_OFFSET, SP, str);
+  emit_load(SELF, RESTORE_SELF_OFFSET, SP, str);
+  emit_load(FP, RESTORE_FP_OFFSET, SP, str); 
   int num_param_bytes = num_params * WORD_SIZE;
-  emit_addiu(SP, SP, bytes_to_move_SP, str); // move the stack pointer back up to its old spot when function invoked. 
-  emit_load(FP, SAVE_FP_OFFSET, SP, str); // move saved FP back into FP.
-  emit_load(SELF, SAVE_SELF_OFFSET, SP, str); // move saved SELF back into SELF. 
-  emit_load(RA, SAVE_RA_OFFSET, SP, str); // move saved RA back into RA.
-  emit_addiu(SP, SP, num_param_bytes, str); // move the stack pointer back up accounting for the params. 
-
+  int bytes_to_restore_SP = num_param_bytes + NUM_REGISTERS_SAVED_BY_CALLER * WORD_SIZE; 
+  emit_addiu(SP, SP, bytes_to_restore_SP, str); 
   emit_return(str);
+
   curr_class->envr->exitscope();
-  str << "# End Emitting code for method " << curr_feat->get_name()->get_string() << endl;
+  str << "# End Emitting code for method " << method->get_name()->get_string() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1837,6 +1839,24 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 //  s << SW << source_reg << " " << offset * WORD_SIZE << "(" << dest_reg << ")" << endl;
 //
 // value of expression is the return object in ACC
+// NM: Stack diagram
+// NM: 
+// NM: |       |     <- { vars in this region are parameters }
+// NM: |-------|  <- fp
+// NM: |-------|     <- saved stuff
+// NM: |       |     <- { vars in this region are locals / created in exprs }
+// NM: |-------|  <- sp
+// NM: |       |
+// NM: code out of this method should look something like this:
+// NM: 
+// NM: <code for expression>
+// NM: sw $a0 offset($sp)
+// NM: 
+// NM: 
+// NM: or something like this:
+// NM: 
+// NM: <code for expression>
+// NM: sw $a0 offset($fp)
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -1847,54 +1867,18 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   // NM: value of the expression being assigned to an object is in $a0
 
   var_loc* loc = envr->lookup(name);
-  if (loc == NULL) {
-    cout << "Could not find identifier " << name->get_string() << ". This should never happen." << endl;
-  }
-
+  
   int offset = loc->offset;
 
-  // NM: If this is the case, we must be looking at an attribute
-  // NM: attributes are stored at POSTIIVE INDICES off of $s0
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
-    cout << "Assigning attribute object" << endl;
     emit_store(ACC, offset, SELF, s);
-
-  // NM: If this is the case, we must be looking at a parameter to a method
-  // NM: method parameters are stored at positive offsets off of the $fp
-    emit_addiu(A1, SELF, offset, s); //for the garbage collector interface
-    emit_jal(GEN_GC_ASSIGN, s); //notify the garbage collector about assignment. 
-  } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
-    cout << "Assigning paramter object" << endl;
-    emit_store(ACC, offset, FP, s);
-
-  // NM: If this is the case, we are looking at a parameter declared in a 
-  // NM: let statement or case statement. This means we're looking at objects
-  // NM: in the temporary region, which is below $fp (at a negative offset)
-  } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
-    cout << "Assigning local object" << endl;
-    emit_store(ACC, (-1)*offset, FP, s);
+    if (cgen_Memmgr != GC_NOGC) {
+      emit_addiu(A1, SELF, offset, s); //for the garbage collector interface
+      emit_jal(GEN_GC_ASSIGN, s); //notify the garbage collector about assignment. 
+    }
+  } else {
+    emit_store(ACC, offset, FP, s); 
   }
-
-  // NM: Stack diagram
-  // NM: 
-  // NM: |       |     <- { vars in this region are parameters }
-  // NM: |-------|  <- fp
-  // NM: |-------|     <- saved stuff
-  // NM: |       |     <- { vars in this region are locals / created in exprs }
-  // NM: |-------|  <- sp
-  // NM: |       |
-
-
-  // NM: code out of this method should look something like this:
-  // NM: 
-  // NM: <code for expression>
-  // NM: sw $a0 offset($sp)
-  // NM: 
-  // NM: 
-  // NM: or something like this:
-  // NM: 
-  // NM: <code for expression>
-  // NM: sw $a0 offset($fp)
 
   s << "# End Code assign expression." << endl;
 }
@@ -1930,8 +1914,7 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
 
   // NM: Evaluate e0 -> the result is stored in $a0
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
-  int bypass_abort_label = table->label_id;
-  table->label_id++;
+  int bypass_abort_label = table->label_id; table->label_id++;
   
   // NM: If $a0 is null, keep going and go into the abort code
 
@@ -1961,16 +1944,23 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
 
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
-  emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
-  
-  // NM: Here, type_name is the type given statically for the dispatch. 
-
-  if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) type_name = curr_class->name;
+  char* dispatch_label = generate_dispatch_table_label_for_class(type_name);
+  emit_load_address(T1, dispatch_label, s); 
+ 
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
-  cout << " loaded dispatch for class " << type_name->get_string() << "at offset " << offset_in_disp_tab << endl;
+
+  
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
   s << "# End Code static dispatch expression." << endl;
+}
+
+char* generate_dispatch_table_label_for_class(Symbol curr_class) {
+  char* class_name = curr_class->name->get_string();
+  char *result = malloc(strlen(class_name)+strlen(DISPTAB_SUFFIX)+1);//+1 for the zero-terminator
+  strcpy(result, class_name);
+  strcat(result, DISPTAB_SUFFIX);
+  return result;
 }
 
 int static_dispatch_class::compute_max_locals() {
