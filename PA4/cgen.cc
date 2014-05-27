@@ -1518,10 +1518,15 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       int offset = curr_class->envr->lookup(curr_feat->get_name())->offset;
       cout << "emitting code to update attribute " << curr_feat->get_name()->get_string() << " at offset " << offset << endl;
       curr_feat->get_expr()->code(str, (NUM_REGISTERS_SAVED_BY_CALLER), curr_class->envr, this, curr_class); //now ACC has value of intializer expression
+      
       if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") == 0) {
-        if (is_int_str_bool(curr_feat->get_type()) == true) continue;
+        if (is_int_str_bool(curr_feat->get_type()) == true) {
+          continue;
+        } else {
+          emit_move(ACC, ZERO, str);
+        }
       }
-      emit_store(ACC, offset, SELF, str);
+       emit_store(ACC, offset, SELF, str);
     }
   }
   emit_move(ACC, SELF, str); // the return value, in this case, the object being initialized, gets put in ACC
@@ -1792,6 +1797,8 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     cout << "Assigning attribute object" << endl;
     emit_store(ACC, offset, SELF, s);
+    emit_addiu(A1, SELF, offset, s); //for the garbage collector interface
+    emit_jal(GEN_GC_ASSIGN, s); //notify the garbage collector about assignment. 
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
     cout << "Assigning paramter object" << endl;
     emit_store(ACC, offset, FP, s);

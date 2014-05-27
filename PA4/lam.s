@@ -1328,6 +1328,9 @@ Variable_init:
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	la	$a0 String_protObj
+	jal	Object.copy
+	sw	$a0 12($s0)
 	move	$a0 $s0
 	addiu	$sp $sp 16
 	lw	$fp 0($sp)
@@ -1363,6 +1366,7 @@ LambdaListRef_init:
 # Begin Code int const expression at line number 77
 	la	$a0 int_const1
 # End Code int const expression.
+	move	$a0 $zero
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
@@ -1388,6 +1392,9 @@ LambdaListNE_init:
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
+	la	$a0 Int_protObj
+	jal	Object.copy
+	sw	$a0 16($s0)
 # Begin Code no_epression expression at line number 0
 # End Code no_epression expression.
 	sw	$a0 20($s0)
@@ -1466,6 +1473,9 @@ String_init:
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
+	la	$a0 Int_protObj
+	jal	Object.copy
+	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 21
 # End Code no_epression expression.
 	sw	$a0 16($s0)
@@ -1591,14 +1601,14 @@ label1:
 	la	$a0 bool_const0
 # End Code bool expression.
 	sw	$a0 -12($fp)
-# Begin Code let expression at line number 390
+# Begin Code let expression at line number 389
 	move	$a0 $zero
 	sw	$a0 -16($fp)
-# Begin Code block epression at line number 391
-# Begin Code loop expression at line number 392
+# Begin Code block epression at line number 390
+# Begin Code loop expression at line number 391
 label2:
-# Begin Code comp expression at line number 392
-# Begin Code objectID expression at line number 392
+# Begin Code comp expression at line number 391
+# Begin Code objectID expression at line number 391
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
@@ -1612,16 +1622,16 @@ label5:
 # End Code comp expression.
 	lw	$t1 12($a0)
 	beq	$t1 $zero label3
-# Begin Code block epression at line number 393
-# Begin Code assign expression at line number 394
-# Begin Code disptach expression at line number 394
-# Begin Code objectID expression at line number 394
+# Begin Code block epression at line number 392
+# Begin Code assign expression at line number 393
+# Begin Code disptach expression at line number 393
+# Begin Code objectID expression at line number 393
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label6
 	la	$a0 str_const0
-	li	$t1 394
+	li	$t1 393
 	jal	_dispatch_abort
 label6:
 	lw	$t1 8($a0)
@@ -1630,14 +1640,14 @@ label6:
 # End Code disptach expression.
 	sw	$a0 -16($fp)
 # End Code assign expression.
-# Begin Code cond expression at line number 395
-# Begin Code eq expression at line number 395
-# Begin Code objectID expression at line number 395
+# Begin Code cond expression at line number 394
+# Begin Code eq expression at line number 394
+# Begin Code objectID expression at line number 394
 # Loading local object into ACC
 	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 -20($fp)
-# Begin Code objectID expression at line number 395
+# Begin Code objectID expression at line number 394
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
@@ -1651,47 +1661,47 @@ label9:
 # End Code eq expression.
 	lw	$t2 12($a0)
 	beq	$t2 $zero label7
-# Begin Code assign expression at line number 396
-# Begin Code bool expression at line number 396
+# Begin Code assign expression at line number 395
+# Begin Code bool expression at line number 395
 	la	$a0 bool_const1
 # End Code bool expression.
 	sw	$a0 -12($fp)
 # End Code assign expression.
 	b	label8
 label7:
-# Begin Code block epression at line number 398
-# Begin Code assign expression at line number 399
-# Begin Code objectID expression at line number 399
+# Begin Code block epression at line number 396
+# Begin Code assign expression at line number 397
+# Begin Code objectID expression at line number 397
 # Loading local object into ACC
 	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 4($fp)
 # End Code assign expression.
-# Begin Code disptach expression at line number 400
-# Begin Code string const expression at line number 400
+# Begin Code disptach expression at line number 398
+# Begin Code string const expression at line number 398
 	la	$a0 str_const39
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 400
+# Begin Code objectID expression at line number 398
 	move	$a0 $s0
 	bne	$a0 $zero label10
 	la	$a0 str_const0
-	li	$t1 400
+	li	$t1 398
 	jal	_dispatch_abort
 label10:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 401
-# Begin Code objectID expression at line number 401
+# Begin Code disptach expression at line number 399
+# Begin Code objectID expression at line number 399
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label11
 	la	$a0 str_const0
-	li	$t1 401
+	li	$t1 399
 	jal	_dispatch_abort
 label11:
 	lw	$t1 8($a0)
@@ -1706,24 +1716,24 @@ label8:
 label3:
 	li	$a0 0
 # End Code loop expression.
-# Begin Code disptach expression at line number 406
-# Begin Code string const expression at line number 406
+# Begin Code disptach expression at line number 402
+# Begin Code string const expression at line number 402
 	la	$a0 str_const1
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 406
+# Begin Code objectID expression at line number 402
 	move	$a0 $s0
 	bne	$a0 $zero label12
 	la	$a0 str_const0
-	li	$t1 406
+	li	$t1 402
 	jal	_dispatch_abort
 label12:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code objectID expression at line number 407
+# Begin Code objectID expression at line number 403
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
@@ -1747,52 +1757,52 @@ Main.eval_class:
 	move	$fp $sp
 	addiu	$sp $sp -24
 	move	$s0 $a0
-# Begin Code block epression at line number 413
-# Begin Code disptach expression at line number 414
-# Begin Code string const expression at line number 414
+# Begin Code block epression at line number 409
+# Begin Code disptach expression at line number 410
+# Begin Code string const expression at line number 410
 	la	$a0 str_const40
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 414
+# Begin Code objectID expression at line number 410
 	move	$a0 $s0
 	bne	$a0 $zero label13
 	la	$a0 str_const0
-	li	$t1 414
+	li	$t1 410
 	jal	_dispatch_abort
 label13:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 415
-# Begin Code string const expression at line number 415
+# Begin Code disptach expression at line number 411
+# Begin Code string const expression at line number 411
 	la	$a0 str_const41
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 415
+# Begin Code objectID expression at line number 411
 	move	$a0 $s0
 	bne	$a0 $zero label14
 	la	$a0 str_const0
-	li	$t1 415
+	li	$t1 411
 	jal	_dispatch_abort
 label14:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 416
-# Begin Code string const expression at line number 416
+# Begin Code disptach expression at line number 412
+# Begin Code string const expression at line number 412
 	la	$a0 str_const23
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 416
+# Begin Code objectID expression at line number 412
 	move	$a0 $s0
 	bne	$a0 $zero label15
 	la	$a0 str_const0
-	li	$t1 416
+	li	$t1 412
 	jal	_dispatch_abort
 label15:
 	lw	$t1 8($a0)
@@ -1816,137 +1826,137 @@ Main.closure_class:
 	move	$fp $sp
 	addiu	$sp $sp -44
 	move	$s0 $a0
-# Begin Code block epression at line number 421
-# Begin Code disptach expression at line number 422
-# Begin Code string const expression at line number 422
+# Begin Code block epression at line number 417
+# Begin Code disptach expression at line number 418
+# Begin Code string const expression at line number 418
 	la	$a0 str_const42
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 422
+# Begin Code objectID expression at line number 418
 	move	$a0 $s0
 	bne	$a0 $zero label16
 	la	$a0 str_const0
-	li	$t1 422
+	li	$t1 418
 	jal	_dispatch_abort
 label16:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 423
-# Begin Code string const expression at line number 423
+# Begin Code disptach expression at line number 419
+# Begin Code string const expression at line number 419
 	la	$a0 str_const43
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 423
+# Begin Code objectID expression at line number 419
 	move	$a0 $s0
 	bne	$a0 $zero label17
 	la	$a0 str_const0
-	li	$t1 423
+	li	$t1 419
 	jal	_dispatch_abort
 label17:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 424
-# Begin Code string const expression at line number 424
+# Begin Code disptach expression at line number 420
+# Begin Code string const expression at line number 420
 	la	$a0 str_const44
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 424
+# Begin Code objectID expression at line number 420
 	move	$a0 $s0
 	bne	$a0 $zero label18
 	la	$a0 str_const0
-	li	$t1 424
+	li	$t1 420
 	jal	_dispatch_abort
 label18:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 425
-# Begin Code string const expression at line number 425
+# Begin Code disptach expression at line number 421
+# Begin Code string const expression at line number 421
 	la	$a0 str_const45
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 425
+# Begin Code objectID expression at line number 421
 	move	$a0 $s0
 	bne	$a0 $zero label19
 	la	$a0 str_const0
-	li	$t1 425
+	li	$t1 421
 	jal	_dispatch_abort
 label19:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 426
-# Begin Code string const expression at line number 426
+# Begin Code disptach expression at line number 422
+# Begin Code string const expression at line number 422
 	la	$a0 str_const46
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 426
+# Begin Code objectID expression at line number 422
 	move	$a0 $s0
 	bne	$a0 $zero label20
 	la	$a0 str_const0
-	li	$t1 426
+	li	$t1 422
 	jal	_dispatch_abort
 label20:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 427
-# Begin Code string const expression at line number 427
+# Begin Code disptach expression at line number 423
+# Begin Code string const expression at line number 423
 	la	$a0 str_const47
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 427
+# Begin Code objectID expression at line number 423
 	move	$a0 $s0
 	bne	$a0 $zero label21
 	la	$a0 str_const0
-	li	$t1 427
+	li	$t1 423
 	jal	_dispatch_abort
 label21:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 428
-# Begin Code string const expression at line number 428
+# Begin Code disptach expression at line number 424
+# Begin Code string const expression at line number 424
 	la	$a0 str_const48
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 428
+# Begin Code objectID expression at line number 424
 	move	$a0 $s0
 	bne	$a0 $zero label22
 	la	$a0 str_const0
-	li	$t1 428
+	li	$t1 424
 	jal	_dispatch_abort
 label22:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 429
-# Begin Code string const expression at line number 429
+# Begin Code disptach expression at line number 425
+# Begin Code string const expression at line number 425
 	la	$a0 str_const23
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 429
+# Begin Code objectID expression at line number 425
 	move	$a0 $s0
 	bne	$a0 $zero label23
 	la	$a0 str_const0
-	li	$t1 429
+	li	$t1 425
 	jal	_dispatch_abort
 label23:
 	lw	$t1 8($a0)
@@ -1970,16 +1980,16 @@ Main.gen_code:
 	move	$fp $sp
 	addiu	$sp $sp -76
 	move	$s0 $a0
-# Begin Code let expression at line number 434
-# Begin Code disptach expression at line number 434
-# Begin Code new with type at line number 434
+# Begin Code let expression at line number 430
+# Begin Code disptach expression at line number 430
+# Begin Code new with type at line number 430
 	la	$a0 LambdaListRef_protObj
 	jal	Object.copy
 	jal	LambdaListRef_init
 # End Code new with type LambdaListRef
 	bne	$a0 $zero label24
 	la	$a0 str_const0
-	li	$t1 434
+	li	$t1 430
 	jal	_dispatch_abort
 label24:
 	lw	$t1 8($a0)
@@ -1987,185 +1997,185 @@ label24:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 -12($fp)
-# Begin Code block epression at line number 435
-# Begin Code disptach expression at line number 436
-# Begin Code string const expression at line number 436
+# Begin Code block epression at line number 431
+# Begin Code disptach expression at line number 432
+# Begin Code string const expression at line number 432
 	la	$a0 str_const49
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 436
+# Begin Code objectID expression at line number 432
 	move	$a0 $s0
 	bne	$a0 $zero label25
 	la	$a0 str_const0
-	li	$t1 436
+	li	$t1 432
 	jal	_dispatch_abort
 label25:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 437
-# Begin Code objectID expression at line number 437
+# Begin Code disptach expression at line number 433
+# Begin Code objectID expression at line number 433
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label26
 	la	$a0 str_const0
-	li	$t1 437
+	li	$t1 433
 	jal	_dispatch_abort
 label26:
 	lw	$t1 8($a0)
 	lw	$t1 28($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 438
-# Begin Code string const expression at line number 438
+# Begin Code disptach expression at line number 434
+# Begin Code string const expression at line number 434
 	la	$a0 str_const50
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 438
+# Begin Code objectID expression at line number 434
 	move	$a0 $s0
 	bne	$a0 $zero label27
 	la	$a0 str_const0
-	li	$t1 438
+	li	$t1 434
 	jal	_dispatch_abort
 label27:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 439
-# Begin Code string const expression at line number 439
+# Begin Code disptach expression at line number 435
+# Begin Code string const expression at line number 435
 	la	$a0 str_const51
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 439
+# Begin Code objectID expression at line number 435
 	move	$a0 $s0
 	bne	$a0 $zero label28
 	la	$a0 str_const0
-	li	$t1 439
+	li	$t1 435
 	jal	_dispatch_abort
 label28:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 440
-# Begin Code objectID expression at line number 440
+# Begin Code disptach expression at line number 436
+# Begin Code objectID expression at line number 436
 	move	$a0 $s0
 	bne	$a0 $zero label29
 	la	$a0 str_const0
-	li	$t1 440
+	li	$t1 436
 	jal	_dispatch_abort
 label29:
 	lw	$t1 8($a0)
 	lw	$t1 56($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 441
-# Begin Code objectID expression at line number 441
+# Begin Code disptach expression at line number 437
+# Begin Code objectID expression at line number 437
 	move	$a0 $s0
 	bne	$a0 $zero label30
 	la	$a0 str_const0
-	li	$t1 441
+	li	$t1 437
 	jal	_dispatch_abort
 label30:
 	lw	$t1 8($a0)
 	lw	$t1 60($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 442
-# Begin Code string const expression at line number 442
+# Begin Code disptach expression at line number 438
+# Begin Code string const expression at line number 438
 	la	$a0 str_const52
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 442
+# Begin Code objectID expression at line number 438
 	move	$a0 $s0
 	bne	$a0 $zero label31
 	la	$a0 str_const0
-	li	$t1 442
+	li	$t1 438
 	jal	_dispatch_abort
 label31:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 443
-# Begin Code string const expression at line number 443
+# Begin Code disptach expression at line number 439
+# Begin Code string const expression at line number 439
 	la	$a0 str_const53
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 443
+# Begin Code objectID expression at line number 439
 	move	$a0 $s0
 	bne	$a0 $zero label32
 	la	$a0 str_const0
-	li	$t1 443
+	li	$t1 439
 	jal	_dispatch_abort
 label32:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 444
-# Begin Code new with type at line number 444
+# Begin Code disptach expression at line number 440
+# Begin Code new with type at line number 440
 	la	$a0 VarList_protObj
 	jal	Object.copy
 	jal	VarList_init
 # End Code new with type VarList
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 444
+# Begin Code objectID expression at line number 440
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 444
+# Begin Code objectID expression at line number 440
 # Loading paramter object into ACC
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label33
 	la	$a0 str_const0
-	li	$t1 444
+	li	$t1 440
 	jal	_dispatch_abort
 label33:
 	lw	$t1 8($a0)
 	lw	$t1 40($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 445
-# Begin Code string const expression at line number 445
+# Begin Code disptach expression at line number 441
+# Begin Code string const expression at line number 441
 	la	$a0 str_const54
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 445
+# Begin Code objectID expression at line number 441
 	move	$a0 $s0
 	bne	$a0 $zero label34
 	la	$a0 str_const0
-	li	$t1 445
+	li	$t1 441
 	jal	_dispatch_abort
 label34:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code loop expression at line number 446
+# Begin Code loop expression at line number 442
 label35:
-# Begin Code comp expression at line number 446
-# Begin Code disptach expression at line number 446
-# Begin Code objectID expression at line number 446
+# Begin Code comp expression at line number 442
+# Begin Code disptach expression at line number 442
+# Begin Code objectID expression at line number 442
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label37
 	la	$a0 str_const0
-	li	$t1 446
+	li	$t1 442
 	jal	_dispatch_abort
 label37:
 	lw	$t1 8($a0)
@@ -2182,15 +2192,15 @@ label39:
 # End Code comp expression.
 	lw	$t1 12($a0)
 	beq	$t1 $zero label36
-# Begin Code let expression at line number 447
-# Begin Code disptach expression at line number 447
-# Begin Code objectID expression at line number 447
+# Begin Code let expression at line number 443
+# Begin Code disptach expression at line number 443
+# Begin Code objectID expression at line number 443
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label40
 	la	$a0 str_const0
-	li	$t1 447
+	li	$t1 443
 	jal	_dispatch_abort
 label40:
 	lw	$t1 8($a0)
@@ -2198,15 +2208,15 @@ label40:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 -16($fp)
-# Begin Code let expression at line number 448
-# Begin Code disptach expression at line number 448
-# Begin Code objectID expression at line number 448
+# Begin Code let expression at line number 444
+# Begin Code disptach expression at line number 444
+# Begin Code objectID expression at line number 444
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label41
 	la	$a0 str_const0
-	li	$t1 448
+	li	$t1 444
 	jal	_dispatch_abort
 label41:
 	lw	$t1 8($a0)
@@ -2214,15 +2224,15 @@ label41:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 -20($fp)
-# Begin Code let expression at line number 449
-# Begin Code disptach expression at line number 449
-# Begin Code objectID expression at line number 449
+# Begin Code let expression at line number 445
+# Begin Code disptach expression at line number 445
+# Begin Code objectID expression at line number 445
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label42
 	la	$a0 str_const0
-	li	$t1 449
+	li	$t1 445
 	jal	_dispatch_abort
 label42:
 	lw	$t1 8($a0)
@@ -2230,47 +2240,47 @@ label42:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 -24($fp)
-# Begin Code block epression at line number 450
-# Begin Code disptach expression at line number 451
-# Begin Code objectID expression at line number 451
+# Begin Code block epression at line number 446
+# Begin Code disptach expression at line number 447
+# Begin Code objectID expression at line number 447
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label43
 	la	$a0 str_const0
-	li	$t1 451
+	li	$t1 447
 	jal	_dispatch_abort
 label43:
 	lw	$t1 8($a0)
 	lw	$t1 36($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 452
-# Begin Code objectID expression at line number 452
+# Begin Code disptach expression at line number 448
+# Begin Code objectID expression at line number 448
 # Loading local object into ACC
 	lw	$a0 -24($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 452
+# Begin Code objectID expression at line number 448
 # Loading local object into ACC
 	lw	$a0 -16($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 452
+# Begin Code objectID expression at line number 448
 # Loading local object into ACC
 	lw	$a0 -12($fp)
 # End Code objectID expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 452
+# Begin Code objectID expression at line number 448
 # Loading local object into ACC
 	lw	$a0 -20($fp)
 # End Code objectID expression.
 	bne	$a0 $zero label44
 	la	$a0 str_const0
-	li	$t1 452
+	li	$t1 448
 	jal	_dispatch_abort
 label44:
 	lw	$t1 8($a0)
@@ -2285,17 +2295,17 @@ label44:
 label36:
 	li	$a0 0
 # End Code loop expression.
-# Begin Code disptach expression at line number 455
-# Begin Code string const expression at line number 455
+# Begin Code disptach expression at line number 451
+# Begin Code string const expression at line number 451
 	la	$a0 str_const50
 # End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 455
+# Begin Code objectID expression at line number 451
 	move	$a0 $s0
 	bne	$a0 $zero label45
 	la	$a0 str_const0
-	li	$t1 455
+	li	$t1 451
 	jal	_dispatch_abort
 label45:
 	lw	$t1 8($a0)
@@ -2320,14 +2330,14 @@ Main.main:
 	move	$fp $sp
 	addiu	$sp $sp -224
 	move	$s0 $a0
-# Begin Code block epression at line number 460
-# Begin Code disptach expression at line number 461
-# Begin Code disptach expression at line number 461
-# Begin Code objectID expression at line number 461
+# Begin Code block epression at line number 456
+# Begin Code disptach expression at line number 457
+# Begin Code disptach expression at line number 457
+# Begin Code objectID expression at line number 457
 	move	$a0 $s0
 	bne	$a0 $zero label46
 	la	$a0 str_const0
-	li	$t1 461
+	li	$t1 457
 	jal	_dispatch_abort
 label46:
 	lw	$t1 8($a0)
@@ -2336,9 +2346,87 @@ label46:
 # End Code disptach expression.
 	bne	$a0 $zero label47
 	la	$a0 str_const0
-	li	$t1 461
+	li	$t1 457
 	jal	_dispatch_abort
 label47:
+	lw	$t1 8($a0)
+	lw	$t1 28($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 458
+# Begin Code string const expression at line number 458
+	la	$a0 str_const1
+# End Code string const expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 458
+	move	$a0 $s0
+	bne	$a0 $zero label48
+	la	$a0 str_const0
+	li	$t1 458
+	jal	_dispatch_abort
+label48:
+	lw	$t1 8($a0)
+	lw	$t1 12($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 459
+# Begin Code disptach expression at line number 459
+# Begin Code objectID expression at line number 459
+	move	$a0 $s0
+	bne	$a0 $zero label49
+	la	$a0 str_const0
+	li	$t1 459
+	jal	_dispatch_abort
+label49:
+	lw	$t1 8($a0)
+	lw	$t1 44($t1)
+	jalr		$t1
+# End Code disptach expression.
+	bne	$a0 $zero label50
+	la	$a0 str_const0
+	li	$t1 459
+	jal	_dispatch_abort
+label50:
+	lw	$t1 8($a0)
+	lw	$t1 28($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 460
+# Begin Code string const expression at line number 460
+	la	$a0 str_const1
+# End Code string const expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 460
+	move	$a0 $s0
+	bne	$a0 $zero label51
+	la	$a0 str_const0
+	li	$t1 460
+	jal	_dispatch_abort
+label51:
+	lw	$t1 8($a0)
+	lw	$t1 12($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 461
+# Begin Code disptach expression at line number 461
+# Begin Code objectID expression at line number 461
+	move	$a0 $s0
+	bne	$a0 $zero label52
+	la	$a0 str_const0
+	li	$t1 461
+	jal	_dispatch_abort
+label52:
+	lw	$t1 8($a0)
+	lw	$t1 48($t1)
+	jalr		$t1
+# End Code disptach expression.
+	bne	$a0 $zero label53
+	la	$a0 str_const0
+	li	$t1 461
+	jal	_dispatch_abort
+label53:
 	lw	$t1 8($a0)
 	lw	$t1 28($t1)
 	jalr		$t1
@@ -2351,103 +2439,25 @@ label47:
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 462
 	move	$a0 $s0
-	bne	$a0 $zero label48
-	la	$a0 str_const0
-	li	$t1 462
-	jal	_dispatch_abort
-label48:
-	lw	$t1 8($a0)
-	lw	$t1 12($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 463
-# Begin Code disptach expression at line number 463
-# Begin Code objectID expression at line number 463
-	move	$a0 $s0
-	bne	$a0 $zero label49
-	la	$a0 str_const0
-	li	$t1 463
-	jal	_dispatch_abort
-label49:
-	lw	$t1 8($a0)
-	lw	$t1 44($t1)
-	jalr		$t1
-# End Code disptach expression.
-	bne	$a0 $zero label50
-	la	$a0 str_const0
-	li	$t1 463
-	jal	_dispatch_abort
-label50:
-	lw	$t1 8($a0)
-	lw	$t1 28($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 464
-# Begin Code string const expression at line number 464
-	la	$a0 str_const1
-# End Code string const expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 464
-	move	$a0 $s0
-	bne	$a0 $zero label51
-	la	$a0 str_const0
-	li	$t1 464
-	jal	_dispatch_abort
-label51:
-	lw	$t1 8($a0)
-	lw	$t1 12($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 465
-# Begin Code disptach expression at line number 465
-# Begin Code objectID expression at line number 465
-	move	$a0 $s0
-	bne	$a0 $zero label52
-	la	$a0 str_const0
-	li	$t1 465
-	jal	_dispatch_abort
-label52:
-	lw	$t1 8($a0)
-	lw	$t1 48($t1)
-	jalr		$t1
-# End Code disptach expression.
-	bne	$a0 $zero label53
-	la	$a0 str_const0
-	li	$t1 465
-	jal	_dispatch_abort
-label53:
-	lw	$t1 8($a0)
-	lw	$t1 28($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 466
-# Begin Code string const expression at line number 466
-	la	$a0 str_const1
-# End Code string const expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 466
-	move	$a0 $s0
 	bne	$a0 $zero label54
 	la	$a0 str_const0
-	li	$t1 466
+	li	$t1 462
 	jal	_dispatch_abort
 label54:
 	lw	$t1 8($a0)
 	lw	$t1 12($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 467
-# Begin Code disptach expression at line number 467
-# Begin Code disptach expression at line number 467
-# Begin Code disptach expression at line number 467
-# Begin Code disptach expression at line number 467
-# Begin Code objectID expression at line number 467
+# Begin Code disptach expression at line number 463
+# Begin Code disptach expression at line number 463
+# Begin Code disptach expression at line number 463
+# Begin Code disptach expression at line number 463
+# Begin Code disptach expression at line number 463
+# Begin Code objectID expression at line number 463
 	move	$a0 $s0
 	bne	$a0 $zero label55
 	la	$a0 str_const0
-	li	$t1 467
+	li	$t1 463
 	jal	_dispatch_abort
 label55:
 	lw	$t1 8($a0)
@@ -2456,12 +2466,12 @@ label55:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 467
-# Begin Code objectID expression at line number 467
+# Begin Code disptach expression at line number 463
+# Begin Code objectID expression at line number 463
 	move	$a0 $s0
 	bne	$a0 $zero label56
 	la	$a0 str_const0
-	li	$t1 467
+	li	$t1 463
 	jal	_dispatch_abort
 label56:
 	lw	$t1 8($a0)
@@ -2470,11 +2480,11 @@ label56:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 467
+# Begin Code objectID expression at line number 463
 	move	$a0 $s0
 	bne	$a0 $zero label57
 	la	$a0 str_const0
-	li	$t1 467
+	li	$t1 463
 	jal	_dispatch_abort
 label57:
 	lw	$t1 8($a0)
@@ -2483,12 +2493,12 @@ label57:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 467
-# Begin Code objectID expression at line number 467
+# Begin Code disptach expression at line number 463
+# Begin Code objectID expression at line number 463
 	move	$a0 $s0
 	bne	$a0 $zero label58
 	la	$a0 str_const0
-	li	$t1 467
+	li	$t1 463
 	jal	_dispatch_abort
 label58:
 	lw	$t1 8($a0)
@@ -2497,13 +2507,347 @@ label58:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 467
+# Begin Code objectID expression at line number 463
 	move	$a0 $s0
 	bne	$a0 $zero label59
 	la	$a0 str_const0
-	li	$t1 467
+	li	$t1 463
 	jal	_dispatch_abort
 label59:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 463
+# Begin Code objectID expression at line number 463
+	move	$a0 $s0
+	bne	$a0 $zero label60
+	la	$a0 str_const0
+	li	$t1 463
+	jal	_dispatch_abort
+label60:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 463
+	move	$a0 $s0
+	bne	$a0 $zero label61
+	la	$a0 str_const0
+	li	$t1 463
+	jal	_dispatch_abort
+label61:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 463
+	move	$a0 $s0
+	bne	$a0 $zero label62
+	la	$a0 str_const0
+	li	$t1 463
+	jal	_dispatch_abort
+label62:
+	lw	$t1 8($a0)
+	lw	$t1 52($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 464
+# Begin Code disptach expression at line number 464
+# Begin Code disptach expression at line number 464
+# Begin Code disptach expression at line number 464
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label63
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label63:
+	lw	$t1 8($a0)
+	lw	$t1 44($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 464
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label64
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label64:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label65
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label65:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 464
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label66
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label66:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label67
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label67:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 464
+	move	$a0 $s0
+	bne	$a0 $zero label68
+	la	$a0 str_const0
+	li	$t1 464
+	jal	_dispatch_abort
+label68:
+	lw	$t1 8($a0)
+	lw	$t1 52($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 465
+# Begin Code disptach expression at line number 465
+# Begin Code disptach expression at line number 465
+# Begin Code objectID expression at line number 465
+	move	$a0 $s0
+	bne	$a0 $zero label69
+	la	$a0 str_const0
+	li	$t1 465
+	jal	_dispatch_abort
+label69:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 465
+# Begin Code objectID expression at line number 465
+	move	$a0 $s0
+	bne	$a0 $zero label70
+	la	$a0 str_const0
+	li	$t1 465
+	jal	_dispatch_abort
+label70:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 465
+	move	$a0 $s0
+	bne	$a0 $zero label71
+	la	$a0 str_const0
+	li	$t1 465
+	jal	_dispatch_abort
+label71:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 465
+	move	$a0 $s0
+	bne	$a0 $zero label72
+	la	$a0 str_const0
+	li	$t1 465
+	jal	_dispatch_abort
+label72:
+	lw	$t1 8($a0)
+	lw	$t1 64($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 466
+# Begin Code disptach expression at line number 466
+# Begin Code disptach expression at line number 466
+# Begin Code disptach expression at line number 466
+# Begin Code disptach expression at line number 466
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label73
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label73:
+	lw	$t1 8($a0)
+	lw	$t1 48($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 466
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label74
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label74:
+	lw	$t1 8($a0)
+	lw	$t1 44($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label75
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label75:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 466
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label76
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label76:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label77
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label77:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 466
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label78
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label78:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label79
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label79:
+	lw	$t1 8($a0)
+	lw	$t1 36($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 466
+	move	$a0 $s0
+	bne	$a0 $zero label80
+	la	$a0 str_const0
+	li	$t1 466
+	jal	_dispatch_abort
+label80:
+	lw	$t1 8($a0)
+	lw	$t1 64($t1)
+	jalr		$t1
+# End Code disptach expression.
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code disptach expression at line number 467
+# Begin Code objectID expression at line number 467
+	move	$a0 $s0
+	bne	$a0 $zero label81
+	la	$a0 str_const0
+	li	$t1 467
+	jal	_dispatch_abort
+label81:
+	lw	$t1 8($a0)
+	lw	$t1 40($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code disptach expression at line number 467
+# Begin Code objectID expression at line number 467
+	move	$a0 $s0
+	bne	$a0 $zero label82
+	la	$a0 str_const0
+	li	$t1 467
+	jal	_dispatch_abort
+label82:
+	lw	$t1 8($a0)
+	lw	$t1 44($t1)
+	jalr		$t1
+# End Code disptach expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 467
+	move	$a0 $s0
+	bne	$a0 $zero label83
+	la	$a0 str_const0
+	li	$t1 467
+	jal	_dispatch_abort
+label83:
 	lw	$t1 8($a0)
 	lw	$t1 36($t1)
 	jalr		$t1
@@ -2513,343 +2857,9 @@ label59:
 # Begin Code disptach expression at line number 467
 # Begin Code objectID expression at line number 467
 	move	$a0 $s0
-	bne	$a0 $zero label60
-	la	$a0 str_const0
-	li	$t1 467
-	jal	_dispatch_abort
-label60:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 467
-	move	$a0 $s0
-	bne	$a0 $zero label61
-	la	$a0 str_const0
-	li	$t1 467
-	jal	_dispatch_abort
-label61:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 467
-	move	$a0 $s0
-	bne	$a0 $zero label62
-	la	$a0 str_const0
-	li	$t1 467
-	jal	_dispatch_abort
-label62:
-	lw	$t1 8($a0)
-	lw	$t1 52($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 468
-# Begin Code disptach expression at line number 468
-# Begin Code disptach expression at line number 468
-# Begin Code disptach expression at line number 468
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label63
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label63:
-	lw	$t1 8($a0)
-	lw	$t1 44($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 468
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label64
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label64:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label65
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label65:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 468
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label66
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label66:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label67
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label67:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 468
-	move	$a0 $s0
-	bne	$a0 $zero label68
-	la	$a0 str_const0
-	li	$t1 468
-	jal	_dispatch_abort
-label68:
-	lw	$t1 8($a0)
-	lw	$t1 52($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 469
-# Begin Code disptach expression at line number 469
-# Begin Code disptach expression at line number 469
-# Begin Code objectID expression at line number 469
-	move	$a0 $s0
-	bne	$a0 $zero label69
-	la	$a0 str_const0
-	li	$t1 469
-	jal	_dispatch_abort
-label69:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 469
-# Begin Code objectID expression at line number 469
-	move	$a0 $s0
-	bne	$a0 $zero label70
-	la	$a0 str_const0
-	li	$t1 469
-	jal	_dispatch_abort
-label70:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 469
-	move	$a0 $s0
-	bne	$a0 $zero label71
-	la	$a0 str_const0
-	li	$t1 469
-	jal	_dispatch_abort
-label71:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 469
-	move	$a0 $s0
-	bne	$a0 $zero label72
-	la	$a0 str_const0
-	li	$t1 469
-	jal	_dispatch_abort
-label72:
-	lw	$t1 8($a0)
-	lw	$t1 64($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 470
-# Begin Code disptach expression at line number 470
-# Begin Code disptach expression at line number 470
-# Begin Code disptach expression at line number 470
-# Begin Code disptach expression at line number 470
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label73
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label73:
-	lw	$t1 8($a0)
-	lw	$t1 48($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 470
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label74
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label74:
-	lw	$t1 8($a0)
-	lw	$t1 44($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label75
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label75:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 470
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label76
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label76:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label77
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label77:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 470
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label78
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label78:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label79
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label79:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 470
-	move	$a0 $s0
-	bne	$a0 $zero label80
-	la	$a0 str_const0
-	li	$t1 470
-	jal	_dispatch_abort
-label80:
-	lw	$t1 8($a0)
-	lw	$t1 64($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code disptach expression at line number 471
-# Begin Code objectID expression at line number 471
-	move	$a0 $s0
-	bne	$a0 $zero label81
-	la	$a0 str_const0
-	li	$t1 471
-	jal	_dispatch_abort
-label81:
-	lw	$t1 8($a0)
-	lw	$t1 40($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 471
-# Begin Code objectID expression at line number 471
-	move	$a0 $s0
-	bne	$a0 $zero label82
-	la	$a0 str_const0
-	li	$t1 471
-	jal	_dispatch_abort
-label82:
-	lw	$t1 8($a0)
-	lw	$t1 44($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
-	move	$a0 $s0
-	bne	$a0 $zero label83
-	la	$a0 str_const0
-	li	$t1 471
-	jal	_dispatch_abort
-label83:
-	lw	$t1 8($a0)
-	lw	$t1 36($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 471
-# Begin Code objectID expression at line number 471
-	move	$a0 $s0
 	bne	$a0 $zero label84
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label84:
 	lw	$t1 8($a0)
@@ -2858,11 +2868,11 @@ label84:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label85
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label85:
 	lw	$t1 8($a0)
@@ -2871,12 +2881,12 @@ label85:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 471
-# Begin Code objectID expression at line number 471
+# Begin Code disptach expression at line number 467
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label86
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label86:
 	lw	$t1 8($a0)
@@ -2885,11 +2895,11 @@ label86:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label87
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label87:
 	lw	$t1 8($a0)
@@ -2898,12 +2908,12 @@ label87:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 472
-# Begin Code objectID expression at line number 472
+# Begin Code disptach expression at line number 468
+# Begin Code objectID expression at line number 468
 	move	$a0 $s0
 	bne	$a0 $zero label88
 	la	$a0 str_const0
-	li	$t1 472
+	li	$t1 468
 	jal	_dispatch_abort
 label88:
 	lw	$t1 8($a0)
@@ -2912,11 +2922,11 @@ label88:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label89
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label89:
 	lw	$t1 8($a0)
@@ -2925,12 +2935,12 @@ label89:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 472
-# Begin Code objectID expression at line number 472
+# Begin Code disptach expression at line number 468
+# Begin Code objectID expression at line number 468
 	move	$a0 $s0
 	bne	$a0 $zero label90
 	la	$a0 str_const0
-	li	$t1 472
+	li	$t1 468
 	jal	_dispatch_abort
 label90:
 	lw	$t1 8($a0)
@@ -2939,11 +2949,11 @@ label90:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label91
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label91:
 	lw	$t1 8($a0)
@@ -2952,12 +2962,12 @@ label91:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 472
-# Begin Code objectID expression at line number 472
+# Begin Code disptach expression at line number 468
+# Begin Code objectID expression at line number 468
 	move	$a0 $s0
 	bne	$a0 $zero label92
 	la	$a0 str_const0
-	li	$t1 472
+	li	$t1 468
 	jal	_dispatch_abort
 label92:
 	lw	$t1 8($a0)
@@ -2966,11 +2976,11 @@ label92:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label93
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label93:
 	lw	$t1 8($a0)
@@ -2979,12 +2989,12 @@ label93:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 472
-# Begin Code objectID expression at line number 472
+# Begin Code disptach expression at line number 468
+# Begin Code objectID expression at line number 468
 	move	$a0 $s0
 	bne	$a0 $zero label94
 	la	$a0 str_const0
-	li	$t1 472
+	li	$t1 468
 	jal	_dispatch_abort
 label94:
 	lw	$t1 8($a0)
@@ -2993,11 +3003,11 @@ label94:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label95
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label95:
 	lw	$t1 8($a0)
@@ -3006,12 +3016,12 @@ label95:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 472
-# Begin Code objectID expression at line number 472
+# Begin Code disptach expression at line number 468
+# Begin Code objectID expression at line number 468
 	move	$a0 $s0
 	bne	$a0 $zero label96
 	la	$a0 str_const0
-	li	$t1 472
+	li	$t1 468
 	jal	_dispatch_abort
 label96:
 	lw	$t1 8($a0)
@@ -3020,11 +3030,11 @@ label96:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label97
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label97:
 	lw	$t1 8($a0)
@@ -3033,26 +3043,26 @@ label97:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 471
+# Begin Code objectID expression at line number 467
 	move	$a0 $s0
 	bne	$a0 $zero label98
 	la	$a0 str_const0
-	li	$t1 471
+	li	$t1 467
 	jal	_dispatch_abort
 label98:
 	lw	$t1 8($a0)
 	lw	$t1 64($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label99
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label99:
 	lw	$t1 8($a0)
@@ -3061,13 +3071,13 @@ label99:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label100
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label100:
 	lw	$t1 8($a0)
@@ -3076,12 +3086,12 @@ label100:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label101
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label101:
 	lw	$t1 8($a0)
@@ -3090,11 +3100,11 @@ label101:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label102
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label102:
 	lw	$t1 8($a0)
@@ -3103,11 +3113,11 @@ label102:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label103
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label103:
 	lw	$t1 8($a0)
@@ -3116,13 +3126,13 @@ label103:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label104
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label104:
 	lw	$t1 8($a0)
@@ -3131,13 +3141,13 @@ label104:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 473
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label105
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label105:
 	lw	$t1 8($a0)
@@ -3146,12 +3156,12 @@ label105:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code disptach expression at line number 473
-# Begin Code objectID expression at line number 473
+# Begin Code disptach expression at line number 469
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label106
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label106:
 	lw	$t1 8($a0)
@@ -3160,11 +3170,11 @@ label106:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label107
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label107:
 	lw	$t1 8($a0)
@@ -3173,11 +3183,11 @@ label107:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label108
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label108:
 	lw	$t1 8($a0)
@@ -3186,11 +3196,11 @@ label108:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label109
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label109:
 	lw	$t1 8($a0)
@@ -3199,18 +3209,18 @@ label109:
 # End Code disptach expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 473
+# Begin Code objectID expression at line number 469
 	move	$a0 $s0
 	bne	$a0 $zero label110
 	la	$a0 str_const0
-	li	$t1 473
+	li	$t1 469
 	jal	_dispatch_abort
 label110:
 	lw	$t1 8($a0)
 	lw	$t1 64($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code int const expression at line number 474
+# Begin Code int const expression at line number 470
 	la	$a0 int_const1
 # End Code int const expression.
 # End Code block epression.
@@ -3741,6 +3751,8 @@ App.init:
 	lw	$a0 8($fp)
 # End Code objectID expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 281
 # Begin Code objectID expression at line number 281
@@ -3748,6 +3760,8 @@ App.init:
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 282
 	move	$a0 $s0
@@ -4306,6 +4320,8 @@ Lambda.init:
 	lw	$a0 8($fp)
 # End Code objectID expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 208
 # Begin Code objectID expression at line number 208
@@ -4313,6 +4329,8 @@ Lambda.init:
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 209
 	move	$a0 $s0
@@ -4967,6 +4985,8 @@ Variable.init:
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 159
 	move	$a0 $s0
@@ -5634,6 +5654,8 @@ LambdaListRef.reset:
 	la	$a0 int_const1
 # End Code int const expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 86
 # Begin Code new with type at line number 86
@@ -5642,6 +5664,8 @@ LambdaListRef.reset:
 	jal	LambdaList_init
 # End Code new with type LambdaList
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 87
 	move	$a0 $s0
@@ -5697,6 +5721,8 @@ label220:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 93
 # Begin Code plus expression at line number 93
@@ -5716,6 +5742,8 @@ label220:
 	sw	$t2 12($a0)
 # End Code plus expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code sub expression at line number 94
 # Begin Code objectID expression at line number 94
@@ -5767,6 +5795,8 @@ label221:
 	jalr		$t1
 # End Code disptach expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 100
 	move	$a0 $s0
@@ -5893,6 +5923,8 @@ LambdaListNE.init:
 	lw	$a0 16($fp)
 # End Code objectID expression.
 	sw	$a0 20($s0)
+	addiu	$a1 $s0 5
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 68
 # Begin Code objectID expression at line number 68
@@ -5900,6 +5932,8 @@ LambdaListNE.init:
 	lw	$a0 12($fp)
 # End Code objectID expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 69
 # Begin Code objectID expression at line number 69
@@ -5907,6 +5941,8 @@ LambdaListNE.init:
 	lw	$a0 8($fp)
 # End Code objectID expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 70
 # Begin Code objectID expression at line number 70
@@ -5914,6 +5950,8 @@ LambdaListNE.init:
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	sw	$a0 24($s0)
+	addiu	$a1 $s0 6
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 71
 	move	$a0 $s0
@@ -6210,6 +6248,8 @@ VarListNE.init:
 	lw	$a0 8($fp)
 # End Code objectID expression.
 	sw	$a0 12($s0)
+	addiu	$a1 $s0 3
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 35
 # Begin Code objectID expression at line number 35
@@ -6217,6 +6257,8 @@ VarListNE.init:
 	lw	$a0 4($fp)
 # End Code objectID expression.
 	sw	$a0 16($s0)
+	addiu	$a1 $s0 4
+	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code objectID expression at line number 35
 	move	$a0 $s0

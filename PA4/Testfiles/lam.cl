@@ -386,26 +386,22 @@ class Main inherits Term {
     {
       out_string("beta-reduce: ");
       e.print_self();
-      let done : Bool <- false,
-          new_expr : Expr in
+      let done : Bool <- false, new_expr : Expr in
         {
-	  while (not done) loop
-	    {
-	      new_expr <- e.beta();
-	      if (new_expr = e) then
-		done <- true
-	      else
-		{
-		  e <- new_expr;
-		  out_string(" =>\n");
-		  e.print_self();
-		}
-	      fi;
-	    }
-          pool;
-	  out_string("\n");
-          e;
-	};
+	         while (not done) loop
+	           {
+	             new_expr <- e.beta();
+	             if (new_expr = e) 
+                then done <- true
+	             else {
+		              e <- new_expr;
+		               out_string(" =>\n");
+		               e.print_self();
+		            } fi;
+	             } pool;
+	           out_string("\n");
+             e;
+	     };
     }
   };
 
