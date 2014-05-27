@@ -1560,16 +1560,16 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   /* first we initialize the parent class, so long as we are not Object */
   if (strcmp(curr_class->name->get_string(), Object->get_string()) != 0) {
     CgenNodeP parent = curr_class->get_parentnd();
-    char* parent_init_label = generate_init_label_for_class(parent);
+    char* parent_init_label = generate_init_label_for_class(parent->name);
     emit_jal(parent_init_label, str); // note the parent init will place the object back into ACC. it is the same object as SELF. 
   }
 
   Features attributes = class_attributes->lookup(curr_class->name);
-  for (int i = feats->first(); feats->more(i); i = feats->next(i)) {
+  for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
     Feature curr_attr = attributes->nth(i);
     int offset = curr_class->envr->lookup(curr_attr->get_name())->offset;
     if (offset != i + DEFAULT_OBJFIELDS) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
-    if (strcmp(curr_feat->get_expr()->get_type_name(), "no_expr") != 0) {
+    if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
       emit_store(ACC, offset, SELF, str);
     }
@@ -1577,7 +1577,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
 
   emit_addiu(SP, SP, bytes_for_locals, str); //move SP up over bytes for locals. 
   emit_load(RA, RESTORE_RA_OFFSET, SP, str); //Restore the value of RA from the stack
-  emit_load(SELF, RESTORE_SELF_OFFSET, SP, STR); //Restore the value of SELF
+  emit_load(SELF, RESTORE_SELF_OFFSET, SP, str); //Restore the value of SELF
   emit_load(FP, RESTORE_FP_OFFSET, SP, str); //Restore the value of FP
   emit_addiu(SP, SP, NUM_REGISTERS_SAVED_BY_CALLER * WORD_SIZE, str); //Move SP up by the number of saved registers. There are no params to init, so that is all we move SP by.
   emit_return(str); 
@@ -1586,9 +1586,9 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   str << "# End Emmitting code to generate initializer method for " << curr_class->name->get_string() << endl;
 }
 
-char* generate_init_label_for_class(Symbol curr_class) {
-  char* class_name = curr_class->name->get_string();
-  char *result = malloc(strlen(class_name)+strlen(CLASSINIT_SUFFIX)+1);//+1 for the zero-terminator
+char* CgenClassTable::generate_init_label_for_class(Symbol curr_class) {
+  char* class_name = curr_class->get_string();
+  char *result = (char*)malloc(strlen(class_name)+strlen(CLASSINIT_SUFFIX)+1);//+1 for the zero-terminator
   strcpy(result, class_name);
   strcat(result, CLASSINIT_SUFFIX);
   return result;
@@ -1864,8 +1864,6 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   s << "# Begin Code assign expression at line number " << get_line_number() << endl;
   expr->code(s, temp_start, envr, table, curr_class); // value of this expression is now in ACC. 
 
-  // NM: value of the expression being assigned to an object is in $a0
-
   var_loc* loc = envr->lookup(name);
   
   int offset = loc->offset;
@@ -1892,20 +1890,38 @@ int assign_class::compute_max_locals() {
 // Static disaptch code gen. Very similiar to dispatch code gen, only now
 // we know the type to dispatch to at compile time. 
 //
+// NM: for each parameter, push that parameter on the stack after evaluating it
+// NM: 
+// NM: should look something like this for each expression:
+// NM: 
+// NM: <code for expression>      # result stored in $a0
+// NM: sw $a0 0($sp)              # put the result at $sp
+// NM: addiu $sp $sp -4           # move $sp
+//  
+// NM: If $a0 is null, keep going and go into the abort code
+//
+// NM: Here, the object is void. :(
+// NM: 
+// NM: Code should look something like this:
+// NM: 
+// NM: lw $a0 str_constX
+// NM: li $T1 Y
+// NM: jal _dispatch_abort
+//
+// NM: Here, the object is not void. Yay!
+// NM: 
+// NM: Code should look something like this:
+// NM: 
+// NM: labelZ:
+// NM: lw $t1 8($a0)    # read in the dispatch table from e0
+// NM: lw $t1 B($t1)    # read in the correct method from the dispatch table
+// NM: jalr $t1         # jump to method def
+//
 ////////////////////////////////////////////////////////////////////////////////
 void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code static dispatch expression at line number " << get_line_number() <<  endl;
-  int num_params = actual->len();
+  int num_params = actual->len();   // actual is list of formal params
   
-
-  // NM: for each parameter, push that parameter on the stack after evaluating it
-  // NM: 
-  // NM: should look something like this for each expression:
-  // NM: 
-  // NM: <code for expression>      # result stored in $a0
-  // NM: sw $a0 0($sp)              # put the result at $sp
-  // NM: addiu $sp $sp -4           # move $sp
-
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
@@ -1915,49 +1931,31 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
   // NM: Evaluate e0 -> the result is stored in $a0
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
   int bypass_abort_label = table->label_id; table->label_id++;
-  
-  // NM: If $a0 is null, keep going and go into the abort code
 
   emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
   
-  // NM: Here, the object is void. :(
-  // NM: 
-  // NM: Code should look something like this:
-  // NM: 
-  // NM: lw $a0 str_constX
-  // NM: li $T1 Y
-  // NM: jal _dispatch_abort
-
   /* here we output the abort routine. Good dispatch will jump over this */
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // load the immediate value of the line number into T1;
-  emit_jal(DISPATCH_ABORT, s);
-
-  // NM: Here, the object is not void. Yay!
-  // NM: 
-  // NM: Code should look something like this:
-  // NM: 
-  // NM: labelZ:
-  // NM: lw $t1 8($a0)    # read in the dispatch table from e0
-  // NM: lw $t1 B($t1)    # read in the correct method from the dispatch table
-  // NM: jalr $t1         # jump to method def
+  emit_jal(DISPATCH_ABORT, s);  
 
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
-  char* dispatch_label = generate_dispatch_table_label_for_class(type_name);
+  char* dispatch_label = table->generate_dispatch_table_label_for_class(type_name);
+
+  if (cgen_debug)  cout << "Statically dispatching to disptab " << dispatch_label << endl;
   emit_load_address(T1, dispatch_label, s); 
  
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, type_name);
 
-  
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
   s << "# End Code static dispatch expression." << endl;
 }
 
-char* generate_dispatch_table_label_for_class(Symbol curr_class) {
-  char* class_name = curr_class->name->get_string();
-  char *result = malloc(strlen(class_name)+strlen(DISPTAB_SUFFIX)+1);//+1 for the zero-terminator
+char* CgenClassTable::generate_dispatch_table_label_for_class(Symbol curr_class) {
+  char* class_name = curr_class->get_string();
+  char *result = (char *)malloc(strlen(class_name)+strlen(DISPTAB_SUFFIX)+1);//+1 for the zero-terminator
   strcpy(result, class_name);
   strcat(result, DISPTAB_SUFFIX);
   return result;
@@ -2001,6 +1999,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
     emit_push(ACC, s);
   }
+  // these will be added to the environment in the method def
 
   /* ** GETTING THE OBJECT UPON WHICH WE DISPATCH ** */
 
@@ -2022,6 +2021,8 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   /* if we get to here in the code, then the dispatch is valid */
   emit_label_def(bypass_abort_label, s);
   emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
+  
+  // Need the type name to find the offset in the disptab
   if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) e0_type = curr_class->name;
   
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
@@ -2053,13 +2054,20 @@ void cond_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   table->label_id++;
   int end_label = table->label_id;
   table->label_id++;
+
+  // Evaluate predicate
   pred->code(s, temp_start, envr, table, curr_class); // evaluate the predicate. Branch to false if false. Otherwise fall through to true. 
   emit_load(T2, BOOL_VAL_OFFSET, ACC, s); // store the value of the boolen in a temporary register. 
-  emit_beq(T2, ZERO, false_label, s); // if the boolean is false (0), jump to the false label and execute the else->expr. 
+  emit_beqz(T2, false_label, s); // if the boolean is false (0), jump to the false label and execute the else->expr. 
+  
+  // Then
   then_exp->code(s, temp_start, envr, table, curr_class); // if the pred is true, evaluate the then expression. Result now stored in ACC
   emit_branch(end_label, s); // jump over the false branch and return with the value of then_expr in ACC. 
+  
+  // Else
   emit_label_def(false_label, s); // output the false label. 
   else_exp->code(s, temp_start, envr, table, curr_class); // if the predicate is false, evaluate the else expression. Result now stored in ACC. 
+  
   emit_label_def(end_label, s); // the end of the expression. Result is in ACC. 
   s << "# End Code cond expression." << endl;
 }
@@ -2086,16 +2094,21 @@ int cond_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code loop expression at line number " << get_line_number() << endl;
-  int loop_begin_label = table->label_id;
-  table->label_id++;
-  int loop_end_label = table->label_id;
-  table->label_id++;
+  int loop_begin_label = table->label_id; table->label_id++;
+  int loop_end_label = table->label_id;   table->label_id++;
+
   emit_label_def(loop_begin_label, s); // this is the start of the loop
+  
+  // predicate
   pred->code(s, temp_start, envr, table, curr_class); // evaluate the loop predicate. Result stored in ACC. Note, result is a BOOL object. Need to get the value of the bool. 
   emit_load(T1, BOOL_VAL_OFFSET, ACC, s); // load the value of the Bool object returned by the predicate into T1. 
-  emit_beq(T1, ZERO, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
+  emit_beqz(T1, loop_end_label, s); // if the predicate evaluates to false, jump to the end branch. otherwise, evaluate the loop body.
+  
+  // body
   body->code(s, temp_start, envr, table, curr_class);
   emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
+  
+  // end
   emit_label_def(loop_end_label, s); // this is the end of the loop label
   emit_load_imm(ACC, VOID, s); // void is returned when the loop terminates. 
   s << "# End Code loop expression." << endl;
@@ -2114,14 +2127,13 @@ int loop_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code typecase expression at line number " << get_line_number() <<  endl;
+  
+  // evaluate the expression
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
-  int local_offset_to_e0 = temp_start; temp_start++; 
-  emit_store(ACC, (-1)*local_offset_to_e0, FP, s); // store value of e0 on the stack. 
-  //emit_move(T3, ACC, s); // move the pointer to e0 object into T3. T3 now contains pointer to e0 object.
+  emit_push(ACC, s);
 
   int success_label = table->label_id; table->label_id++;
   int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
-
   int curr_branch_label = table->label_id; table->label_id++; // a current label in the case struct. 
 
   /* check for void e0 */
@@ -2130,35 +2142,45 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   emit_load_imm(T1, get_line_number(), s); // line number in T1
   emit_jal(CASE_ABORT2, s); // abort with _case_abort2
 
-  for (int i = 0; i < cases->len(); i++) { // i is the index in the sorted_tags array
+  // e0 is valid (ie not void)
+  // i is the index in the sorted_branch_class_tags array-- it keeps track of 
+  // which class should come next
+  for (int i = 0; i < cases->len(); i++) { 
+    // j is the index in the actual branches array -- we iterate through with j
+    // to find the case that corresponds with the next class in the sorted array
     for (int j = cases->first(); cases->more(j); j = cases->next(j)) {
       Symbol curr_branch_type = cases->nth(j)->get_type_decl();
       int curr_tag = *(table->name_to_tag->lookup(curr_branch_type));
+
+      // we end up printing out all branches, in order of tag.
+      // if the current branch is the next one in the tag order 
       if (sorted_branch_class_tags[i] == curr_tag) {
         envr->enterscope(); // each branch gets its own scope. 
 
         emit_label_def(curr_branch_label, s); // set the label of the current branch. 
         curr_branch_label = table->label_id++;
-        emit_load(T3, (-1)*local_offset_to_e0, FP, s); // move value of e0 saved on stack into T3.
-        emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
+
+        emit_load(T1, 1, SP, s);              // we pushed e0 on the stack, now load e0 into $t1
+        emit_load(T2, TAG_OFFSET, T1, s);     // put the tag of e0 into $t2
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
 
         emit_blti(T2, curr_tag, curr_branch_label, s);
         emit_bgti(T2, tag_of_lowest_child, curr_branch_label, s); 
-        
+
         // if we get here in the assembly, then this is the branch we evaluate. 
         // first, add the branch identifier to the enviornment. 
         var_loc* loc = new var_loc;
         loc->context = LOCAL_CONTEXT;
-        if (temp_start < 0) {
-           cout << "Out of local space. This should never happen." << endl;
-        }
+
         loc->offset = temp_start;
+
+        // add to environment
         envr->addid(cases->nth(j)->get_id(), loc);
-        emit_store(T3, (-1)*loc->offset, FP, s); // now bind the value of e0 to the identifier of this branch
-        // finally, evaluate the epression of this branch, with the value of e0 boud to the identifier of this branch. 
-        cases->nth(j)->get_branch_expr()->code(s, temp_start + 1, envr, table, curr_class);
+        emit_store(T1, loc->offset, FP, s);
+
+        // $t1 could get overwritten here, but we don't care cause $t1 isn't accessed below
+        cases->nth(j)->get_branch_expr()->code(s, temp_start -1, envr, table, curr_class);
 
         emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success. 
         envr->exitscope(); // leave the branch scope. 
@@ -2166,15 +2188,14 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
       }
     }
   }
-  emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
-  emit_load_address(ACC, CLASSNAMETAB, s); // move the address of the class_nameTab into ACC.
-  emit_load(T2, TAG_OFFSET, T3, s); // load the tag number of the class of e0 into T2. T2 now contains the tag of the current class. 
-  emit_load_imm(T1, WORD_SIZE, s); // load 4 into T1
-  emit_mul(T2, T2, T1, s); // T1 contains the immediate 4. T2 contains the offset in the table. Need to move forward by word size. 
-  emit_addu(ACC, ACC, T2, s); // add offset contained in T2 to the address of the class_nameTab in ACC. store result in ACC. ACC now contains the address of the string constant that contains the name of the class of e0. 
-  emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
 
+  emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
+  // TODO: need to pass params to case_abort
+  emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
   emit_label_def(success_label, s); // jumps to here on successful evaluation of case, bypassing the _case_abort
+
+  // clean up the stack!
+  emit_addiu(SP, SP, WORD_SIZE, s);
   s << "# End Code typecase expression." << endl;
 }
 
@@ -2272,25 +2293,27 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
     if (table->is_int_str_bool(type_decl)) {
+      // TODO: check this
       s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
       emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
     } else {
+      // if it's not an int, str, or bool, make it void
       emit_move(ACC, ZERO, s);
     }
+
+  // else: evaluate assignment
   } else {
     init->code(s, temp_start, envr, table, curr_class); // otherwise, the intialization of the new variable being declared is the value of the init, which is stored in ACC if we evaluate init. 
   }
 
    var_loc* loc = new var_loc;
    loc->context = LOCAL_CONTEXT;
-   if (temp_start < 0) {
-     cout << "Out of local space. This should never happen." << endl;
-   }
+
    loc->offset = temp_start;
    envr->addid(identifier, loc);
 
-   emit_store(ACC, (-1)*loc->offset, FP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
-   body->code(s, temp_start + 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
+   emit_store(ACC, loc->offset, FP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
+   body->code(s, temp_start - 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
 
    envr->exitscope(); // once we finish processing this let, we don't want to know about the locally declared variable anymore. 
     s << "# End Code let expression." << endl;
@@ -2312,11 +2335,14 @@ int let_class::compute_max_locals() {
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code plus expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now the correct return value. 
@@ -2337,11 +2363,14 @@ int plus_class::compute_max_locals() {
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code sub expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  
   emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
@@ -2362,11 +2391,14 @@ int sub_class::compute_max_locals() {
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code mul expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  
   emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
@@ -2387,11 +2419,14 @@ int mul_class::compute_max_locals() {
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code divide expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+  
   emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
   emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
@@ -2414,9 +2449,13 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
-  emit_store(T1, (-1)*temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
-  emit_jal(OBJECT_DOT_COPY, s); // copy the int obect in ACC as a result of evaluating e1. 
-  emit_load(T1, (-1)*temp_start, FP, s); // load the neg'd value saved on stack back into T1
+  
+  emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
+  emit_jal(OBJECT_DOT_COPY, s); 
+  // copy the int obect in ACC as a result of evaluating e1. Object.copy doesnt 
+  // use T1, but incase it changes, we store value of t1 inlocal space, as T1 is not a callee saved register 
+  
+  emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
   emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
   s << "# End Code neg expression." << endl;
 }
@@ -2433,18 +2472,24 @@ int neg_class::compute_max_locals() {
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code lt expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+  
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
+  
   emit_blt(T1, ACC, true_label, s); // if (T1 = e1) < (ACC = e2), then branch to true label. else fall through
   emit_load_bool(ACC, falsebool, s); // load the false Bool object into ACC. 
   emit_branch(return_label, s); // jump to the return label. 
+  
   emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
+  
   emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
   s << "# End Code lt expression." << endl;
 }
@@ -2464,15 +2509,19 @@ int lt_class::compute_max_locals() {
 void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code eq expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Result stored in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_move(T2, ACC, s); // now e2 is in T2. e1 in T1, e2 in T2
   int return_label = table->label_id; table->label_id++;
   emit_load_bool(ACC, truebool, s); // load the true Bool object into ACC
+  
   emit_beq(T1, T2, return_label, s); // if the pointers in T1 and T2 are the same, then the objects are equal. We loaded the true Bool in ACC, so we simply return. 
   emit_load_bool(A1, falsebool, s); // if T1 and T2 are not equal, then we need to run the equality test. This method in the trap-handler expects the true Bool in ACC and false Bool in A1
   emit_jal(EQUALITY_TEST, s); // jump to the equality test. This will return the true Bool in ACC if T1 and T2 are equal according to semanctics of COOL, or the false Bool in ACC if they are not. 
+  
   emit_label_def(return_label, s); // the return label if the objects have same pointer. 
   s << "# End Code eq expression." << endl;
 }
@@ -2491,18 +2540,24 @@ int eq_class::compute_max_locals() {
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code leq expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
-  emit_store(ACC, (-1)*temp_start, FP, s); // store e1 on stack
-  e2->code(s, temp_start + 1, envr, table, curr_class); // evaluate e2. Value in ACC
-  emit_load(T1, (-1)*temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ACC, temp_start, FP, s); // store e1 on stack
+  
+  e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  
   emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+  
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
+  
   emit_bleq(T1, ACC, true_label, s); // if (T1 = e1) <= (ACC = e2), then branch to true label. else fall through
   emit_load_bool(ACC, falsebool, s); // load the false Bool object into ACC. 
   emit_branch(return_label, s); // jump to the return label. 
+  
   emit_label_def(true_label, s); // if e1 < e2, the control flow will jump to here. 
   emit_load_bool(ACC, truebool, s); // load the true bool into ACC. 
+  
   emit_label_def(return_label, s); // the false branch will jump here, skipping the loading of the bool. 
   s << "# End Code leq expression." << endl;
 }
@@ -2525,9 +2580,11 @@ void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
    emit_fetch_int(T2, ACC, s); // get the int value out of the bool. 
    int bool_is_false = table->label_id; table->label_id++;
    int return_label = table->label_id; table->label_id++;
+   
    emit_beqz(T2, bool_is_false, s); // jump to the bool_is_false label if the value in T2 is equal to 0. The value in T2 is the value of the e1 Bool. 0 indicates a false Bool. 
    emit_load_bool(ACC, truebool, s); // if we fall through the beqz, then the e1 Bool value is not 0, so it is a true Bool. so we load the false Bool into ACC, and jump to the return label. 
    emit_branch(return_label, s); // jump to the return label, with the true Bool loaded in ACC. 
+   
    emit_label_def(bool_is_false, s); // jump to this label if e1 is a false bool. 
    emit_load_bool(ACC, truebool, s); // load the opposite of false, so the true Bool into ACC. 
    emit_label_def(return_label, s);  // return label. 
@@ -2592,7 +2649,6 @@ int bool_const_class::compute_max_locals() {
 // Use that typname to generate the labels for the prototype and 
 // init methods we want the code to access. 
 //
-// TODO, need to handle SELF_TYPE TODO
 //
 // We will then need to call the copy method, passing the address of this
 // prototype object, and then call the init method, this time passing
@@ -2635,8 +2691,13 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
     emit_load_address(T2, CLASSOBJTAB, s); // move the address of the object table into T2
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
-    emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy. 
+    emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
+
+    emit_store(T2, temp_start, FP, s);
+
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
+
+    emit_load(T2, temp_start, FP, s);
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
 
@@ -2718,9 +2779,7 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   }
 
   var_loc* loc = envr->lookup(name);
-  if (loc == NULL) {
-    cout << "Could not find identifier " << name->get_string() << ". This should never happen." << endl;
-  }
+  
   int offset = loc->offset;
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     s << "# Loading attribute object into ACC" << endl;
@@ -2730,7 +2789,7 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
     emit_load(ACC, offset, FP, s);
   } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
     s << "# Loading local object into ACC" << endl;
-    emit_load(ACC, (-1)*offset, FP, s);
+    emit_load(ACC, offset, FP, s);
   }
   s << "# End Code objectID expression." << endl;
 }

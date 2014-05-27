@@ -69,6 +69,10 @@ private:
    void dump_class_methods(Symbol class_name, ostream& s);
    void dump_classes_attributes(ostream& s);
    void dump_class_attributes(Symbol class_name, ostream& s);
+
+
+   char* generate_init_label_for_class(Symbol curr_class);
+   
 public:
 
    List<CgenNode> *nds;
@@ -95,6 +99,7 @@ public:
    int* get_sorted_tags(Cases cases, CgenClassTableP table); 
    int get_lowest_child_tag_for_class(Symbol curr_branch_type);
    CgenNodeP get_class_node_for_type(Symbol type);
+   char* generate_dispatch_table_label_for_class(Symbol curr_class);
 };
 
 

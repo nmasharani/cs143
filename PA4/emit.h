@@ -23,6 +23,7 @@
 ///////////////////////////////////////////////////////////////////////
 #define NUM_REGISTERS_SAVED_BY_CALLER 3
 #define OFFSET_OF_TEMP_START_FROM_FP -1
+#define NUM_SAVED_REGS_ABOVE_FP 2
 #define VOID 0
 
 /* Ofsets are relative to SP */
