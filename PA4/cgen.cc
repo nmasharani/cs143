@@ -1565,7 +1565,12 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   }
 
   Features attributes = class_attributes->lookup(curr_class->name);
-  for (int i = attributes->first(); attributes->more(i); i = attributes->next(i)) {
+  Features parent_attributes = class_attributes->lookup(curr_class->get_parentnd()->name);
+  int start_index = 0;
+  if (parent_attributes) {
+    start_index = parent_attributes->len();
+  }
+  for (int i = start_index; attributes->more(i); i = attributes->next(i)) {
     Feature curr_attr = attributes->nth(i);
     int offset = curr_class->envr->lookup(curr_attr->get_name())->offset;
     if (offset != i + DEFAULT_OBJFIELDS) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
