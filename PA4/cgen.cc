@@ -1575,6 +1575,8 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     }
   }
 
+  emit_move(ACC, SELF, str);
+
   emit_addiu(SP, SP, bytes_for_locals, str); //move SP up over bytes for locals. 
   emit_load(RA, RESTORE_RA_OFFSET, SP, str); //Restore the value of RA from the stack
   emit_load(SELF, RESTORE_SELF_OFFSET, SP, str); //Restore the value of SELF
@@ -1655,14 +1657,14 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   emit_move(FP, SP, str);
   emit_push(RA, str);
   emit_addiu(SP, SP, -1*bytes_for_locals, str); 
+
   emit_move(SELF, ACC, str); 
 
   Formals params = method->get_formals();
   int num_params = params->len();
   for (int i = params->first(); params->more(i); i = params->next(i)) {
     Formal curr_param = params->nth(i);
-    int normalized_index = i - params->first();
-    int offset_from_FP = num_params - normalized_index + NUM_SAVED_REGS_ABOVE_FP;
+    int offset_from_FP = num_params - i + NUM_SAVED_REGS_ABOVE_FP;
     var_loc* loc = new var_loc;
     loc->context = FEATURE_CONTEXT;
     loc->offset = offset_from_FP;
@@ -1670,6 +1672,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   }
 
   method->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); // now the return Object of this expression is in ACC
+
 
   emit_addiu(SP, SP, bytes_for_locals, str);
   emit_load(RA, RESTORE_RA_OFFSET, SP, str);
