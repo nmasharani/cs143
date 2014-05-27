@@ -1585,7 +1585,7 @@ void CgenClassTable::code_init_methods() {
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature curr_feat) {
   str << "# Begin Emitting code for method " << curr_feat->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-
+  str << GLOBAL << curr_class->name << "." <<  curr_feat->get_name() << endl;
   emit_method_ref(curr_class->name, curr_feat->get_name(), str); str << LABEL;
   int num_locals_needed = curr_feat->get_expr()->compute_max_locals();
   num_locals_needed += NUM_REGISTERS_SAVED_BY_CALLER; // add 3 for the registers we will push
@@ -2191,7 +2191,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value. 
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now the correct return value. 
   s << "# End Code plus expression." << endl;
 }
 
@@ -2294,7 +2294,7 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 }
 
 int neg_class::compute_max_locals() {
-  return e1->compute_max_locals();
+  return e1->compute_max_locals() + 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2420,7 +2420,7 @@ void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_l
   //
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
-  emit_load_int(ACC,inttable.lookup_string(token->get_string()),s);
+  emit_load_int(ACC,inttable.lookup_string(token->get_string()), s);
   s << "# End Code int const expression." << endl;
 }
 
@@ -2555,7 +2555,7 @@ int isvoid_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void no_expr_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code no_epression expression at line number " << get_line_number() << endl;
-  emit_move(ACC, ZERO, s); 
+  //emit_move(ACC, ZERO, s); 
   s << "# End Code no_epression expression." << endl;
   return;
 }

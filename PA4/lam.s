@@ -1283,11 +1283,9 @@ App_init:
 	move	$s0 $a0
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
@@ -1307,11 +1305,9 @@ Lambda_init:
 	move	$s0 $a0
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
@@ -1331,7 +1327,6 @@ Variable_init:
 	move	$s0 $a0
 	jal	Expr_init
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	move	$a0 $s0
 	addiu	$sp $sp 16
@@ -1370,7 +1365,6 @@ LambdaListRef_init:
 # End Code int const expression.
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
@@ -1390,18 +1384,14 @@ LambdaListNE_init:
 	move	$s0 $a0
 	jal	LambdaList_init
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 20($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 24($s0)
 	move	$a0 $s0
@@ -1437,11 +1427,9 @@ VarListNE_init:
 	move	$s0 $a0
 	jal	VarList_init
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 # Begin Code no_epression expression at line number 0
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
@@ -1477,10 +1465,8 @@ String_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
-	move	$a0 $zero
 # End Code no_epression expression.
 # Begin Code no_epression expression at line number 21
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 16($s0)
 	move	$a0 $s0
@@ -1500,7 +1486,6 @@ Bool_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 	move	$a0 $s0
@@ -1520,7 +1505,6 @@ Int_init:
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code no_epression expression at line number 21
-	move	$a0 $zero
 # End Code no_epression expression.
 	sw	$a0 12($s0)
 	move	$a0 $s0
@@ -1562,6 +1546,7 @@ Object_init:
 	jr	$ra	
 # End Emmitting code to generate initializer method for Object
 # Begin Emitting code for method beta_reduce
+	.globl	Main.beta_reduce
 Main.beta_reduce:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -1754,6 +1739,7 @@ label12:
 	jr	$ra	
 # End Emitting code for method beta_reduce
 # Begin Emitting code for method eval_class
+	.globl	Main.eval_class
 Main.eval_class:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -1822,6 +1808,7 @@ label15:
 	jr	$ra	
 # End Emitting code for method eval_class
 # Begin Emitting code for method closure_class
+	.globl	Main.closure_class
 Main.closure_class:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -1975,6 +1962,7 @@ label23:
 	jr	$ra	
 # End Emitting code for method closure_class
 # Begin Emitting code for method gen_code
+	.globl	Main.gen_code
 Main.gen_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -2324,6 +2312,7 @@ label45:
 	jr	$ra	
 # End Emitting code for method gen_code
 # Begin Emitting code for method main
+	.globl	Main.main
 Main.main:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3233,6 +3222,7 @@ label110:
 	jr	$ra	
 # End Emitting code for method main
 # Begin Emitting code for method var
+	.globl	Term.var
 Term.var:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3276,6 +3266,7 @@ label111:
 	jr	$ra	
 # End Emitting code for method var
 # Begin Emitting code for method lam
+	.globl	Term.lam
 Term.lam:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3325,6 +3316,7 @@ label112:
 	jr	$ra	
 # End Emitting code for method lam
 # Begin Emitting code for method app
+	.globl	Term.app
 Term.app:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3374,6 +3366,7 @@ label113:
 	jr	$ra	
 # End Emitting code for method app
 # Begin Emitting code for method i
+	.globl	Term.i
 Term.i:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3433,6 +3426,7 @@ label115:
 	jr	$ra	
 # End Emitting code for method i
 # Begin Emitting code for method k
+	.globl	Term.k
 Term.k:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3532,6 +3526,7 @@ label119:
 	jr	$ra	
 # End Emitting code for method k
 # Begin Emitting code for method s
+	.globl	Term.s
 Term.s:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3731,6 +3726,7 @@ label128:
 	jr	$ra	
 # End Emitting code for method s
 # Begin Emitting code for method init
+	.globl	App.init
 App.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3764,6 +3760,7 @@ App.init:
 	jr	$ra	
 # End Emitting code for method init
 # Begin Emitting code for method print_self
+	.globl	App.print_self
 App.print_self:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3862,6 +3859,7 @@ label133:
 	jr	$ra	
 # End Emitting code for method print_self
 # Begin Emitting code for method beta
+	.globl	App.beta
 App.beta:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -3979,6 +3977,7 @@ label134:
 	jr	$ra	
 # End Emitting code for method beta
 # Begin Emitting code for method substitute
+	.globl	App.substitute
 App.substitute:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4086,6 +4085,7 @@ label143:
 	jr	$ra	
 # End Emitting code for method substitute
 # Begin Emitting code for method gen_code
+	.globl	App.gen_code
 App.gen_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4291,6 +4291,7 @@ label153:
 	jr	$ra	
 # End Emitting code for method gen_code
 # Begin Emitting code for method init
+	.globl	Lambda.init
 Lambda.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4324,6 +4325,7 @@ Lambda.init:
 	jr	$ra	
 # End Emitting code for method init
 # Begin Emitting code for method print_self
+	.globl	Lambda.print_self
 Lambda.print_self:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4405,6 +4407,7 @@ label157:
 	jr	$ra	
 # End Emitting code for method print_self
 # Begin Emitting code for method beta
+	.globl	Lambda.beta
 Lambda.beta:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4422,6 +4425,7 @@ Lambda.beta:
 	jr	$ra	
 # End Emitting code for method beta
 # Begin Emitting code for method apply
+	.globl	Lambda.apply
 Lambda.apply:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4463,6 +4467,7 @@ label158:
 	jr	$ra	
 # End Emitting code for method apply
 # Begin Emitting code for method substitute
+	.globl	Lambda.substitute
 Lambda.substitute:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4568,6 +4573,7 @@ label160:
 	jr	$ra	
 # End Emitting code for method substitute
 # Begin Emitting code for method gen_code
+	.globl	Lambda.gen_code
 Lambda.gen_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4714,6 +4720,7 @@ label169:
 	jr	$ra	
 # End Emitting code for method gen_code
 # Begin Emitting code for method gen_closure_code
+	.globl	Lambda.gen_closure_code
 Lambda.gen_closure_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4945,6 +4952,7 @@ label184:
 	jr	$ra	
 # End Emitting code for method gen_closure_code
 # Begin Emitting code for method init
+	.globl	Variable.init
 Variable.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -4971,6 +4979,7 @@ Variable.init:
 	jr	$ra	
 # End Emitting code for method init
 # Begin Emitting code for method print_self
+	.globl	Variable.print_self
 Variable.print_self:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5004,6 +5013,7 @@ label185:
 	jr	$ra	
 # End Emitting code for method print_self
 # Begin Emitting code for method beta
+	.globl	Variable.beta
 Variable.beta:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5021,6 +5031,7 @@ Variable.beta:
 	jr	$ra	
 # End Emitting code for method beta
 # Begin Emitting code for method substitute
+	.globl	Variable.substitute
 Variable.substitute:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5065,6 +5076,7 @@ label187:
 	jr	$ra	
 # End Emitting code for method substitute
 # Begin Emitting code for method gen_code
+	.globl	Variable.gen_code
 Variable.gen_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5292,6 +5304,7 @@ label201:
 	jr	$ra	
 # End Emitting code for method gen_code
 # Begin Emitting code for method print_self
+	.globl	Expr.print_self
 Expr.print_self:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5340,6 +5353,7 @@ label209:
 	jr	$ra	
 # End Emitting code for method print_self
 # Begin Emitting code for method beta
+	.globl	Expr.beta
 Expr.beta:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5388,6 +5402,7 @@ label211:
 	jr	$ra	
 # End Emitting code for method beta
 # Begin Emitting code for method substitute
+	.globl	Expr.substitute
 Expr.substitute:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5436,6 +5451,7 @@ label213:
 	jr	$ra	
 # End Emitting code for method substitute
 # Begin Emitting code for method gen_code
+	.globl	Expr.gen_code
 Expr.gen_code:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5484,6 +5500,7 @@ label215:
 	jr	$ra	
 # End Emitting code for method gen_code
 # Begin Emitting code for method isNil
+	.globl	LambdaListRef.isNil
 LambdaListRef.isNil:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5513,6 +5530,7 @@ label216:
 	jr	$ra	
 # End Emitting code for method isNil
 # Begin Emitting code for method headE
+	.globl	LambdaListRef.headE
 LambdaListRef.headE:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5542,6 +5560,7 @@ label217:
 	jr	$ra	
 # End Emitting code for method headE
 # Begin Emitting code for method headC
+	.globl	LambdaListRef.headC
 LambdaListRef.headC:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5571,6 +5590,7 @@ label218:
 	jr	$ra	
 # End Emitting code for method headC
 # Begin Emitting code for method headN
+	.globl	LambdaListRef.headN
 LambdaListRef.headN:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5600,6 +5620,7 @@ label219:
 	jr	$ra	
 # End Emitting code for method headN
 # Begin Emitting code for method reset
+	.globl	LambdaListRef.reset
 LambdaListRef.reset:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5633,6 +5654,7 @@ LambdaListRef.reset:
 	jr	$ra	
 # End Emitting code for method reset
 # Begin Emitting code for method add
+	.globl	LambdaListRef.add
 LambdaListRef.add:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5720,6 +5742,7 @@ label220:
 	jr	$ra	
 # End Emitting code for method add
 # Begin Emitting code for method removeHead
+	.globl	LambdaListRef.removeHead
 LambdaListRef.removeHead:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5756,6 +5779,7 @@ label221:
 	jr	$ra	
 # End Emitting code for method removeHead
 # Begin Emitting code for method isNil
+	.globl	LambdaListNE.isNil
 LambdaListNE.isNil:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5774,6 +5798,7 @@ LambdaListNE.isNil:
 	jr	$ra	
 # End Emitting code for method isNil
 # Begin Emitting code for method headE
+	.globl	LambdaListNE.headE
 LambdaListNE.headE:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5793,6 +5818,7 @@ LambdaListNE.headE:
 	jr	$ra	
 # End Emitting code for method headE
 # Begin Emitting code for method headC
+	.globl	LambdaListNE.headC
 LambdaListNE.headC:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5812,6 +5838,7 @@ LambdaListNE.headC:
 	jr	$ra	
 # End Emitting code for method headC
 # Begin Emitting code for method headN
+	.globl	LambdaListNE.headN
 LambdaListNE.headN:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5831,6 +5858,7 @@ LambdaListNE.headN:
 	jr	$ra	
 # End Emitting code for method headN
 # Begin Emitting code for method tail
+	.globl	LambdaListNE.tail
 LambdaListNE.tail:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5850,6 +5878,7 @@ LambdaListNE.tail:
 	jr	$ra	
 # End Emitting code for method tail
 # Begin Emitting code for method init
+	.globl	LambdaListNE.init
 LambdaListNE.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5897,6 +5926,7 @@ LambdaListNE.init:
 	jr	$ra	
 # End Emitting code for method init
 # Begin Emitting code for method isNil
+	.globl	LambdaList.isNil
 LambdaList.isNil:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5915,6 +5945,7 @@ LambdaList.isNil:
 	jr	$ra	
 # End Emitting code for method isNil
 # Begin Emitting code for method headE
+	.globl	LambdaList.headE
 LambdaList.headE:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5949,6 +5980,7 @@ label222:
 	jr	$ra	
 # End Emitting code for method headE
 # Begin Emitting code for method headC
+	.globl	LambdaList.headC
 LambdaList.headC:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -5983,6 +6015,7 @@ label223:
 	jr	$ra	
 # End Emitting code for method headC
 # Begin Emitting code for method headN
+	.globl	LambdaList.headN
 LambdaList.headN:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6015,6 +6048,7 @@ label224:
 	jr	$ra	
 # End Emitting code for method headN
 # Begin Emitting code for method tail
+	.globl	LambdaList.tail
 LambdaList.tail:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6049,6 +6083,7 @@ label225:
 	jr	$ra	
 # End Emitting code for method tail
 # Begin Emitting code for method add
+	.globl	LambdaList.add
 LambdaList.add:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6101,6 +6136,7 @@ label226:
 	jr	$ra	
 # End Emitting code for method add
 # Begin Emitting code for method isNil
+	.globl	VarListNE.isNil
 VarListNE.isNil:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6119,6 +6155,7 @@ VarListNE.isNil:
 	jr	$ra	
 # End Emitting code for method isNil
 # Begin Emitting code for method head
+	.globl	VarListNE.head
 VarListNE.head:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6138,6 +6175,7 @@ VarListNE.head:
 	jr	$ra	
 # End Emitting code for method head
 # Begin Emitting code for method tail
+	.globl	VarListNE.tail
 VarListNE.tail:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6157,6 +6195,7 @@ VarListNE.tail:
 	jr	$ra	
 # End Emitting code for method tail
 # Begin Emitting code for method init
+	.globl	VarListNE.init
 VarListNE.init:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6190,6 +6229,7 @@ VarListNE.init:
 	jr	$ra	
 # End Emitting code for method init
 # Begin Emitting code for method print
+	.globl	VarListNE.print
 VarListNE.print:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6254,6 +6294,7 @@ label229:
 	jr	$ra	
 # End Emitting code for method print
 # Begin Emitting code for method isNil
+	.globl	VarList.isNil
 VarList.isNil:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6272,6 +6313,7 @@ VarList.isNil:
 	jr	$ra	
 # End Emitting code for method isNil
 # Begin Emitting code for method head
+	.globl	VarList.head
 VarList.head:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6306,6 +6348,7 @@ label230:
 	jr	$ra	
 # End Emitting code for method head
 # Begin Emitting code for method tail
+	.globl	VarList.tail
 VarList.tail:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6340,6 +6383,7 @@ label231:
 	jr	$ra	
 # End Emitting code for method tail
 # Begin Emitting code for method add
+	.globl	VarList.add
 VarList.add:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
@@ -6380,6 +6424,7 @@ label232:
 	jr	$ra	
 # End Emitting code for method add
 # Begin Emitting code for method print
+	.globl	VarList.print
 VarList.print:
 	sw	$fp 0($sp)
 	sw	$s0 -4($sp)
