@@ -2585,7 +2585,7 @@ void comp_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
    int return_label = table->label_id; table->label_id++;
    
    emit_beqz(T2, bool_is_false, s); // jump to the bool_is_false label if the value in T2 is equal to 0. The value in T2 is the value of the e1 Bool. 0 indicates a false Bool. 
-   emit_load_bool(ACC, truebool, s); // if we fall through the beqz, then the e1 Bool value is not 0, so it is a true Bool. so we load the false Bool into ACC, and jump to the return label. 
+   emit_load_bool(ACC, falsebool, s); // if we fall through the beqz, then the e1 Bool value is not 0, so it is a true Bool. so we load the false Bool into ACC, and jump to the return label. 
    emit_branch(return_label, s); // jump to the return label, with the true Bool loaded in ACC. 
    
    emit_label_def(bool_is_false, s); // jump to this label if e1 is a false bool. 

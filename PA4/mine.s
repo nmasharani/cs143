@@ -26,29 +26,11 @@ _MemMgr_COLLECTOR:
 _MemMgr_TEST:
 	.word	0
 	.word	-1
-str_const17:
+str_const15:
 	.word	5
 	.word	5
 	.word	String_dispTab
 	.word	int_const1
-	.byte	0	
-	.align	2
-	.word	-1
-str_const16:
-	.word	5
-	.word	6
-	.word	String_dispTab
-	.word	int_const4
-	.ascii	"Main"
-	.byte	0	
-	.align	2
-	.word	-1
-str_const15:
-	.word	5
-	.word	6
-	.word	String_dispTab
-	.word	int_const4
-	.ascii	"Cons"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -57,7 +39,7 @@ str_const14:
 	.word	6
 	.word	String_dispTab
 	.word	int_const4
-	.ascii	"List"
+	.ascii	"Main"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -65,8 +47,8 @@ str_const13:
 	.word	5
 	.word	6
 	.word	String_dispTab
-	.word	int_const6
-	.ascii	"String"
+	.word	int_const4
+	.ascii	"Cons"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -75,11 +57,29 @@ str_const12:
 	.word	6
 	.word	String_dispTab
 	.word	int_const4
-	.ascii	"Bool"
+	.ascii	"List"
 	.byte	0	
 	.align	2
 	.word	-1
 str_const11:
+	.word	5
+	.word	6
+	.word	String_dispTab
+	.word	int_const6
+	.ascii	"String"
+	.byte	0	
+	.align	2
+	.word	-1
+str_const10:
+	.word	5
+	.word	6
+	.word	String_dispTab
+	.word	int_const4
+	.ascii	"Bool"
+	.byte	0	
+	.align	2
+	.word	-1
+str_const9:
 	.word	5
 	.word	5
 	.word	String_dispTab
@@ -88,7 +88,7 @@ str_const11:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const10:
+str_const8:
 	.word	5
 	.word	5
 	.word	String_dispTab
@@ -97,7 +97,7 @@ str_const10:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const9:
+str_const7:
 	.word	5
 	.word	6
 	.word	String_dispTab
@@ -106,7 +106,7 @@ str_const9:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const8:
+str_const6:
 	.word	5
 	.word	7
 	.word	String_dispTab
@@ -115,7 +115,7 @@ str_const8:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const7:
+str_const5:
 	.word	5
 	.word	7
 	.word	String_dispTab
@@ -124,7 +124,7 @@ str_const7:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const6:
+str_const4:
 	.word	5
 	.word	7
 	.word	String_dispTab
@@ -133,30 +133,12 @@ str_const6:
 	.byte	0	
 	.align	2
 	.word	-1
-str_const5:
+str_const3:
 	.word	5
 	.word	8
 	.word	String_dispTab
 	.word	int_const9
 	.ascii	"<basic class>"
-	.byte	0	
-	.align	2
-	.word	-1
-str_const4:
-	.word	5
-	.word	9
-	.word	String_dispTab
-	.word	int_const10
-	.ascii	"list is not nil\n"
-	.byte	0	
-	.align	2
-	.word	-1
-str_const3:
-	.word	5
-	.word	8
-	.word	String_dispTab
-	.word	int_const11
-	.ascii	"list is nil\n"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -182,28 +164,16 @@ str_const0:
 	.word	5
 	.word	9
 	.word	String_dispTab
-	.word	int_const12
+	.word	int_const10
 	.ascii	"Testfiles/list.cl"
 	.byte	0	
 	.align	2
-	.word	-1
-int_const12:
-	.word	3
-	.word	4
-	.word	Int_dispTab
-	.word	17
-	.word	-1
-int_const11:
-	.word	3
-	.word	4
-	.word	Int_dispTab
-	.word	12
 	.word	-1
 int_const10:
 	.word	3
 	.word	4
 	.word	Int_dispTab
-	.word	16
+	.word	17
 	.word	-1
 int_const9:
 	.word	3
@@ -324,14 +294,14 @@ Object_protObj:
 	.word	3
 	.word	Object_dispTab
 class_nameTab:
+	.word	str_const7
+	.word	str_const8
+	.word	str_const14
 	.word	str_const9
 	.word	str_const10
-	.word	str_const16
 	.word	str_const11
 	.word	str_const12
 	.word	str_const13
-	.word	str_const14
-	.word	str_const15
 class_objTab:
 	.word	Object_protObj
 	.word	Object_init
@@ -711,7 +681,7 @@ Main.main:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
-	addiu	$sp $sp -44
+	addiu	$sp $sp -24
 	move	$s0 $a0
 # Begin Code block epression at line number 127
 # Begin Code assign expression at line number 128
@@ -816,7 +786,7 @@ label16:
 # End Code disptach expression.
 	lw	$t2 12($a0)
 	beqz	$t2 label17
-	la	$a0 bool_const0
+	la	$a0 bool_const1
 	b	label18
 label17:
 	la	$a0 bool_const1
@@ -825,103 +795,35 @@ label18:
 	lw	$t1 12($a0)
 	beqz	$t1 label15
 # Begin Code block epression at line number 130
-# Begin Code cond expression at line number 131
-# Begin Code eq expression at line number 131
 # Begin Code disptach expression at line number 131
 # Begin Code objectID expression at line number 131
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	bne	$a0 $zero label21
-	la	$a0 str_const0
-	li	$t1 131
-	jal	_dispatch_abort
-label21:
-	lw	$t1 8($a0)
-	lw	$t1 12($t1)
-	jalr		$t1
-# End Code disptach expression.
-	sw	$a0 -4($fp)
-# Begin Code bool expression at line number 131
-	la	$a0 bool_const1
-# End Code bool expression.
-	lw	$t1 -4($fp)
-	move	$t2 $a0
-	la	$a0 bool_const1
-	beq	$t1 $t2 label22
-	la	$a1 bool_const0
-	jal	equality_test
-label22:
-# End Code eq expression.
-	lw	$t2 12($a0)
-	beqz	$t2 label19
-# Begin Code disptach expression at line number 131
-# Begin Code string const expression at line number 131
-	la	$a0 str_const3
-# End Code string const expression.
 	sw	$a0 0($sp)
 	addiu	$sp $sp -4
 # Begin Code objectID expression at line number 131
 	move	$a0 $s0
-	bne	$a0 $zero label23
+	bne	$a0 $zero label19
 	la	$a0 str_const0
 	li	$t1 131
 	jal	_dispatch_abort
-label23:
-	lw	$t1 8($a0)
-	lw	$t1 12($t1)
-	jalr		$t1
-# End Code disptach expression.
-	b	label20
 label19:
-# Begin Code disptach expression at line number 131
-# Begin Code string const expression at line number 131
-	la	$a0 str_const4
-# End Code string const expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 131
-	move	$a0 $s0
-	bne	$a0 $zero label24
-	la	$a0 str_const0
-	li	$t1 131
-	jal	_dispatch_abort
-label24:
 	lw	$t1 8($a0)
-	lw	$t1 12($t1)
+	lw	$t1 28($t1)
 	jalr		$t1
 # End Code disptach expression.
-label20:
-# End Code cond expression.
+# Begin Code assign expression at line number 132
 # Begin Code disptach expression at line number 132
 # Begin Code objectID expression at line number 132
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 132
-	move	$a0 $s0
-	bne	$a0 $zero label25
+	bne	$a0 $zero label20
 	la	$a0 str_const0
 	li	$t1 132
 	jal	_dispatch_abort
-label25:
-	lw	$t1 8($a0)
-	lw	$t1 28($t1)
-	jalr		$t1
-# End Code disptach expression.
-# Begin Code assign expression at line number 133
-# Begin Code disptach expression at line number 133
-# Begin Code objectID expression at line number 133
-# Loading attribute object into ACC
-	lw	$a0 12($s0)
-# End Code objectID expression.
-	bne	$a0 $zero label26
-	la	$a0 str_const0
-	li	$t1 133
-	jal	_dispatch_abort
-label26:
+label20:
 	lw	$t1 8($a0)
 	lw	$t1 20($t1)
 	jalr		$t1
@@ -934,7 +836,7 @@ label15:
 	li	$a0 0
 # End Code loop expression.
 # End Code block epression.
-	addiu	$sp $sp 44
+	addiu	$sp $sp 24
 	lw	$ra 4($sp)
 	lw	$s0 8($sp)
 	lw	$fp 12($sp)
@@ -1078,11 +980,11 @@ List.head:
 # Begin Code disptach expression at line number 35
 # Begin Code objectID expression at line number 35
 	move	$a0 $s0
-	bne	$a0 $zero label27
+	bne	$a0 $zero label21
 	la	$a0 str_const0
 	li	$t1 35
 	jal	_dispatch_abort
-label27:
+label21:
 	lw	$t1 8($a0)
 	lw	$t1 0($t1)
 	jalr		$t1
@@ -1113,11 +1015,11 @@ List.tail:
 # Begin Code disptach expression at line number 40
 # Begin Code objectID expression at line number 40
 	move	$a0 $s0
-	bne	$a0 $zero label28
+	bne	$a0 $zero label22
 	la	$a0 str_const0
 	li	$t1 40
 	jal	_dispatch_abort
-label28:
+label22:
 	lw	$t1 8($a0)
 	lw	$t1 0($t1)
 	jalr		$t1
@@ -1159,11 +1061,11 @@ List.cons:
 	jal	Object.copy
 	jal	Cons_init
 # End Code new with type Cons
-	bne	$a0 $zero label29
+	bne	$a0 $zero label23
 	la	$a0 str_const0
 	li	$t1 50
 	jal	_dispatch_abort
-label29:
+label23:
 	lw	$t1 8($a0)
 	lw	$t1 28($t1)
 	jalr		$t1

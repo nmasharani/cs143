@@ -128,10 +128,12 @@ class Main inherits IO {
 	 mylist <- new List.cons(1).cons(2).cons(3).cons(4).cons(5);
 	 while (not mylist.isNil()) loop
 	    {
+         if (mylist.isNil() = true) then out_string("list is nil\n") else out_string("list is not nil\n") fi;
 	       print_list(mylist);
 	       mylist <- mylist.tail();
 	    }
 	 pool;
+
       }
    };
 
