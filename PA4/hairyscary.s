@@ -143,10 +143,10 @@ str_const1:
 	.word	-1
 str_const0:
 	.word	8
-	.word	10
+	.word	11
 	.word	String_dispTab
 	.word	int_const8
-	.ascii	"Testfiles/hairyscary.cl"
+	.ascii	"./Testfiles/hairyscary.cl"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -154,7 +154,7 @@ int_const8:
 	.word	6
 	.word	4
 	.word	Int_dispTab
-	.word	23
+	.word	25
 	.word	-1
 int_const7:
 	.word	6

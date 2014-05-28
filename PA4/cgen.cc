@@ -2701,11 +2701,8 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
     emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
 
-    emit_store(T2, temp_start, FP, s);
-
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
 
-    emit_load(T2, temp_start, FP, s);
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
 
