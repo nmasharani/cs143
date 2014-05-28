@@ -2692,8 +2692,10 @@ int bool_const_class::compute_max_locals() {
 void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code new with type at line number " << get_line_number() << endl;
   if (strcmp(type_name->get_string(), SELF_TYPE->get_string()) == 0) {
-    
+    // NM: 
     //move the address of the prototype object of the current class into ACC
+
+
     emit_load(T1, TAG_OFFSET, SELF, s); // move the tag of class of the curent object into T1. This will be our index into the class_ObjTab
     emit_load_imm(T2, 8, s); // load 8 into T2
     emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
@@ -2701,11 +2703,8 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
     emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
 
-    emit_store(T2, temp_start, FP, s);
-
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
 
-    emit_load(T2, temp_start, FP, s);
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
 
