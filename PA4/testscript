@@ -1,16 +1,11 @@
 for file in Testfiles/*.cl
 	do
 		echo $file
-		\rm our_output.s
-		\rm their_output.s
-		\rm our_console
-		\rm their_console
-		\rm our_runtime
-		\rm their_runtime
-		./mycoolc -t -o our_output.s $file &> our_console
-		/usr/class/cs143/bin/spim -file our_output.s &> our_runtime
-		/usr/class/cs143/bin/coolc -t -o their_output.s $file &> their_console
-		/usr/class/cs143/bin/spim -file their_output.s &> their_runtime
+
+		./mycoolc -t $file -o our_output.s > our_console
+		/usr/class/cs143/bin/spim -file our_output.s > our_runtime
+		/usr/class/cs143/bin/coolc -t $file -o their_output.s > their_console
+		/usr/class/cs143/bin/spim -file their_output.s > their_runtime
 
 		diff our_runtime their_runtime
 

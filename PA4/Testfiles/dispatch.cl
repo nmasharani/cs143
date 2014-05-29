@@ -1,6 +1,7 @@
 class Main {
 	a : A <- new A;
 	b : B <- new B;
+	c : C <- new C;
 	io : IO <- new IO;
 	main() : SELF_TYPE { 
 		{
@@ -26,6 +27,8 @@ class Main {
 
 			a.test_self_dispatch();
 			b.test_self_dispatch();
+
+			c.test();
 			self;
 		}
 	};
@@ -126,6 +129,31 @@ class B inherits A {
 
 
 			self@A.test_self_dispatch();
+		}
+	};
+};
+
+
+class C {
+	io: IO<- new IO;
+	x : Int <- 5;
+	test() : Int {
+		test_param_order(x, x <- x + 5, x + 2, x <- x + 5, x + 2)
+	};
+
+	test_param_order(a : Int, b : Int, c : Int, d : Int, e : Int) : Int {
+		{
+			io.out_int(a);
+			io.out_string("\n");
+			io.out_int(b);
+			io.out_string("\n");
+			io.out_int(c);
+			io.out_string("\n");
+			io.out_int(d);
+			io.out_string("\n");
+			io.out_int(e);
+			io.out_string("\n");
+			a;
 		}
 	};
 };
