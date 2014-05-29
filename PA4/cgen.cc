@@ -1541,7 +1541,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_push(SELF, str); //push the old SEFL on the stack, move the SP down by 4
   emit_move(FP, SP, str); //move FP down to SP
   emit_push(RA, str); //push the old RA on the stack, just below the new FP. Move SP down by 4
-  null_stack_space(num_locals_needed);
+  null_stack_space(num_locals_needed); //zrero out the preallocated stack
   emit_addiu(SP, SP, -1*bytes_for_locals, str); //move the SP down by the number of locals we need. This sets up the frame for this method.
   emit_move(SELF, ACC, str); // move SELF into ACC. this completes the settup of the frame for this init method 
 
@@ -1661,7 +1661,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   emit_push(SELF, str);
   emit_move(FP, SP, str);
   emit_push(RA, str);
-  null_stack_space(num_locals_needed);
+  null_stack_space(num_locals_needed); 
   emit_addiu(SP, SP, -1*bytes_for_locals, str); 
 
 
@@ -1851,9 +1851,10 @@ CgenNode::CgenNode(Class_ nd, Basicness bstatus, CgenClassTableP ct) :
 // value of expression is the return object in ACC
 // NM: Stack diagram
 // NM: 
-// NM: |       |     <- { vars in this region are parameters }
-// NM: |-------|  <- fp
-// NM: |-------|     <- saved stuff
+// NM: |_______|     <- { vars in this region are parameters }
+//     |       |  <- saved FP, SELF
+// NM: |-------|  <- new fp
+// NM: |-------|     <- saved RA
 // NM: |       |     <- { vars in this region are locals / created in exprs }
 // NM: |-------|  <- sp
 // NM: |       |
@@ -2037,7 +2038,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
   
-  cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
+  if (cgen_debug) cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
   s << "# End Code disptach expression." << endl;
@@ -2116,7 +2117,7 @@ void loop_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   
   // body
   body->code(s, temp_start, envr, table, curr_class);
-  emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicat. 
+  emit_branch(loop_begin_label, s); // after executing th body of the loop, go back and evaluate the predicate. 
   
   // end
   emit_label_def(loop_end_label, s); // this is the end of the loop label
@@ -2140,7 +2141,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   
   // evaluate the expression
   expr->code(s, temp_start, envr, table, curr_class); // e0 object pointer now in ACC
-  emit_push(ACC, s);
+  emit_push(ACC, s); //store ACC on stack. Don't use temp space because this is less confusing and easy to track. Think of it like a param to a dispatch. 
 
   int success_label = table->label_id; table->label_id++;
   int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
@@ -2200,7 +2201,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   }
 
   emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
-  // TODO: need to pass params to case_abort
+  // CASE_ABORT expects the e0 object in ACC. If we do not evaluate a case brach, it will be there.
   emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain object pointe for e0
   emit_label_def(success_label, s); // jumps to here on successful evaluation of case, bypassing the _case_abort
 
@@ -2210,7 +2211,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 }
 
 int typcase_class::compute_max_locals() {
-  int sum = 2; // Need two tempporaries by default. 
+  int sum = 2; // Need two tempporaries by default (1 + 1 for padding ). 
   sum += expr->compute_max_locals();
   for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
     Case curr_case = cases->nth(i);
@@ -2332,7 +2333,7 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 int let_class::compute_max_locals() {
   int num1 = init->compute_max_locals();
   int num2 = body->compute_max_locals();
-  return num1 + num2 + 1;
+  return num1 + num2 + 1; // plus 1 is key. 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
