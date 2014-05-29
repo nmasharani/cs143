@@ -15,20 +15,4 @@ for file in Testfiles/*.cl
 
 	done
 
-for file in valid_testfiles_pa3/*.cl
-	do
-		echo $file
-
-		./mycoolc -t $file -o our_output.s > our_console
-		/usr/class/cs143/bin/spim -file our_output.s > our_runtime
-		/usr/class/cs143/bin/coolc -t $file -o their_output.s > their_console
-		/usr/class/cs143/bin/spim -file their_output.s > their_runtime
-
-		diff our_runtime their_runtime
-
-		echo ""
-		echo "***********************************************************************"
-		echo ""
-
-	done
 
