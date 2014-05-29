@@ -11,7 +11,7 @@ class Main {
 class A {
 	b : B;
 	io : IO <- new IO;
-
+	c: Int <- 42;
 	test() : SELF_TYPE {
 		{
 			b <- new B;
