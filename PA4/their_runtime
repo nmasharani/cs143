@@ -4,6 +4,10 @@ All Rights Reserved.
 See the file README for a full copyright notice.
 Loaded: /usr/class/cs143/lib/trap.handler
 Increasing heap...
-Testfiles/disp_abort.cl:4: Dispatch to void.
-Stats -- #instructions : 162
-         #reads : 22  #writes 21  #branches 28  #other 91
+Increasing heap...
+Increasing heap...
+Increasing heap...
+hello
+hello, world!COOL program successfully executed
+Stats -- #instructions : 541
+         #reads : 104  #writes 79  #branches 106  #other 252
