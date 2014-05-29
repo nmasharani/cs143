@@ -2176,8 +2176,8 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
 
-        emit_blti(T2, curr_tag, curr_branch_label, s);
-        emit_bgti(T2, tag_of_lowest_child, curr_branch_label, s); 
+        emit_blti(T2, curr_tag, curr_branch_label, s); //algorithm determined by studying the reference compiler output. 
+        emit_bgti(T2, tag_of_lowest_child, curr_branch_label, s);  //method determined by studying the reference compiler output. 
 
         // if we get here in the assembly, then this is the branch we evaluate. 
         // first, add the branch identifier to the enviornment. 
@@ -2188,12 +2188,12 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         // add to environment
         envr->addid(cases->nth(j)->get_id(), loc);
-        emit_store(T1, loc->offset, FP, s);
+        emit_store(T1, loc->offset, FP, s); //store the value of e0 at this location identified by the id of the case branch. 
 
         // $t1 could get overwritten here, but we don't care cause $t1 isn't accessed below
-        cases->nth(j)->get_branch_expr()->code(s, temp_start -1, envr, table, curr_class);
+        cases->nth(j)->get_branch_expr()->code(s, temp_start -1, envr, table, curr_class); //return value of case expression is the value of the case expression with value of e0 bound to id of case branch. 
 
-        emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success. 
+        emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success, bypassing the no match case abort. 
         envr->exitscope(); // leave the branch scope. 
         break;
       }
@@ -2304,7 +2304,6 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
     if (table->is_int_str_bool(type_decl)) {
-      // TODO: check this
       s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
       emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
     } else {
@@ -2356,7 +2355,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
 
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now the correct return value. 
+  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now a pointer to a new int object containing the correct return value. 
   s << "# End Code plus expression." << endl;
 }
 
@@ -2488,8 +2487,8 @@ void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   
-  emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
-  emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+  emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
+  emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
   
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
@@ -2556,8 +2555,8 @@ void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   
-  emit_fetch_int(ACC, ACC, s); // get the int value out of the Int object stored in ACC, and place the int value in ACC
-  emit_fetch_int(T1, T1, s); // get the int value out of the Int object stored in T1, and place the int value in T1
+  emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
+  emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
   
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
@@ -2733,7 +2732,7 @@ int new__class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code isvoid expression at line number " << get_line_number() << endl;
-  e1->code(s, temp_start, envr, table, curr_class);
+  e1->code(s, temp_start, envr, table, curr_class); //evaluate e1
   int void_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
   emit_beqz(ACC, void_label, s); // jump to the void label if the value of e1 is void. 
@@ -2797,7 +2796,7 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
     s << "# Loading attribute object into ACC" << endl;
     emit_load(ACC, offset, SELF, s);
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
-    s << "# Loading paramter object into ACC" << endl;
+    s << "# Loading parameter object into ACC" << endl;
     emit_load(ACC, offset, FP, s);
   } else if (strcmp(loc->context, LOCAL_CONTEXT) == 0) {
     s << "# Loading local object into ACC" << endl;
