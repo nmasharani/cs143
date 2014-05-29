@@ -1451,7 +1451,7 @@ void CgenNode::set_parentnd(CgenNodeP p)
 //
 ////////////////////////////////////////////////////////////////////////////////
 void CgenClassTable::initialize_class_enviornment() {
-  cout << "INITIALIZE CLASS ENVIRONMENT\n";
+  if (cgen_debug) cout << "INITIALIZE CLASS ENVIRONMENT\n";
   // For each class
   for(List<CgenNode> *l = nds; l; l = l->tl()) {
     CgenNodeP curr_class = l->hd();
@@ -1665,7 +1665,7 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   emit_addiu(SP, SP, -1*bytes_for_locals, str); 
 
 
-  emit_move(SELF, ACC, str); 
+  emit_move(SELF, ACC, str);  //bind self to the calling object in ACC
 
   Formals params = method->get_formals();
   int num_params = params->len();

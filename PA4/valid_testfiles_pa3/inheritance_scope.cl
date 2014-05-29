@@ -15,8 +15,8 @@ class Two inherits Main {
 };
 
 class Three inherits Main {
-	a: Int;
+	ab: Int;
 	a() : Int { 
-		a <- 5
+		ab <- 5
 	};
 };

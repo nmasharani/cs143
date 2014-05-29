@@ -5,20 +5,20 @@ class Main {
 };
 
 class A {
-	a(s: String) : Int {
+	a(s: String) : Object {
 		s.length()
 	};
 };
 
 class A2 {
-	a(s: String) : String {
+	a(s: String) : Object {
 		s.concat(s)
 	};
 };
 
 
 class A3 {
-	a(s: String, i: Int) : String {
+	a(s: String, i: Int) : Object {
 		s.substr(i, i)
 	};
 };

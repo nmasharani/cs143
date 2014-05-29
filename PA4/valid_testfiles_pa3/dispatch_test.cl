@@ -1,3 +1,9 @@
+class Main {
+	main() : Object {
+		42
+	};
+};
+
 class Test1 {
 	x : Int <- 0;
 	y : Int <- 0;

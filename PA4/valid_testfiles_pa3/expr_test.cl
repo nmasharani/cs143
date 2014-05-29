@@ -1,6 +1,37 @@
 (* A fairly comprehensive test file containing many different expressions. 
  * Excludes dispatch, case, and let statements. *)
 
+class Main {
+	t: Test3 <- new Test3;
+	main() : Object {
+		{
+			t.expr1();
+			
+			t.expr4();
+			t.expr5();
+			
+			t.expr9();
+			t.expr10();
+			t.expr11();
+			t.expr12();
+			t.expr13();
+			t.expr14();
+			t.expr15();
+			t.expr16();
+			t.expr17();
+			t.expr18();
+			t.expr19();
+			t.expr20();
+			t.expr21();
+			t.expr22();
+			t.expr23();
+			t.expr24();
+			t.expr25();
+		}
+		
+	};
+};
+
 class Test3 {
 	x : Int;
 	y : Int <- 0;

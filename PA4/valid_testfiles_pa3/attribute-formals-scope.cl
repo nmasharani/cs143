@@ -1,8 +1,8 @@
 -- formals can be same as attribute
 
-class A{ 
+class Main{ 
 	a: Int;
-	a(a: Int) : Int {
+	main() : Int {
 		42
 	};
 };

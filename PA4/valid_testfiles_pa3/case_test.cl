@@ -1,5 +1,5 @@
-class Test {
-	case_test() : Int {
+class Main {
+	main() : Int {
 		case 1 + 1 of
 			x : Bool => 0;
 			y : Int => 1;
