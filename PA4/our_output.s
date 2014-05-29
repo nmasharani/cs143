@@ -310,6 +310,9 @@ Main_init:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
+	sw	$zero 0($sp)
+	sw	$zero -4($sp)
+	sw	$zero -8($sp)
 	addiu	$sp $sp -12
 	move	$s0 $a0
 	jal	Object_init
@@ -340,6 +343,8 @@ String_init:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
+	sw	$zero 0($sp)
+	sw	$zero -4($sp)
 	addiu	$sp $sp -8
 	move	$s0 $a0
 	jal	Object_init
@@ -360,6 +365,7 @@ Bool_init:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
+	sw	$zero 0($sp)
 	addiu	$sp $sp -4
 	move	$s0 $a0
 	jal	Object_init
@@ -380,6 +386,7 @@ Int_init:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
+	sw	$zero 0($sp)
 	addiu	$sp $sp -4
 	move	$s0 $a0
 	jal	Object_init
@@ -439,6 +446,9 @@ Main.main:
 	move	$fp $sp
 	sw	$ra 0($sp)
 	addiu	$sp $sp -4
+	sw	$zero 0($sp)
+	sw	$zero -4($sp)
+	sw	$zero -8($sp)
 	addiu	$sp $sp -12
 	move	$s0 $a0
 # Begin Code loop expression at line number 5

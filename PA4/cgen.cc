@@ -885,16 +885,6 @@ Symbol formal_class::get_name() { return name; };
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Max helper function. 
-//
-////////////////////////////////////////////////////////////////////////////////
-int max(int num1, int num2) {
-  if (num1 > num2) return num1;
-  return num2;
-}
-
-////////////////////////////////////////////////////////////////////////////////
-//
 // Emits the labels and outlays space for the prototype objects of the
 // program being compiled. 
 //
@@ -1228,9 +1218,6 @@ void CgenClassTable::assign_class_tags(CgenNodeP curr_class) {
 ////////////////////////////////////////////////////////////////////////////////
 CgenClassTable::CgenClassTable(Classes classes, ostream& s) : nds(NULL) , str(s)
 {
-   //stringclasstag = 4;
-   //intclasstag =    2; // see the assign_class_tags function
-   //boolclasstag =   3;
 
    enterscope();
    if (cgen_debug) cout << "Building CgenClassTable" << endl;
@@ -1554,6 +1541,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   emit_push(SELF, str); //push the old SEFL on the stack, move the SP down by 4
   emit_move(FP, SP, str); //move FP down to SP
   emit_push(RA, str); //push the old RA on the stack, just below the new FP. Move SP down by 4
+  null_stack_space(num_locals_needed);
   emit_addiu(SP, SP, -1*bytes_for_locals, str); //move the SP down by the number of locals we need. This sets up the frame for this method.
   emit_move(SELF, ACC, str); // move SELF into ACC. this completes the settup of the frame for this init method 
 
@@ -1573,7 +1561,7 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   for (int i = start_index; attributes->more(i); i = attributes->next(i)) {
     Feature curr_attr = attributes->nth(i);
     int offset = curr_class->envr->lookup(curr_attr->get_name())->offset;
-    if (offset != i + DEFAULT_OBJFIELDS) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
+    if ((offset != i + DEFAULT_OBJFIELDS) && cgen_debug) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
     if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
       emit_store(ACC, offset, SELF, str);
@@ -1617,6 +1605,18 @@ void CgenClassTable::code_init_methods() {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Zeros the preallocated stack to prevent issues with garbage collector
+// seeing bad data. 
+//
+////////////////////////////////////////////////////////////////////////////////
+void CgenClassTable::null_stack_space(int num_locals_needed) {
+  for (int i = 0; i < num_locals_needed; i++) {
+    emit_store(ZERO, -i, SP, str);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // Emits the code for the method method
 // defined in curr_class
 //
@@ -1651,7 +1651,7 @@ void CgenClassTable::code_init_methods() {
 void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   str << "# Begin Emitting code for method " << method->get_name()->get_string() << endl;
   curr_class->envr->enterscope();
-  if(cgen_debug) str << GLOBAL << curr_class->name << "." <<  method->get_name() << endl; //for debugging purposes so that we can see the 
+  if(cgen_debug) str << GLOBAL << curr_class->name << "." <<  method->get_name() << endl; //for debugging purposes so that we can see the method address in spim
   emit_method_ref(curr_class->name, method->get_name(), str); str << LABEL;
 
   int num_locals_needed = method->get_expr()->compute_max_locals();
@@ -1661,7 +1661,9 @@ void CgenClassTable::code_method(CgenNodeP curr_class, Feature method) {
   emit_push(SELF, str);
   emit_move(FP, SP, str);
   emit_push(RA, str);
+  null_stack_space(num_locals_needed);
   emit_addiu(SP, SP, -1*bytes_for_locals, str); 
+
 
   emit_move(SELF, ACC, str); 
 

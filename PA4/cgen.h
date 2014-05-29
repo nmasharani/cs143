@@ -100,6 +100,7 @@ public:
    int get_lowest_child_tag_for_class(Symbol curr_branch_type);
    CgenNodeP get_class_node_for_type(Symbol type);
    char* generate_dispatch_table_label_for_class(Symbol curr_class);
+   void null_stack_space(int num_locals_needed);
 };
 
 
