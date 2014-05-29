@@ -5,9 +5,7 @@ See the file README for a full copyright notice.
 Loaded: /usr/class/cs143/lib/trap.handler
 Increasing heap...
 Increasing heap...
-Increasing heap...
-Increasing heap...
-hello
-hello, world!COOL program successfully executed
-Stats -- #instructions : 541
-         #reads : 104  #writes 79  #branches 106  #other 252
+Hi Sundaram
+COOL program successfully executed
+Stats -- #instructions : 283
+         #reads : 52  #writes 40  #branches 54  #other 137
