@@ -1,25 +1,22 @@
-echo $1
-t=${1%%.*}
-s=${t##*/}
-echo $s.s
-\rm mine_console.txt
-\rm reference_console.txt
-echo ""
-echo "********************"
-echo ""
-echo "compiling: ours"
-./mycoolc -k $file &> mine_console.txt
-echo "running: ours"
-/usr/class/cs143/bin/spim -file $s.s
-echo ""
-echo "********************"
-echo ""
-echo "compiling: ref"
-/usr/class/cs143/bin/coolc -k $file &> reference_console.txt
-echo "running: ref"
-/usr/class/cs143/bin/spim -file $s.s
+for file in Testfiles/*.cl
+	do
+		echo $file
+		\rm our_output.s
+		\rm their_output.s
+		\rm our_console
+		\rm their_console
+		\rm our_runtime
+		\rm their_runtime
+		./mycoolc -t -o our_output.s $file &> our_console
+		/usr/class/cs143/bin/spim -file our_output.s &> our_runtime
+		/usr/class/cs143/bin/coolc -t -o their_output.s $file &> their_console
+		/usr/class/cs143/bin/spim -file their_output.s &> their_runtime
 
+		diff our_runtime their_runtime
 
-echo ""
-echo "***********************************************************************"
-echo ""
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+
+	done
+

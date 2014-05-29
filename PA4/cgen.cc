@@ -2199,7 +2199,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
   emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
   // TODO: need to pass params to case_abort
-  emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain the class Name of the object e0
+  emit_jal(CASE_ABORT, s); // could not find a matching branch, so abort. Only requires that ACC contain object pointe for e0
   emit_label_def(success_label, s); // jumps to here on successful evaluation of case, bypassing the _case_abort
 
   // clean up the stack!
@@ -2703,7 +2703,9 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
     emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
 
+    emit_store(T2, temp_start, FP, s); //store T2 on the stack
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
+    emit_load(T2, temp_start, FP, s); //restore saved value of T2
 
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
@@ -2718,7 +2720,7 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
 }
 
 int new__class::compute_max_locals() {
-  return 0;
+  return 1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
