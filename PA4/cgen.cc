@@ -1891,7 +1891,6 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
     }
   } else {
     emit_store(ACC, offset, FP, s); 
-    emit_store(ZERO, offset, FP, s);
   }
 
   s << "# End Code assign expression." << endl;
@@ -2360,8 +2359,17 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
 
   emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
+  emit_move("$s1", T2, s);
+
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now a pointer to a new int object containing the correct return value. 
+  emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
+
+  //emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  //emit_store(ZERO, temp_start, FP, s);
+  //emit_fetch_int(T2, T1, s);
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T2 into the int val slot of ACC. ACC is now a pointer to a new int object containing the correct return value. 
   s << "# End Code plus expression." << endl;
 }
 
@@ -2389,8 +2397,12 @@ void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
   emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
+  emit_move("$s1", T2, s);
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
   s << "# End Code sub expression." << endl;
 }
 
@@ -2418,8 +2430,18 @@ void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
   emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
+
+  emit_move("$s1", T2, s);
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
+
+
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+  //emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
   s << "# End Code mul expression." << endl;
 }
 
@@ -2447,8 +2469,17 @@ void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
   emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
+
+  emit_move("$s1", T2, s);
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
   emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
+
+
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+  //emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
+  //emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
   s << "# End Code divide expression." << endl;
 }
 
@@ -2468,10 +2499,13 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
-  emit_store(T1, DEFAULT_OBJFIELDS, ACC, s);
+  emit_move("$s1", T1, s);
+
+  //emit_store(T1, DEFAULT_OBJFIELDS, ACC, s);
   
   //emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
   emit_jal(OBJECT_DOT_COPY, s); 
+  emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
   // copy the int obect in ACC as a result of evaluating e1. Object.copy doesnt 
   // use T1, but incase it changes, we store value of t1 inlocal space, as T1 is not a callee saved register 
   
@@ -2719,11 +2753,17 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
     emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
 
-    emit_store(T2, temp_start, FP, s); //store T2 on the stack
+    //emit_store(T2, temp_start, FP, s); //store T2 on the stack
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
-    emit_load(T2, temp_start, FP, s); //restore saved value of T2
-    emit_store(ZERO, temp_start, FP, s);
+    //emit_load(T2, temp_start, FP, s); //restore saved value of T2
+    //emit_store(ZERO, temp_start, FP, s);
 
+    emit_load(T1, TAG_OFFSET, SELF, s); // move the tag of class of the curent object into T1. This will be our index into the class_ObjTab
+    emit_load_imm(T2, 8, s); // load 8 into T2
+    emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
+    emit_load_address(T2, CLASSOBJTAB, s); // move the address of the object table into T2
+    emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
+    //emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
 
