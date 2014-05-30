@@ -319,7 +319,7 @@ branch we see to which the variable conforms.
 
 WHY OUR CODE IS CORRECT:
 
-We believe that our code is most definitly correct. We have poured over all of the COOL documentation, the manual, the support code, and the assignment handouts, and have meticuously written tests cases to test these features. IN all cases, we match the rererence, except in the reporting of increasing heap... and PC number when reporting the division by 0 error. Both of these cases were deemed acceptable by the course staff. 
+We believe that our code is most definitly correct. We have poured over all of the COOL documentation, the manual, the support code, and the assignment handouts, and have meticuously written tests cases to test these features. Furthermore, we have written test casees for every issue posted about on piazza, and our solution exhbiits the desired behavior as specified by both the course staff and the COOL documentation. IN all cases, we match the rererence, except in the reporting of increasing heap... and PC number when reporting the division by 0 error. Both of these cases were deemed acceptable by the course staff. 
 
 Because our code is written according to the COOL manual specifcation, we know it to be correct, and feel very strongly in our submission. 
 
