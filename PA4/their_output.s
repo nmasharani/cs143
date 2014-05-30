@@ -17,13 +17,13 @@ _string_tag:
 	.word	4
 	.globl	_MemMgr_INITIALIZER
 _MemMgr_INITIALIZER:
-	.word	_GenGC_Init
+	.word	_NoGC_Init
 	.globl	_MemMgr_COLLECTOR
 _MemMgr_COLLECTOR:
-	.word	_GenGC_Collect
+	.word	_NoGC_Collect
 	.globl	_MemMgr_TEST
 _MemMgr_TEST:
-	.word	0
+	.word	1
 	.word	-1
 str_const8:
 	.word	4
@@ -290,14 +290,10 @@ Main_init:
 	jal	Object_init
 	la	$a0 int_const0
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 12
-	jal	_GenGC_Assign
 	la	$a0 IO_protObj
 	jal	Object.copy
 	jal	IO_init
 	sw	$a0 16($s0)
-	addiu	$a1 $s0 16
-	jal	_GenGC_Assign
 	move	$a0 $s0
 	lw	$fp 12($sp)
 	lw	$s0 8($sp)
@@ -399,8 +395,6 @@ label3:
 	sub	$t1 $t1 $t2
 	sw	$t1 12($a0)
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 12
-	jal	_GenGC_Assign
 	b	label0
 label1:
 	move	$a0 $zero

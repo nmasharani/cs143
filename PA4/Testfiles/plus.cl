@@ -1,8 +1,13 @@
-class Main {
-	x: Int <- 1;
-	y: Int <- 2;
-	io: IO <- new IO;
-	main() : Object {
-		io.out_int(x / y)
+class Main inherits IO {
+	x: Int;
+	--io: IO <- new IO;
+	main() : Int {
+		{
+			out_string("hello");
+			x <- x * 3;
+			x <- x + 1;
+			--io.out_int(x);
+		}
+		
 	};
 };

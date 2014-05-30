@@ -1566,8 +1566,8 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
       emit_store(ACC, offset, SELF, str);
       if (cgen_Memmgr != GC_NOGC) {
-        emit_addiu(A1, SELF, offset, str); //for the garbage collector interface
-        emit_jal(GEN_GC_ASSIGN, str); //notify the garbage collector about assignment. 
+        //emit_addiu(A1, SELF, offset, str); //for the garbage collector interface
+        //emit_jal(GEN_GC_ASSIGN, str); //notify the garbage collector about assignment. 
       }
     }
   }
@@ -2469,12 +2469,13 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
   
-  //emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
+  emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
   emit_jal(OBJECT_DOT_COPY, s); 
   // copy the int obect in ACC as a result of evaluating e1. Object.copy doesnt 
   // use T1, but incase it changes, we store value of t1 inlocal space, as T1 is not a callee saved register 
   
-  //emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
+  emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
+  emit_store(ZERO, temp_start, FP, s);
   emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
   s << "# End Code neg expression." << endl;
 }

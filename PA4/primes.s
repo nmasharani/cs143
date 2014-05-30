@@ -18,13 +18,13 @@ _string_tag:
 	.word	5
 	.globl	_MemMgr_INITIALIZER
 _MemMgr_INITIALIZER:
-	.word	_GenGC_Init
+	.word	_NoGC_Init
 	.globl	_MemMgr_COLLECTOR
 _MemMgr_COLLECTOR:
-	.word	_GenGC_Collect
+	.word	_NoGC_Collect
 	.globl	_MemMgr_TEST
 _MemMgr_TEST:
-	.word	0
+	.word	1
 	.word	-1
 str_const15:
 	.word	5
@@ -430,21 +430,15 @@ label0:
 # End Code int const expression.
 # End Code block epression.
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
 # Begin Code objectID expression at line number 39
 # Loading attribute object into ACC
 	lw	$a0 12($s0)
 # End Code objectID expression.
 	sw	$a0 16($s0)
-	addiu	$a1 $s0 4
-	jal	_GenGC_Assign
 # Begin Code int const expression at line number 43
 	la	$a0 int_const2
 # End Code int const expression.
 	sw	$a0 24($s0)
-	addiu	$a1 $s0 6
-	jal	_GenGC_Assign
 # Begin Code loop expression at line number 46
 label1:
 # Begin Code bool expression at line number 46
@@ -472,16 +466,12 @@ label1:
 	sw	$t2 12($a0)
 # End Code plus expression.
 	sw	$a0 16($s0)
-	addiu	$a1 $s0 4
-	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code assign expression at line number 50
 # Begin Code int const expression at line number 50
 	la	$a0 int_const1
 # End Code int const expression.
 	sw	$a0 20($s0)
-	addiu	$a1 $s0 5
-	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code loop expression at line number 52
 label3:
@@ -624,8 +614,6 @@ label6:
 	sw	$t2 12($a0)
 # End Code plus expression.
 	sw	$a0 20($s0)
-	addiu	$a1 $s0 5
-	jal	_GenGC_Assign
 # End Code assign expression.
 	b	label3
 label4:
@@ -676,8 +664,6 @@ label15:
 	lw	$a0 16($s0)
 # End Code objectID expression.
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
 # End Code assign expression.
 # Begin Code disptach expression at line number 67
 # Begin Code objectID expression at line number 67
@@ -772,8 +758,6 @@ label2:
 	li	$a0 0
 # End Code loop expression.
 	sw	$a0 28($s0)
-	addiu	$a1 $s0 7
-	jal	_GenGC_Assign
 	move	$a0 $s0
 	addiu	$sp $sp 108
 	lw	$ra 4($sp)

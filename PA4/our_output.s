@@ -18,13 +18,13 @@ _string_tag:
 	.word	4
 	.globl	_MemMgr_INITIALIZER
 _MemMgr_INITIALIZER:
-	.word	_GenGC_Init
+	.word	_NoGC_Init
 	.globl	_MemMgr_COLLECTOR
 _MemMgr_COLLECTOR:
-	.word	_GenGC_Collect
+	.word	_NoGC_Collect
 	.globl	_MemMgr_TEST
 _MemMgr_TEST:
-	.word	0
+	.word	1
 	.word	-1
 str_const11:
 	.word	4
@@ -320,16 +320,12 @@ Main_init:
 	la	$a0 int_const0
 # End Code int const expression.
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
 # Begin Code new with type at line number 3
 	la	$a0 IO_protObj
 	jal	Object.copy
 	jal	IO_init
 # End Code new with type IO
 	sw	$a0 16($s0)
-	addiu	$a1 $s0 4
-	jal	_GenGC_Assign
 	move	$a0 $s0
 	addiu	$sp $sp 12
 	lw	$ra 4($sp)
@@ -519,8 +515,6 @@ label4:
 	sw	$t2 12($a0)
 # End Code sub expression.
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
 # End Code assign expression.
 # End Code block epression.
 	b	label0
