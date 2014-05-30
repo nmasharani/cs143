@@ -33,7 +33,7 @@ x more_complexity.cl
 x my_arith.cl
 x my_complex.cl
 x mycase.cl               
-NOT WORKING new.cl
+x new.cl
 x new_complex.cl
 x new_selftype.cl         
 x palindrome.cl            

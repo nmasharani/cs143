@@ -30,7 +30,7 @@ str_const11:
 	.word	4
 	.word	5
 	.word	String_dispTab
-	.word	int_const1
+	.word	int_const2
 	.byte	0	
 	.align	2
 	.word	-1
@@ -74,7 +74,7 @@ str_const6:
 	.word	4
 	.word	5
 	.word	String_dispTab
-	.word	int_const6
+	.word	int_const1
 	.ascii	"IO"
 	.byte	0	
 	.align	2
@@ -92,7 +92,7 @@ str_const4:
 	.word	4
 	.word	7
 	.word	String_dispTab
-	.word	int_const0
+	.word	int_const6
 	.ascii	"_prim_slot"
 	.byte	0	
 	.align	2
@@ -129,7 +129,7 @@ str_const0:
 	.word	9
 	.word	String_dispTab
 	.word	int_const9
-	.ascii	"Testfiles/while.cl"
+	.ascii	"./Testfiles/plus.cl"
 	.byte	0	
 	.align	2
 	.word	-1
@@ -137,7 +137,7 @@ int_const9:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	18
+	.word	19
 	.word	-1
 int_const8:
 	.word	2
@@ -155,7 +155,7 @@ int_const6:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	2
+	.word	10
 	.word	-1
 int_const5:
 	.word	2
@@ -179,19 +179,19 @@ int_const2:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	1
+	.word	0
 	.word	-1
 int_const1:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	0
+	.word	2
 	.word	-1
 int_const0:
 	.word	2
 	.word	4
 	.word	Int_dispTab
-	.word	10
+	.word	1
 	.word	-1
 bool_const0:
 	.word	3
@@ -207,16 +207,17 @@ bool_const1:
 	.word	-1
 Main_protObj:
 	.word	5
-	.word	5
+	.word	6
 	.word	Main_dispTab
-	.word	int_const1
+	.word	int_const2
+	.word	int_const2
 	.word	0
 	.word	-1
 String_protObj:
 	.word	4
 	.word	5
 	.word	String_dispTab
-	.word	int_const1
+	.word	int_const2
 	.word	0
 	.word	-1
 Bool_protObj:
@@ -313,25 +314,26 @@ Main_init:
 	sw	$zero 0($sp)
 	sw	$zero -4($sp)
 	sw	$zero -8($sp)
-	addiu	$sp $sp -12
+	sw	$zero -12($sp)
+	addiu	$sp $sp -16
 	move	$s0 $a0
 	jal	Object_init
 # Begin Code int const expression at line number 2
 	la	$a0 int_const0
 # End Code int const expression.
 	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
-# Begin Code new with type at line number 3
+# Begin Code int const expression at line number 3
+	la	$a0 int_const1
+# End Code int const expression.
+	sw	$a0 16($s0)
+# Begin Code new with type at line number 4
 	la	$a0 IO_protObj
 	jal	Object.copy
 	jal	IO_init
 # End Code new with type IO
-	sw	$a0 16($s0)
-	addiu	$a1 $s0 4
-	jal	_GenGC_Assign
+	sw	$a0 20($s0)
 	move	$a0 $s0
-	addiu	$sp $sp 12
+	addiu	$sp $sp 16
 	lw	$ra 4($sp)
 	lw	$s0 8($sp)
 	lw	$fp 12($sp)
@@ -452,82 +454,42 @@ Main.main:
 	addiu	$sp $sp -4
 	sw	$zero 0($sp)
 	sw	$zero -4($sp)
-	sw	$zero -8($sp)
-	addiu	$sp $sp -12
+	addiu	$sp $sp -8
 	move	$s0 $a0
-# Begin Code loop expression at line number 5
-label0:
-# Begin Code lt expression at line number 5
-# Begin Code int const expression at line number 5
-	la	$a0 int_const1
-# End Code int const expression.
+# Begin Code disptach expression at line number 6
+# Begin Code divide expression at line number 6
+# Begin Code objectID expression at line number 6
+# Loading attribute object into ACC
+	lw	$a0 12($s0)
+# End Code objectID expression.
 	sw	$a0 -4($fp)
-# Begin Code objectID expression at line number 5
-# Loading attribute object into ACC
-	lw	$a0 12($s0)
-# End Code objectID expression.
-	lw	$t1 -4($fp)
-	sw	$zero -4($fp)
-	lw	$a0 12($a0)
-	lw	$t1 12($t1)
-	blt	$t1 $a0 label2
-	la	$a0 bool_const0
-	b	label3
-label2:
-	la	$a0 bool_const1
-label3:
-# End Code lt expression.
-	lw	$t1 12($a0)
-	beqz	$t1 label1
-# Begin Code block epression at line number 6
-# Begin Code disptach expression at line number 7
-# Begin Code objectID expression at line number 7
-# Loading attribute object into ACC
-	lw	$a0 12($s0)
-# End Code objectID expression.
-	sw	$a0 0($sp)
-	addiu	$sp $sp -4
-# Begin Code objectID expression at line number 7
+# Begin Code objectID expression at line number 6
 # Loading attribute object into ACC
 	lw	$a0 16($s0)
 # End Code objectID expression.
-	bne	$a0 $zero label4
+	lw	$t1 -4($fp)
+	lw	$t2 12($t1)
+	lw	$t3 12($a0)
+	div	$t2 $t2 $t3
+	jal	Object.copy
+	sw	$t2 12($a0)
+# End Code divide expression.
+	sw	$a0 0($sp)
+	addiu	$sp $sp -4
+# Begin Code objectID expression at line number 6
+# Loading attribute object into ACC
+	lw	$a0 20($s0)
+# End Code objectID expression.
+	bne	$a0 $zero label0
 	la	$a0 str_const0
-	li	$t1 7
+	li	$t1 6
 	jal	_dispatch_abort
-label4:
+label0:
 	lw	$t1 8($a0)
 	lw	$t1 16($t1)
 	jalr		$t1
 # End Code disptach expression.
-# Begin Code assign expression at line number 8
-# Begin Code sub expression at line number 8
-# Begin Code objectID expression at line number 8
-# Loading attribute object into ACC
-	lw	$a0 12($s0)
-# End Code objectID expression.
-	sw	$a0 -4($fp)
-# Begin Code int const expression at line number 8
-	la	$a0 int_const2
-# End Code int const expression.
-	lw	$t1 -4($fp)
-	sw	$zero -4($fp)
-	lw	$t2 12($t1)
-	lw	$t3 12($a0)
-	sub	$t2 $t2 $t3
-	jal	Object.copy
-	sw	$t2 12($a0)
-# End Code sub expression.
-	sw	$a0 12($s0)
-	addiu	$a1 $s0 3
-	jal	_GenGC_Assign
-# End Code assign expression.
-# End Code block epression.
-	b	label0
-label1:
-	li	$a0 0
-# End Code loop expression.
-	addiu	$sp $sp 12
+	addiu	$sp $sp 8
 	lw	$ra 4($sp)
 	lw	$s0 8($sp)
 	lw	$fp 12($sp)
