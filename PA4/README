@@ -222,6 +222,105 @@ TESTING:
 
 Testing this assignment was probably the most frustrating out of all of them. In the first three, the error cases were contained in the manual and it was just a matter of processing the manual and devising the appropriate cases. In this PA4, the majority of error checking is completed previously, leaving only three error cases to catch (dispatch on void, case on void, no match case statement). We found it much more difficult to verify program correctness than to veriy that we correctly reported all errors. That being said, we persevered and tested extensively over the course of four days, and feel confident in our output. 
 
-To test, we employed four methdos. First, we visually inspected the code to catch sily mistakes like storin the true Bool in ACC instead of the false Bool in the neg statement for example. Second, we annotated our emitted MIPS with informational commments to see the structrue of the outputted code. We compared with the reference and reversed engineered the reference code to get an idea of what was going on. Third, we stepped through programs in spim, verifying the contents of the registers and the stack as we went. We made sure to do this for the tricky edge cases as well, like those of case, and new with SELF_TYPE. Finally, we wrote a shell script that diff'd our output with the reference. 
+To test, we employed four methdos. First, we visually inspected the code to catch sily mistakes like storin the true Bool in ACC instead of the false Bool in the neg statement for example. Second, we annotated our emitted MIPS with informational commments to see the structrue of the outputted code. We compared with the reference and reversed engineered the reference code to get an idea of what was going on. Third, we stepped through programs in spim, verifying the contents of the registers and the stack as we went. We made sure to do this for the tricky edge cases as well, like those of case, and new with SELF_TYPE. Finally, we wrote a shell script that diff'd our output with the reference. We ran this script with both the GC and verified the output in both cases. 
+
+In doing so, we noticed that we matched output in all cases except for strange cases of 
+increasing heap.... being reported. We spoke to Professor Aiken about this and he indicated that we should not worry about it. Indeed, running the progrma from the command line and not the shell script matched the reference with both vidsual and manual copy paste diffing in these cases. 
+
+What follows is a detailed description of our testing, and explanation of several
+key files. Note, we have a signifcant number of additional files in the associated
+testfiule directories, but only commented on a few as here as specified by the assignment handout.  
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+TESTING OUR CODE GENERATOR
+
+For this assignment, we had two testfile directories: Testfiles, which contains
+tests we wrote specifically to test our code generator, and valid_testfiles_pa3, 
+which contains the valid cool programs we wrote to test assignments 1-3, as a 
+sanity check. 
+
+We used a script, testscript, to automate our testing process to 
+increase the volume we were able to test. The test script used diff to compare 
+the outputs of cool programs compiled with our compiler and the reference. In 
+all but a few cases, we found that our compiler matched the reference in output
+using this script. In the few cases mentioned above, the program required user 
+input, so we couldn't test them with an automated script, so we verified the 
+outputs manually. We also saw that our compiler didn't match the reference 
+completely--the number of instructions, reads, rights, etc. were always different,
+which is probably due to the fact that our code generation implementation is
+different to the reference's.
+
+When writing our test files, we used IO to output the values of variables at 
+certain critical points in the program, so that we could verify that the 
+behavior was as expected. Since it is possible to have a cool program that runs
+successfully and emits a success message, but that might have incorrect behavior,
+we found that this printing was very important in identifying incorrect behavior. 
+
+For more information about testing, see the descriptions of several select test 
+files below.
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+DESCRIPTIONS OF TEST FILES
+
+Due to the volume of test files we wrote, we cannot write on every single one 
+of them. For more information about a file, look at the comments in a file
+itself.
+
+Note that, for ease of testing, we copied the test files from 
+/usr/class/cs143/examples to our Testfiles directory.
+
+
+FILE 1: Testfiles/a111_let_self_type.cl
+
+This file tests the usage of SELF_TYPE in let statements, attributes, assignment, 
+and new statements. Since SELF_TYPE is a "special case" in all of these expression 
+types, we found it to be especially important to test it carefully--we had a 
+few very tricky bugs that came from these special cases, and that we found 
+through testing. This file also takes advantage of the built in Object method
+type_name, which is pre-generated in the trap handler. Using this method requires
+our stack convention to conform to the trap handler's stack convention, so this
+file also tests that.
+
+FILE 2: Testfiles/let_test.cl
+
+This file tests the dynamic scope and stack convention in let statements. Since
+let statements are part of a new scope, but we don't enter a new stack frame upon
+entering a let statement, getting these statements to work correctly with the 
+correct dynamic scope is tricky and important. It is also very easy for the
+stack to become corrupted in the complicated implementation of let statements,
+so this file also allowed us to test that. 
+
+FILE 3: Testfiles/dispatch.cl
+
+This file tests that dispatch of all types works correctly, with the correct stack
+convention. The file tests dispatch with and without parameters, with and without
+static types, and with and without expressions upon which the method is being 
+called. This file also tests the order in which parameters are evaluated. 
+
+FILE 4: Testfiles/a2_nest_case.cl
+
+This file tests nested case statements. Like let statements, case statements are
+tricky because, although they define a new scope, they don't get executed on a new
+stack frame. Therefore, ensuring that the stack is preserved and that temporary 
+variables aren't overwritten is extremely important. Testing these nested case
+statements ensures that the stack convention is as we designed it.
+
+FILE 5: Testfiles/case_test.cl
+
+This file stress tests case statements to ensure that the variables go to the 
+correct branch of the statement. Since we want each variable to go to the branch
+that is closest to it in the inheritance tree, we can't just go with the first 
+branch we see to which the variable conforms.
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+WHY OUR CODE IS CORRECT:
+
+We believe that our code is most definitly correct. We have poured over all of the COOL documentation, the manual, the support code, and the assignment handouts, and have meticuously written tests cases to test these features. IN all cases, we match the rererence, except in the reporting of increasing heap... and PC number when reporting the division by 0 error. Both of these cases were deemed acceptable by the course staff. 
+
+Because our code is written according to the COOL manual specifcation, we know it to be correct, and feel very strongly in our submission. 
 
 
