@@ -1565,6 +1565,10 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
       emit_store(ACC, offset, SELF, str);
+      if (cgen_Memmgr != GC_NOGC) {
+        emit_addiu(A1, SELF, offset*WORD_SIZE, str); //for the garbage collector interface
+        emit_jal(GEN_GC_ASSIGN, str); //notify the garbage collector about assignment. 
+      }
     }
   }
 
@@ -1882,11 +1886,12 @@ void assign_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     emit_store(ACC, offset, SELF, s);
     if (cgen_Memmgr != GC_NOGC) {
-      emit_addiu(A1, SELF, offset, s); //for the garbage collector interface
+      emit_addiu(A1, SELF, offset*WORD_SIZE, s); //for the garbage collector interface
       emit_jal(GEN_GC_ASSIGN, s); //notify the garbage collector about assignment. 
     }
   } else {
     emit_store(ACC, offset, FP, s); 
+    emit_store(ZERO, offset, FP, s);
   }
 
   s << "# End Code assign expression." << endl;
@@ -2192,7 +2197,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         // $t1 could get overwritten here, but we don't care cause $t1 isn't accessed below
         cases->nth(j)->get_branch_expr()->code(s, temp_start -1, envr, table, curr_class); //return value of case expression is the value of the case expression with value of e0 bound to id of case branch. 
-
+        emit_store(ZERO, loc->offset, FP, s);
         emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success, bypassing the no match case abort. 
         envr->exitscope(); // leave the branch scope. 
         break;
@@ -2324,7 +2329,7 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
 
    emit_store(ACC, loc->offset, FP, s); // now store the initializer value in the stack slot for this newly decalred variable. 
    body->code(s, temp_start - 1, envr, table, curr_class); // now evaluate the body of the let, with the newly declared enviornment. result will be in ACC, which is the return value of this expression. 
-
+   emit_store(ZERO, loc->offset, FP, s);
    envr->exitscope(); // once we finish processing this let, we don't want to know about the locally declared variable anymore. 
     s << "# End Code let expression." << endl;
 }
@@ -2349,6 +2354,7 @@ void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
 
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
+  emit_store(ZERO, temp_start, FP, s);
 
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
@@ -2377,7 +2383,8 @@ void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
@@ -2405,7 +2412,8 @@ void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
@@ -2433,7 +2441,8 @@ void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
   emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
   
@@ -2459,14 +2468,16 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
   emit_neg(T1, T1, s); // perform the neg operation on the value. 
+  emit_store(T1, DEFAULT_OBJFIELDS, ACC, s);
   
-  emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
+  //emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
   emit_jal(OBJECT_DOT_COPY, s); 
   // copy the int obect in ACC as a result of evaluating e1. Object.copy doesnt 
   // use T1, but incase it changes, we store value of t1 inlocal space, as T1 is not a callee saved register 
   
-  emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
-  emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
+ // emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
+  //emit_store(ZERO, temp_start, FP, s);
+  //emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
   s << "# End Code neg expression." << endl;
 }
 
@@ -2486,7 +2497,8 @@ void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
   
@@ -2523,7 +2535,8 @@ void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_move(T2, ACC, s); // now e2 is in T2. e1 in T1, e2 in T2
   int return_label = table->label_id; table->label_id++;
   emit_load_bool(ACC, truebool, s); // load the true Bool object into ACC
@@ -2554,7 +2567,8 @@ void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
-  
+  emit_store(ZERO, temp_start, FP, s);
+
   emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
   emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
   
@@ -2708,6 +2722,7 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     emit_store(T2, temp_start, FP, s); //store T2 on the stack
     emit_jal(OBJECT_DOT_COPY, s); // copy the object in ACC. result is passed back in ACC
     emit_load(T2, temp_start, FP, s); //restore saved value of T2
+    emit_store(ZERO, temp_start, FP, s);
 
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
