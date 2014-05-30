@@ -158,3 +158,70 @@ Instructions
 Write-up for PA4
 ----------------
 
+user: lpappas9
+user: nisham
+
+CODE STRUCTURE:
+
+All of the work that our code perfoms happens in cgen.cc. The file contains detailed comments,
+but we will recap the high level points here. The entry point to our code generator is the 
+constructor for the CgenClassTable. Indeed, all of the functions that we wrote get called 
+from this constructor. 
+
+In the constructor, we first set up the enviornment and static data sections. We make a pass over
+the classes of the program, and build the inheritance graph. In our initial pass, we travers the 
+inheritance graph, and assign unique tags to each class. This serves as a means of identifying the
+class at runtime, as the class tag will be stored in the dynamic object data structure. We allocated tags in a specific way so as to simplify the design of the case statement. We assign tags
+in order of inheritance. Object gets the lowest tage 0. Then, objects leftmost child gets
+the next tag, and that child's leftmost child gets the next tag, so on and so forth. The tags
+also serve as indeces into the global name and object tables of the generated code. 
+
+Using the inheritance graph, we traverse the graph and collect all attributes and methods for each class. By starting at the root (Object) and working our way down, we ensue correct order on inherited attributes and on inherited methods, as explained in lecture and in the assignment handouts. We store the list of attributes and list of methods for each class in two symbol tables. This allows easy lookup by class name, and this greatly simplifies our code design later in the process. 
+
+Once we have collected the attributes and methods for each class and built our data structures mentioned above, we then begin to emit the actual code. First, we emit the static data section. 
+We emit the protoype object according to the default initializations as specied in the manual. The correct order of attributes is ensured based on our method of collecting all attributes for a given class in our intial pass in the constructor. We then emit the dispatch tables for each class.Having allready built a list of methods for each class that observes inhertiance order, we simply
+print the methods contained in this list for each class. The starter code provided us funcitonality
+to emit the static string and int constants. We then emit the name and object tables according to tag order. To do this, we use another data structure built during code generator construction that maps a class name to its tag and vice versa. With that finished, the static code generation phase of the code generator is finished. 
+
+We then move to emit the code for the fucntions of the program. There are two types of functions, 
+1. the default init methods for each class 2. The methods defined by the users program. We emit both of these, according to the stack convention described in the code comments and later in this README. We pay close attention to only initialize attributes once in init methods, by first calling
+the parent's object init method, and then initializing the atttributes defined for this class. 
+
+Each method definition links to the expression generation code by calling expr->code(...) on the assciated expressio (method body for methods, attribute program specified initializers for init methods). 
+
+The expression code generation is the final piece of the code generator and is very straighforward.We designed the code to follow the semantic rules listd in sectio 13 of the manual. Furthermore, the code is documented with a translation of the MIPS assmebly to the right of the call in the source code. We also output comments in the emitted MIPS, to further clarify the code. 
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+DESIGIN DECISIONS: 
+
+The key design decision was our managing of the stack. We intially designed the stack differently than our curent implimentation, but encountered problems in the calling the basic methods (as these pop the passed arguments off the stack). Thus, we redesigned and decided to follow the method
+we learnd about in CS107. 
+
+Specifically, the callee always saves three registers. These are the FP, SELF, and RA registers. These registers are saved in the callee's frame and in this order, with saved FP at highest address and saved RA at the lowest address of the saved registers. We then move the new FP to just after the saved SELF. This means that there are 2 words of space between the FP and the paramters to the method. We then compute the number of local variables needed to evaluate the method body
+and move the stack pointer down by this amount. However, before doing so, we null out the stack memory so as to prevent the Garbage collector from tampering with an old pointer. This movement of the SP allows us to move reduce the number of instructions the machine needs to execute. 
+
+As mentioned above, parameters are passed to methods in the convention of C. Specifcally, they are passed in reverse order, where the last argument is at an 8 byte offset from the FP of the method. 
+
+The final element of our stack management discipline has to do with tracking the locations of local variables in the active stack. To do this, we deisgned a data struct called var_lock. This struct contains a string idetnifying the type of varibale (CLASS = attribute, FEATURE = formal param to method, LOCAL = declared in let or case statement). The second field is an integer that represents an ofset in words from some reference point. The reference point is always the adrressed
+contained in a register. In the case of local varibales, the offset is negative, and is the number
+of words below the FP that the designated varibale lives. The offset for a formal is positive and is the offset above the FP (including the saved registers SELF and FP). Finally, for the case of CLASS, the offset is positive and is the offset from the SELF register (which contains the address of the object) to the repsective attribute. 
+
+As in PA3, we use a symbol table to keep track of the current identier in scope. We rely on the type and scope checking performed in PA3, and assume that no type/scope issues exist. Thus, for each class, we intialize the enviornment to contain attributes (inherited and local) of the class, and then proceed to add/remove scopes for method definitions, let statements, and case statements. In COOL, these are the only four places that an identifier can be introduced. 
+
+As mentioned, our decision to allocat tags as we did was to allow for efficient impleimentation of the case statement. Our tag assignment allowed us to order the case statements by greatest tag number, and then use the bgti and blti  operators to select the proper case branch.
+
+Finally, it should be noted that we adhered to the Garbage collector interface by outputting a -1 eye catcher in our protobjs, and calling the GC notify method in assignment to attributes as instructed.  
+
+The rest of the code is straightforward and easily followed by the extensive comments in the source code. Please refer to respective sections in the code for further details if desired. 
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+TESTING: 
+
+Testing this assignment was probably the most frustrating out of all of them. In the first three, the error cases were contained in the manual and it was just a matter of processing the manual and devising the appropriate cases. In this PA4, the majority of error checking is completed previously, leaving only three error cases to catch (dispatch on void, case on void, no match case statement). We found it much more difficult to verify program correctness than to veriy that we correctly reported all errors. That being said, we persevered and tested extensively over the course of four days, and feel confident in our output. 
+
+To test, we employed four methdos. First, we visually inspected the code to catch sily mistakes like storin the true Bool in ACC instead of the false Bool in the neg statement for example. Second, we annotated our emitted MIPS with informational commments to see the structrue of the outputted code. We compared with the reference and reversed engineered the reference code to get an idea of what was going on. Third, we stepped through programs in spim, verifying the contents of the registers and the stack as we went. We made sure to do this for the tricky edge cases as well, like those of case, and new with SELF_TYPE. Finally, we wrote a shell script that diff'd our output with the reference. 
+
+
