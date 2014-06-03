@@ -39,6 +39,7 @@
 #define MAXINT  100000000    
 #define WORD_SIZE    4
 #define LOG_WORD_SIZE 2     // for logical shifts
+#define BYTE_SIZE 8
 
 // Global names
 #define CLASSNAMETAB         "class_nameTab"
@@ -110,6 +111,7 @@
 #define JALR  "\tjalr\t"  
 #define JAL   "\tjal\t"                 
 #define RET   "\tjr\t"RA"\t"
+#define JUMP  "\tj\t"  
 
 #define SW    "\tsw\t"
 #define LW    "\tlw\t"
@@ -126,6 +128,7 @@
 #define MUL   "\tmul\t"
 #define SUB   "\tsub\t"
 #define SLL   "\tsll\t"
+#define SRL   "\tsrl\t"
 #define BEQZ  "\tbeqz\t"
 #define BRANCH   "\tb\t"
 #define BEQ      "\tbeq\t"
@@ -133,5 +136,10 @@
 #define BLEQ     "\tble\t"
 #define BLT      "\tblt\t"
 #define BGT      "\tbgt\t"
+#define BGEZ     "\tbgez\t"
+#define ORI      "\tori\t"
+#define OR      "\tor\t"
+#define XORI     "\txori\t"
+#define XOR     "\txor\t"
 
 

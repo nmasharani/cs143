@@ -48,6 +48,7 @@
 
 extern void emit_string_constant(ostream& str, char *s);
 extern int cgen_debug;
+extern int cgen_optimize;
 
 ////////////////////////////////////////////////////////////////////////
 // Three symbols from the semantic analyzer (semant.cc) are used.
@@ -324,6 +325,10 @@ static void emit_sub(char *dest, char *src1, char *src2, ostream& s)
 static void emit_sll(char *dest, char *src1, int num, ostream& s)
 { s << SLL << dest << " " << src1 << " " << num << endl; }
 
+static void emit_srl(char *dest, char *src1, int num, ostream &s) {
+  s << SRL << dest << " " << src1 << " " << num << endl; 
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Emit mips helper. 
@@ -491,6 +496,13 @@ static void emit_bgti(char *src1, int imm, int label, ostream &s)
   s << endl;
 }
 
+static void emit_bgez(char *src1, int label, ostream &s)
+{
+  s << BGEZ << src1 << " ";
+  emit_label_ref(label,s);
+  s << endl;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Emit mips helper. 
@@ -558,6 +570,38 @@ static void emit_gc_check(char *source, ostream &s)
   if (source != (char*)A1) emit_move(A1, source, s);
   s << JAL << "_gc_check" << endl;
 }
+
+static void emit_jump(int label, ostream& s) {
+  s << JUMP;
+  emit_label_ref(label, s);
+  s << endl;
+}
+
+static void emit_restore_int(char *source, CgenClassTableP table, ostream &s) {
+  int pos_label = table->label_id; table->label_id++;
+  int end_label = table->label_id; table->label_id++;
+  emit_move(T1, source, s);
+  
+  emit_bgez(T1, pos_label, s);
+
+  // negative case
+  // int sign_bit = 1 << (4 * BYTE_SIZE - 1);
+  emit_load_imm(T2, 1, s);
+  emit_sll(T2, T2, (4 * BYTE_SIZE - 1), s);
+
+
+  s << XOR << T1 << " " <<  T1 << " " << T2 << endl;
+  emit_srl(T1, T1, 1, s);
+   emit_load_imm(T2, -1, s);
+  s << XOR << T1 << " " <<  T1 << " " << T2 << endl;
+  // emit_neg(T1, T1, s);
+  emit_jump(end_label, s);
+  emit_label_def(pos_label, s);
+  emit_srl(T1, T1, 1, s);
+  emit_label_def(end_label, s);
+}
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -651,14 +695,16 @@ void IntEntry::code_def(ostream &s, int intclasstag)
   // Add -1 eye catcher
   s << WORD << "-1" << endl;
 
-  code_ref(s);  s << LABEL                                // label
-      << WORD << intclasstag << endl                      // class tag
-      << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << endl  // object size
-      << WORD; 
+  code_ref(s);  s << LABEL;                                // label
+     if (!cgen_optimize) {
+        s << WORD << intclasstag << endl                      // class tag
+        << WORD << (DEFAULT_OBJFIELDS + INT_SLOTS) << endl  // object size
+        << WORD; 
 
-      emit_disptable_ref(Int, s);
+        emit_disptable_ref(Int, s);
 
-      s << endl;                                          // dispatch table
+        s << endl;                                          // dispatch table
+     }
       s << WORD << str << endl;                           // integer value
 }
 
@@ -828,6 +874,10 @@ void CgenClassTable::code_constants()
   stringtable.add_string("");
   inttable.add_string("0");
 
+  if (cgen_optimize) {
+    inttable.add_string("1");
+  }
+
   stringtable.code_string_table(str,stringclasstag);
   inttable.code_string_table(str,intclasstag);
   code_bools(boolclasstag);
@@ -845,7 +895,11 @@ void CgenClassTable::emit_proto_attribute(ostream& s, Symbol type) {
 
   if (strcmp(type->get_string(), Int->get_string()) == 0) {
     //find the int const label associated with 0 and return that
-    s << WORD; inttable.lookup_string("0")->code_ref(s); s << endl;
+    if (cgen_optimize) {
+      s << WORD; inttable.lookup_string("1")->code_ref(s); s << endl;
+    } else {
+      s << WORD; inttable.lookup_string("0")->code_ref(s); s << endl;
+    }
     return;
   }
   if (strcmp(type->get_string(), Str->get_string()) == 0) {
@@ -1558,12 +1612,37 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
   if (parent_attributes) {
     start_index = parent_attributes->len();
   }
+
   for (int i = start_index; attributes->more(i); i = attributes->next(i)) {
     Feature curr_attr = attributes->nth(i);
     int offset = curr_class->envr->lookup(curr_attr->get_name())->offset;
     if ((offset != i + DEFAULT_OBJFIELDS) && cgen_debug) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
     if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
+      if (cgen_optimize) {
+
+        // if it's an int (using static type)
+        if (strcmp(curr_attr->get_expr()->get_type()->get_string(), Int->get_string()) == 0) {
+          // get the int from the pointer
+          int end_label = label_id; label_id++;
+          
+          // shift left and add one before jumping to positive/negative case 
+          emit_sll(T1, ACC, 1, str);
+          emit_addiu(T1, T1, 1, str);
+
+          // if it's positive, jump to end_label below
+          emit_bgez(ACC, end_label, str);
+
+          // use positive representation, with sign bit flipped
+          emit_neg(T1, T1, str);
+          emit_load_imm(T2, 1, str);
+          emit_sll(T2, T2, (4 * BYTE_SIZE - 1), str);
+          str << OR << T1 << " " <<  T1 << " " << T2 << endl;
+          
+          emit_label_def(end_label, str);
+          emit_move(ACC, T1, str);
+        }
+      }
       emit_store(ACC, offset, SELF, str);
       if (cgen_Memmgr != GC_NOGC) {
         emit_addiu(A1, SELF, offset*WORD_SIZE, str); //for the garbage collector interface
@@ -2470,18 +2549,16 @@ int divide_class::compute_max_locals() {
 void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code neg expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
-  emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
-  emit_neg(T1, T1, s); // perform the neg operation on the value. 
-  emit_store(T1, DEFAULT_OBJFIELDS, ACC, s);
-  
-  //emit_store(T1, temp_start, FP, s); // store the neg'd value on the stack, as T1 might be corrupted. 
-  emit_jal(OBJECT_DOT_COPY, s); 
-  // copy the int obect in ACC as a result of evaluating e1. Object.copy doesnt 
-  // use T1, but incase it changes, we store value of t1 inlocal space, as T1 is not a callee saved register 
-  
- // emit_load(T1, temp_start, FP, s); // load the neg'd value saved on stack back into T1
-  //emit_store(ZERO, temp_start, FP, s);
-  // emit_store(T1, DEFAULT_OBJFIELDS, ACC, s); // load the neg'd value into the newly created object's int value slot. Value to return is now in ACC. 
+  if (cgen_optimize) {
+    emit_neg(ACC, ACC, s);
+  } else {
+    emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
+    emit_neg(T1, T1, s); // perform the neg operation on the value. 
+    emit_move("$s1", T1, s);
+    emit_jal(OBJECT_DOT_COPY, s); 
+    emit_store("$s1", DEFAULT_OBJFIELDS, ACC, s);
+  }
+
   s << "# End Code neg expression." << endl;
 }
 
@@ -2634,6 +2711,9 @@ void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_l
   // Need to be sure we have an IntEntry *, not an arbitrary Symbol
   //
   emit_load_int(ACC,inttable.lookup_string(token->get_string()), s);
+  if (cgen_optimize) {
+    emit_load(ACC, 0, ACC, s);
+  }
   s << "# End Code int const expression." << endl;
 }
 
@@ -2814,6 +2894,7 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     s << "# Loading attribute object into ACC" << endl;
     emit_load(ACC, offset, SELF, s);
+    emit_restore_int(ACC, table, s);
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
     s << "# Loading parameter object into ACC" << endl;
     emit_load(ACC, offset, FP, s);
