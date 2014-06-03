@@ -503,6 +503,13 @@ static void emit_bgez(char *src1, int label, ostream &s)
   s << endl;
 }
 
+static void emit_blez(char *src1, int label, ostream &s)
+{
+  s << BLEZ << src1 << " ";
+  emit_label_ref(label,s);
+  s << endl;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Emit mips helper. 
@@ -577,31 +584,54 @@ static void emit_jump(int label, ostream& s) {
   s << endl;
 }
 
+// WARNING: this method uses S1 as a temporary register!!!
 static void emit_restore_int(char *source, CgenClassTableP table, ostream &s) {
   int pos_label = table->label_id; table->label_id++;
   int end_label = table->label_id; table->label_id++;
-  emit_move(T1, source, s);
   
-  emit_bgez(T1, pos_label, s);
+  emit_bgez(source, pos_label, s);
 
   // negative case
   // int sign_bit = 1 << (4 * BYTE_SIZE - 1);
-  emit_load_imm(T2, 1, s);
-  emit_sll(T2, T2, (4 * BYTE_SIZE - 1), s);
+  emit_load_imm(S1, 1, s);
+  emit_sll(S1, S1, (4 * BYTE_SIZE - 1), s);
 
 
-  s << XOR << T1 << " " <<  T1 << " " << T2 << endl;
-  emit_srl(T1, T1, 1, s);
-   emit_load_imm(T2, -1, s);
-  s << XOR << T1 << " " <<  T1 << " " << T2 << endl;
-  // emit_neg(T1, T1, s);
+  s << XOR << source << " " <<  source << " " << S1 << endl;
+  emit_srl(source, source, 1, s);
+  emit_load_imm(S1, -1, s);
+  s << XOR << source << " " <<  source << " " << S1 << endl;
   emit_jump(end_label, s);
   emit_label_def(pos_label, s);
-  emit_srl(T1, T1, 1, s);
+  emit_srl(source, source, 1, s);
   emit_label_def(end_label, s);
 }
 
+// WARNING: this method uses S1 as a temporary register!!!
+static void emit_convert_int(char *source, CgenClassTableP table, ostream& s) {
+  // get the int from the pointer
+  int end_label = label_id; label_id++;
+  
+  // shift left and add one before jumping to positive/negative case 
+  emit_move(S1, source, str);
+  emit_sll(source, source, 1, str);
+  emit_addiu(source, source, 1, str);
 
+  // if it's positive, jump to end_label below
+  emit_bgez(S1, end_label, str);
+
+  // use positive representation, with sign bit flipped
+  emit_neg(source, source, str);
+  emit_load_imm(S1, 1, str);
+  emit_sll(S1, S1, (4 * BYTE_SIZE - 1), str);
+  str << OR << source << " " <<  source << " " << S1 << endl;
+  
+  emit_label_def(end_label, str);
+}
+
+static void emit_andi(char* dest, char* source, int imm, ostream& s) {
+  s << ANDI << dest << " " << source << " " << imm << endl;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2256,6 +2286,18 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
         curr_branch_label = table->label_id++;
 
         emit_load(T1, 1, SP, s);              // we pushed e0 on the stack, now load e0 into $t1
+        
+        // check if the dynamic type is an integer.
+        if (cgen_optimize) {
+          emit_andi(T2, T1, 1, s);
+          int int_label = table->label_id; table->label_id++;
+          emit_blez(T2, int_label, s);
+
+          int e0_tag = *(table->name_to_tag->lookup(Int));
+          emit_load_imm(T2, e0_tag, s);
+          emit_label_def(int_label, s);
+        } 
+
         emit_load(T2, TAG_OFFSET, T1, s);     // put the tag of e0 into $t2
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
@@ -2550,7 +2592,9 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code neg expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   if (cgen_optimize) {
+    emit_restore_int(ACC, ACC, s);
     emit_neg(ACC, ACC, s);
+    emit_convert_int(ACC, ACC, s);
   } else {
     emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
     emit_neg(T1, T1, s); // perform the neg operation on the value. 
@@ -2894,7 +2938,6 @@ void object_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
   if (strcmp(loc->context, CLASS_CONTEXT) == 0) {
     s << "# Loading attribute object into ACC" << endl;
     emit_load(ACC, offset, SELF, s);
-    emit_restore_int(ACC, table, s);
   } else if (strcmp(loc->context, FEATURE_CONTEXT) == 0) {
     s << "# Loading parameter object into ACC" << endl;
     emit_load(ACC, offset, FP, s);

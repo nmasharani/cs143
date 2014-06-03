@@ -104,6 +104,7 @@
 #define SP   "$sp"		// Stack pointer 
 #define FP   "$fp"		// Frame pointer 
 #define RA   "$ra"		// Return address 
+#define S1   "$s1"
 
 //
 // Opcodes
@@ -137,9 +138,11 @@
 #define BLT      "\tblt\t"
 #define BGT      "\tbgt\t"
 #define BGEZ     "\tbgez\t"
+#define BLEZ     "\tblez\t"
 #define ORI      "\tori\t"
 #define OR      "\tor\t"
 #define XORI     "\txori\t"
 #define XOR     "\txor\t"
+#define ANDI    "\tandi\t"
 
 
