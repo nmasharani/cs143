@@ -10,11 +10,16 @@
 -- Test for register allocation. Nest let expressions very long. Nest cases within one another. 
 -- Excersise the edge cases. 1. Return ints/bools from methods 2. Excersise the new operator
 
+-- Perform method calls on built in objects that have strings as fields
+-- do some funny stuff with negative numbers, because those are hard
+
 class Main {
 	x: Int <- 42;
 	y: Object <- x;
 	z: Object <- y.copy();
 	io: IO <- new IO;
+	s : String <- "this is a string";
+
 	main() : Object {
 		{
 			io.out_int(x);
@@ -27,7 +32,21 @@ class Main {
 					q: Object => io.out_int(x);
 					w: Int => io.out_int(w);
 				esac;
+				io.out_string("\n");
+				
+				io.out_string(s.concat("\n"));
+				io.out_int(~x);
+				io.out_string("\n");
+				io.out_string(s.substr(1, 3).concat("\n"));
+				io.out_int(~x);
+				io.out_string("\n");
+				-- i think the reference compiler gets this wrong?
+				-- should be -42/-1 + -3*-2 = 48
+				x <- (~x / ~1) + (~3 * ~2);
+				io.out_int(x);
+				io.out_string("\n");
 			};
 		}
 	};
 };
+
