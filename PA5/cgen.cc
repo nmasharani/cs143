@@ -585,6 +585,7 @@ static void emit_jump(int label, ostream& s) {
 }
 
 // WARNING: this method uses S1 as a temporary register!!!
+// turns from storage int to normal int
 static void emit_restore_int(char *source, CgenClassTableP table, ostream &s) {
   int pos_label = table->label_id; table->label_id++;
   int end_label = table->label_id; table->label_id++;
@@ -608,25 +609,26 @@ static void emit_restore_int(char *source, CgenClassTableP table, ostream &s) {
 }
 
 // WARNING: this method uses S1 as a temporary register!!!
+// Turns from normal int to storage int
 static void emit_convert_int(char *source, CgenClassTableP table, ostream& s) {
   // get the int from the pointer
-  int end_label = label_id; label_id++;
+  int end_label = table->label_id; table->label_id++;
   
   // shift left and add one before jumping to positive/negative case 
-  emit_move(S1, source, str);
-  emit_sll(source, source, 1, str);
-  emit_addiu(source, source, 1, str);
+  emit_move(S1, source, s);
+  emit_sll(source, source, 1, s);
+  emit_addiu(source, source, 1, s);
 
   // if it's positive, jump to end_label below
-  emit_bgez(S1, end_label, str);
+  emit_bgez(S1, end_label, s);
 
   // use positive representation, with sign bit flipped
-  emit_neg(source, source, str);
-  emit_load_imm(S1, 1, str);
-  emit_sll(S1, S1, (4 * BYTE_SIZE - 1), str);
-  str << OR << source << " " <<  source << " " << S1 << endl;
+  emit_neg(source, source, s);
+  emit_load_imm(S1, 1, s);
+  emit_sll(S1, S1, (4 * BYTE_SIZE - 1), s);
+  s << OR << source << " " <<  source << " " << S1 << endl;
   
-  emit_label_def(end_label, str);
+  emit_label_def(end_label, s);
 }
 
 static void emit_andi(char* dest, char* source, int imm, ostream& s) {
@@ -1649,30 +1651,6 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     if ((offset != i + DEFAULT_OBJFIELDS) && cgen_debug) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
     if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
-      if (cgen_optimize) {
-
-        // if it's an int (using static type)
-        if (strcmp(curr_attr->get_expr()->get_type()->get_string(), Int->get_string()) == 0) {
-          // get the int from the pointer
-          int end_label = label_id; label_id++;
-          
-          // shift left and add one before jumping to positive/negative case 
-          emit_sll(T1, ACC, 1, str);
-          emit_addiu(T1, T1, 1, str);
-
-          // if it's positive, jump to end_label below
-          emit_bgez(ACC, end_label, str);
-
-          // use positive representation, with sign bit flipped
-          emit_neg(T1, T1, str);
-          emit_load_imm(T2, 1, str);
-          emit_sll(T2, T2, (4 * BYTE_SIZE - 1), str);
-          str << OR << T1 << " " <<  T1 << " " << T2 << endl;
-          
-          emit_label_def(end_label, str);
-          emit_move(ACC, T1, str);
-        }
-      }
       emit_store(ACC, offset, SELF, str);
       if (cgen_Memmgr != GC_NOGC) {
         emit_addiu(A1, SELF, offset*WORD_SIZE, str); //for the garbage collector interface
@@ -1875,6 +1853,19 @@ bool CgenClassTable::is_int_str_bool(Symbol type) {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
+// Returns true if the type is Int, Bool, String, Object, or IO.
+// False otherwise. 
+//
+////////////////////////////////////////////////////////////////////////////////
+bool CgenClassTable::is_basic_class(Symbol type) {
+  if (is_int_str_bool(type)) return true;
+  if (strcmp(type->get_string(), Object->get_string()) == 0) return true;
+  if (strcmp(type->get_string(), IO->get_string()) == 0) return true;
+  return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
 // Code generation launcher. Consolidates
 // the functions that generate mips to str.  
 //
@@ -2047,9 +2038,32 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
   s << "# Begin Code static dispatch expression at line number " << get_line_number() <<  endl;
   int num_params = actual->len();   // actual is list of formal params
   
+  bool basic_class = table->is_basic_class(type_name);
+
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
+    
+    if (cgen_optimize) {
+      if (strcmp(curr_param->get_type()->get_string(), Int->get_string()) == 0) {
+        if (basic_class) {
+          emit_store(ACC, temp_start, FP, s);
+          
+          // have to allocate a new integer :(
+          s << LA << ACC << " " << Int->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+          emit_jal(OBJECT_DOT_COPY, s); //call object.copy
+          
+          // call the init method. 
+          s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+          
+          emit_load(T2, temp_start, FP, s);
+          emit_store(ZERO, temp_start, FP, s);
+          emit_restore_int(T2, table, s);
+          emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+        }
+      }
+    }
+
     emit_push(ACC, s);
   }
 
@@ -2075,6 +2089,19 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
 
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
+
+  if (cgen_optimize) {
+    if (strcmp(get_type()->get_string(), Int->get_string()) == 0) {
+      if (basic_class) {
+        // have to get the int out of the object
+        
+        emit_load(ACC, DEFAULT_OBJFIELDS, ACC, s);
+        emit_convert_int(ACC, table, s);
+      }
+    }
+  }
+
+
   s << "# End Code static dispatch expression." << endl;
 }
 
@@ -2115,6 +2142,22 @@ int static_dispatch_class::compute_max_locals() {
 ////////////////////////////////////////////////////////////////////////////////
 void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code disptach expression at line number " << get_line_number() <<  endl;
+  Symbol e0_type = expr->get_type();
+  if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) e0_type = curr_class->name;
+  bool basic_class = false;
+
+  if (cgen_optimize) {
+    Features e0_methods = table->class_methods->lookup(e0_type);
+    for (int i = e0_methods->first(); e0_methods->more(i); i = e0_methods->next(i)) {
+      Feature method = e0_methods->nth(i);
+      if (strcmp(method->get_name()->get_string(), name->get_string()) == 0) {
+        if (table->is_basic_class(method->current_class)) {
+          basic_class = true;
+        }
+        break;
+      }
+    }
+  }
 
   /* ** STORING PARAMETERS ** */
 
@@ -2122,6 +2165,27 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_param = actual->nth(i);
     curr_param->code(s, temp_start, envr, table, curr_class); // Now the return value for this argument is in ACC. 
+
+    if (cgen_optimize) {
+      if (strcmp(curr_param->get_type()->get_string(), Int->get_string()) == 0) {
+        if (basic_class) {
+          emit_store(ACC, temp_start, FP, s);
+          
+          // have to allocate a new integer :(
+          s << LA << ACC << " " << Int->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+          emit_jal(OBJECT_DOT_COPY, s); //call object.copy
+          
+          // call the init method. 
+          s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+          
+          emit_load(T2, temp_start, FP, s);
+          emit_store(ZERO, temp_start, FP, s);
+          emit_restore_int(T2, table, s);
+          emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+        }
+      }
+    }
+
     emit_push(ACC, s);
   }
   // these will be added to the environment in the method def
@@ -2129,9 +2193,8 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   /* ** GETTING THE OBJECT UPON WHICH WE DISPATCH ** */
 
   expr->code(s, temp_start, envr, table, curr_class); // we know the value of e0 is now in ACC. This is the object invoking the dispatch. 
-  Symbol e0_type = expr->get_type();
-  int bypass_abort_label = table->label_id;
-  table->label_id++;
+  
+  int bypass_abort_label = table->label_id; table->label_id++;
   emit_bne(ACC, ZERO, bypass_abort_label, s); // skip to the bypass abort label if ACC is not zero. 
 
   /* ** DISPATCH UPON A NULL OBJECT ** */
@@ -2148,18 +2211,29 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
   emit_load(T1, DISPTABLE_OFFSET, ACC, s); // else, we load the address of the dispatch table for this class into a temporary T1. 
   
   // Need the type name to find the offset in the disptab
-  if (strcmp(e0_type->get_string(), SELF_TYPE->get_string()) == 0) e0_type = curr_class->name;
   
   int offset_in_disp_tab = table->compute_offset_in_disp_table(name, e0_type);
   
   if (cgen_debug) cout << " loaded dispatch for class " << e0_type->get_string() << "at offset " << offset_in_disp_tab << endl;
   emit_load(T1, offset_in_disp_tab, T1, s);
   emit_jalr(T1, s);
+
+  if (cgen_optimize) {
+    if (strcmp(get_type()->get_string(), Int->get_string()) == 0) {
+      if (basic_class) {
+        // have to get the int out of the object
+        
+        emit_load(ACC, DEFAULT_OBJFIELDS, ACC, s);
+        emit_convert_int(ACC, table, s);
+      }
+    }
+  }
+
   s << "# End Code disptach expression." << endl;
 }
 
 int dispatch_class::compute_max_locals() {
-  int sum = 0;
+  int sum = 1;
   sum += expr->compute_max_locals();
   for (int i = actual->first(); actual->more(i); i = actual->next(i)) {
     Expression curr_expr = actual->nth(i);
@@ -2259,10 +2333,12 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
   int success_label = table->label_id; table->label_id++;
   int* sorted_branch_class_tags = table->get_sorted_tags(cases, table); // get the tags of the branches in sorted order. 
+  
+  int get_type_label = table->label_id; table->label_id++;
   int curr_branch_label = table->label_id; table->label_id++; // a current label in the case struct. 
 
   /* check for void e0 */
-  emit_bne(ACC, ZERO, curr_branch_label, s); // if not void, bypass the abort call.
+  emit_bne(ACC, ZERO, get_type_label, s); // if not void, bypass the abort call.
   emit_load_string(ACC, stringtable.lookup_string(curr_class->filename->get_string()), s); // filename in ACC
   emit_load_imm(T1, get_line_number(), s); // line number in T1
   emit_jal(CASE_ABORT2, s); // abort with _case_abort2
@@ -2270,6 +2346,32 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
   // e0 is valid (ie not void)
   // i is the index in the sorted_branch_class_tags array-- it keeps track of 
   // which class should come next
+
+  emit_label_def(get_type_label, s);
+
+  // check if the dynamic type is an integer.
+  emit_load(T1, 1, SP, s);  
+  if (cgen_optimize) {
+    emit_andi(T2, T1, 1, s);
+    int not_int_label = table->label_id; table->label_id++;
+    int end_label = table->label_id; table->label_id++;
+    emit_blez(T2, not_int_label, s);
+
+    int e0_tag = *(table->name_to_tag->lookup(Int));
+    emit_load_imm(T2, e0_tag, s);
+    emit_jump(end_label, s);
+
+    emit_label_def(not_int_label, s);
+    emit_load(T2, TAG_OFFSET, T1, s);
+
+    emit_label_def(end_label, s);
+    emit_store(T2, temp_start, FP, s);
+  } else {
+    emit_load(T2, TAG_OFFSET, T1, s);     // put the tag of e0 into $t2
+    emit_store(T2, temp_start, FP, s);
+  }
+
+
   for (int i = 0; i < cases->len(); i++) { 
     // j is the index in the actual branches array -- we iterate through with j
     // to find the case that corresponds with the next class in the sorted array
@@ -2287,18 +2389,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 
         emit_load(T1, 1, SP, s);              // we pushed e0 on the stack, now load e0 into $t1
         
-        // check if the dynamic type is an integer.
-        if (cgen_optimize) {
-          emit_andi(T2, T1, 1, s);
-          int int_label = table->label_id; table->label_id++;
-          emit_blez(T2, int_label, s);
-
-          int e0_tag = *(table->name_to_tag->lookup(Int));
-          emit_load_imm(T2, e0_tag, s);
-          emit_label_def(int_label, s);
-        } 
-
-        emit_load(T2, TAG_OFFSET, T1, s);     // put the tag of e0 into $t2
+        emit_load(T2, temp_start, FP, s);     // put the tag of e0 into $t2
 
         int tag_of_lowest_child = table->get_lowest_child_tag_for_class(curr_branch_type); // counter intuitive, but the tag_of_the_lowest_child will be a high number. 
 
@@ -2310,14 +2401,14 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
         var_loc* loc = new var_loc;
         loc->context = LOCAL_CONTEXT;
 
-        loc->offset = temp_start;
+        loc->offset = temp_start - 1;
 
         // add to environment
         envr->addid(cases->nth(j)->get_id(), loc);
         emit_store(T1, loc->offset, FP, s); //store the value of e0 at this location identified by the id of the case branch. 
 
         // $t1 could get overwritten here, but we don't care cause $t1 isn't accessed below
-        cases->nth(j)->get_branch_expr()->code(s, temp_start -1, envr, table, curr_class); //return value of case expression is the value of the case expression with value of e0 bound to id of case branch. 
+        cases->nth(j)->get_branch_expr()->code(s, temp_start - 2, envr, table, curr_class); //return value of case expression is the value of the case expression with value of e0 bound to id of case branch. 
         emit_store(ZERO, loc->offset, FP, s);
         emit_branch(success_label, s); // if we do not jump on the blti and bgti calls, then we fall through and jump to the success, bypassing the no match case abort. 
         envr->exitscope(); // leave the branch scope. 
@@ -2325,6 +2416,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
       }
     }
   }
+  emit_store(ZERO, temp_start, FP, s);
 
   emit_label_def(curr_branch_label, s); // we jump here if we do not find a match above. so we load class name into ACC, and call _cond_abort
   // CASE_ABORT expects the e0 object in ACC. If we do not evaluate a case brach, it will be there.
@@ -2337,7 +2429,7 @@ void typcase_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc
 }
 
 int typcase_class::compute_max_locals() {
-  int sum = 2; // Need two tempporaries by default (1 + 1 for padding ). 
+  int sum = 3; // Need three temporaries by default (1 + 1 for padding + 1 for e0 tag). 
   sum += expr->compute_max_locals();
   for (int i = cases->first(); cases->more(i); i = cases->next(i)) {
     Case curr_case = cases->nth(i);
@@ -2429,9 +2521,29 @@ void let_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code let expression at line number " << get_line_number() <<  endl;
 
   if (strcmp(init->get_type_name(), "no_expr") == 0) {
+
     if (table->is_int_str_bool(type_decl)) {
-      s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; // load the address of the protoype object into ACC
-      emit_jal(OBJECT_DOT_COPY, s); // call object.copy on the protoype object in ACC, which will make a new object in the heap, and return a pointer to it in ACC
+
+      if (cgen_optimize) {
+
+        if (strcmp(type_decl->get_string(), Int->get_string()) == 0) {
+
+          emit_load_int(ACC,inttable.lookup_string("1"), s);
+          emit_load(ACC, 0, ACC, s);
+          emit_convert_int(ACC, table, s);
+
+        } else {
+          s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; 
+          emit_jal(OBJECT_DOT_COPY, s); 
+        }
+      } else {
+        // load the address of the protoype object into ACC
+        s << LA << ACC  << " " << type_decl->get_string() << PROTOBJ_SUFFIX << endl; 
+        
+        // call object.copy on the protoype object in ACC, which will make a new object in the heap, 
+        // and return a pointer to it in ACC
+        emit_jal(OBJECT_DOT_COPY, s); 
+      }
     } else {
       // if it's not an int, str, or bool, make it void
       emit_move(ACC, ZERO, s);
@@ -2471,19 +2583,32 @@ int let_class::compute_max_locals() {
 void plus_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code plus expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
 
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
-  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
-
-  emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
-  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-   // move the value of T2 into the int val slot of ACC. ACC is now a pointer to a new int object containing the correct return value. 
+  if (cgen_optimize) {
+    emit_add(T2, ACC, T1, s);
+    emit_move(ACC, T2, s);
+    emit_convert_int(ACC, table, s);
+  } else {
+    emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+    emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+    emit_add(T2, T2, T3, s); // T2 now contains T2 + T3
+    emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+    emit_jal(OBJECT_DOT_COPY, s); 
+    // ACC contains an int object, which is e2. Simply copy it, and then update 
+    // the value to T3's value. move the value of T2 into the int val slot of ACC. 
+    // ACC is now a pointer to a new int object containing the correct return value. 
+  }
   s << "# End Code plus expression." << endl;
 }
 
@@ -2501,19 +2626,33 @@ int plus_class::compute_max_locals() {
 void sub_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code sub expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
-  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
-  
-  emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
-  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  // emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  if (cgen_optimize) {
+    emit_sub(T2, ACC, T1, s);
+    emit_move(ACC, T2, s);
+    emit_convert_int(ACC, table, s);
+  } else {
+    emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+    emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+    emit_sub(T2, T2, T3, s); // T2 now contains T2 - T3
+    emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+    emit_jal(OBJECT_DOT_COPY, s); 
+    // ACC contains an int object, which is e2. Simply copy it, and then update 
+    // the value to T3's value. move the value of T2 into the int val slot of ACC. 
+    // ACC is now a pointer to a new int object containing the correct return value. 
+  }
+
   s << "# End Code sub expression." << endl;
 }
 
@@ -2531,19 +2670,33 @@ int sub_class::compute_max_locals() {
 void mul_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code mul expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
-  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
-  
-  emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
-  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  // emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  if (cgen_optimize) {
+    emit_mul(T2, ACC, T1, s);
+    emit_move(ACC, T2, s);
+    emit_convert_int(ACC, table, s);
+  } else {
+    emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+    emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+    
+    emit_mul(T2, T2, T3, s); // T2 now contains T2 * T3
+    emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+    emit_jal(OBJECT_DOT_COPY, s); 
+    // ACC contains an int object, which is e2. Simply copy it, and then update 
+    // the value to T3's value. move the value of T2 into the int val slot of ACC. 
+    // ACC is now a pointer to a new int object containing the correct return value. 
+  }
   s << "# End Code mul expression." << endl;
 }
 
@@ -2561,19 +2714,33 @@ int mul_class::compute_max_locals() {
 void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code divide expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. Value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value of e2 in ACC. 
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
-  emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
-  
-  emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
-  emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
-  emit_jal(OBJECT_DOT_COPY, s); // ACC contains an int object, which is e2. Simply copy it, and then update the value to T3's value
-  // emit_store(T2, DEFAULT_OBJFIELDS, ACC, s); // move the value of T3 into the int val slot of ACC. ACC is now the correct return value.
+  if (cgen_optimize) {
+    emit_div(T2, ACC, T1, s);
+    emit_move(ACC, T2, s);
+    emit_convert_int(ACC, table, s);
+  } else {
+    emit_fetch_int(T2, T1, s); // move the numerical value of the e0 int into T2
+    emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
+    
+    emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
+    emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+    emit_jal(OBJECT_DOT_COPY, s); 
+    // ACC contains an int object, which is e2. Simply copy it, and then update 
+    // the value to T3's value. move the value of T2 into the int val slot of ACC. 
+    // ACC is now a pointer to a new int object containing the correct return value. 
+  }
   s << "# End Code divide expression." << endl;
 }
 
@@ -2592,9 +2759,9 @@ void neg_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* e
   s << "# Begin Code neg expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // value now in ACC. ACC is an Int object
   if (cgen_optimize) {
-    emit_restore_int(ACC, ACC, s);
+    emit_restore_int(ACC, table, s);
     emit_neg(ACC, ACC, s);
-    emit_convert_int(ACC, ACC, s);
+    emit_convert_int(ACC, table, s);
   } else {
     emit_fetch_int(T1, ACC, s); // get the value of the int and put it in T1
     emit_neg(T1, T1, s); // perform the neg operation on the value. 
@@ -2618,15 +2785,23 @@ int neg_class::compute_max_locals() {
 void lt_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code lt expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
-  emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
-  
+  if (!cgen_optimize) {
+    emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
+    emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
+  }
+
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
   
@@ -2667,6 +2842,14 @@ void eq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* en
   emit_load_bool(ACC, truebool, s); // load the true Bool object into ACC
   
   emit_beq(T1, T2, return_label, s); // if the pointers in T1 and T2 are the same, then the objects are equal. We loaded the true Bool in ACC, so we simply return. 
+  
+  if (cgen_optimize) {
+    emit_andi(S1, T1, 1, s);
+    emit_load_bool(ACC, falsebool, s);
+    emit_bgez(S1, return_label, s);
+    emit_load_bool(ACC, truebool, s);
+  }
+
   emit_load_bool(A1, falsebool, s); // if T1 and T2 are not equal, then we need to run the equality test. This method in the trap-handler expects the true Bool in ACC and false Bool in A1
   emit_jal(EQUALITY_TEST, s); // jump to the equality test. This will return the true Bool in ACC if T1 and T2 are equal according to semanctics of COOL, or the false Bool in ACC if they are not. 
   
@@ -2688,14 +2871,22 @@ int eq_class::compute_max_locals() {
 void leq_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code leq expression at line number " << get_line_number() <<  endl;
   e1->code(s, temp_start, envr, table, curr_class); // evaluate e1. value of e1 in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_store(ACC, temp_start, FP, s); // store e1 on stack
   
   e2->code(s, temp_start - 1, envr, table, curr_class); // evaluate e2. Value in ACC
+  if (cgen_optimize) {
+    emit_restore_int(ACC, table, s);
+  }
   emit_load(T1, temp_start, FP, s); // load the value of e1 saved on stack into T1
   emit_store(ZERO, temp_start, FP, s);
 
-  emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
-  emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
+  if (!cgen_optimize) {
+    emit_fetch_int(ACC, ACC, s); // get the int value of e2 out of the Int object stored in ACC, and place the int value in ACC
+    emit_fetch_int(T1, T1, s); // get the int value of e1 out of the Int object stored in T1, and place the int value in T1
+  }
   
   int true_label = table->label_id; table->label_id++;
   int return_label = table->label_id; table->label_id++;
@@ -2757,6 +2948,7 @@ void int_const_class::code(ostream& s, int temp_start, SymbolTable<Symbol, var_l
   emit_load_int(ACC,inttable.lookup_string(token->get_string()), s);
   if (cgen_optimize) {
     emit_load(ACC, 0, ACC, s);
+    emit_convert_int(ACC, table, s);
   }
   s << "# End Code int const expression." << endl;
 }
@@ -2839,10 +3031,34 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
     // NM: 
     //move the address of the prototype object of the current class into ACC
 
+    if (cgen_optimize) {
+      emit_andi(T2, SELF, 1, s);
+      int not_int_label = table->label_id; table->label_id++;
+      int end_label = table->label_id; table->label_id++;
+      emit_blez(T2, not_int_label, s);
 
-    emit_load(T1, TAG_OFFSET, SELF, s); // move the tag of class of the curent object into T1. This will be our index into the class_ObjTab
-    emit_load_imm(T2, 8, s); // load 8 into T2
-    emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
+      int e0_tag = *(table->name_to_tag->lookup(Int));
+      emit_load_imm(T1, e0_tag, s);
+      emit_jump(end_label, s);
+
+      emit_label_def(not_int_label, s);
+      emit_load(T1, TAG_OFFSET, SELF, s);
+
+      emit_label_def(end_label, s);
+    } else {
+      emit_load(T1, TAG_OFFSET, SELF, s);     // put the tag of e0 into $t2
+    }
+
+    int int_label = 0;
+
+    if (cgen_optimize) {
+      int_label = table->label_id; table->label_id++;
+      emit_load_imm(T2, *(table->name_to_tag->lookup(Int)), s);
+      emit_beq(T1, T2, int_label, s);
+    }
+
+    emit_load_imm(T2, 8, s);                        // load 8 into T2
+    emit_mul(T1, T1, T2, s);                        // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
     emit_load_address(T2, CLASSOBJTAB, s); // move the address of the object table into T2
     emit_addu(T2, T1, T2, s); // add the offset stored in T1 to the address stored in T2. T2 now contains address of protoype object
     emit_load(ACC, 0, T2, s); // ACC now contains the address of the object we want to copy.
@@ -2854,12 +3070,33 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
 
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
-
+    
+    if (cgen_optimize) {
+      emit_label_def(int_label, s);
+      emit_load_int(ACC,inttable.lookup_string("1"), s);
+      emit_load(ACC, 0, ACC, s);
+      emit_convert_int(ACC, table, s);
+    }
 
   } else {
-    s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
-    emit_jal(OBJECT_DOT_COPY, s); //call object.copy
-    s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; //call the init method. 
+    if (cgen_optimize) {
+      if (strcmp(type_name->get_string(), Int->get_string()) == 0) {
+        emit_load_int(ACC,inttable.lookup_string("1"), s);
+        emit_load(ACC, 0, ACC, s);
+        emit_convert_int(ACC, table, s);
+        
+      } else {
+        s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+        emit_jal(OBJECT_DOT_COPY, s); //call object.copy
+        //call the init method. 
+        s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+      }
+    } else {
+      s << LA << ACC << " " << type_name->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+      emit_jal(OBJECT_DOT_COPY, s); //call object.copy
+      //call the init method. 
+      s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+    }    
   }
   s << "# End Code new with type " << type_name->get_string() << endl;
 }
@@ -2876,9 +3113,19 @@ int new__class::compute_max_locals() {
 void isvoid_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* envr, CgenClassTableP table, CgenNodeP curr_class) {
   s << "# Begin Code isvoid expression at line number " << get_line_number() << endl;
   e1->code(s, temp_start, envr, table, curr_class); //evaluate e1
+  
+  int not_void_label = table->label_id; table->label_id++;
+  // if it's an int, you can't return true
+  if (cgen_optimize) {
+    emit_andi(T2, ACC, 1, s);
+    emit_bgti(T2, 0, not_void_label, s);
+  } 
+
   int void_label = table->label_id; table->label_id++;
+  
   int return_label = table->label_id; table->label_id++;
   emit_beqz(ACC, void_label, s); // jump to the void label if the value of e1 is void. 
+  emit_label_def(not_void_label, s);
   emit_load_bool(ACC, falsebool, s); // fall through the jump, so we load in the false Bool. 
   emit_branch(return_label, s); // jump to the return label. 
   emit_label_def(void_label, s); // if the expression in e1 is void, then we jump to here. 

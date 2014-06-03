@@ -4,6 +4,6 @@ All Rights Reserved.
 See the file README for a full copyright notice.
 Loaded: /usr/class/cs143/lib/trap.handler
 GenGC initialized.
-firstsecondthirdfirstsecondthirdCOOL program successfully executed
-Stats -- #instructions : 394
-         #reads : 79  #writes 67  #branches 70  #other 178
+10987654321COOL program successfully executed
+Stats -- #instructions : 1251
+         #reads : 283  #writes 167  #branches 282  #other 519

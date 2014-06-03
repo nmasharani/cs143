@@ -1,6 +1,11 @@
-class Main {
-	a : Int <- ~5;
+class Main inherits IO {
+	a : Int <- 5;
 	main() : Object {
-		a
+		{
+			out_int(a);
+			out_string("\n");
+			out_int(5);
+			out_string("\n");
+		}
 	};
 };
