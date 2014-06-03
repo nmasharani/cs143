@@ -34,6 +34,12 @@ class Main {
 				esac;
 				io.out_string("\n");
 
+				case y of 
+					q: Object => io.out_int(1);
+					w: Int => io.out_int(2);
+				esac;
+				io.out_string("\n");
+
 				io.out_string(s.concat("\n"));
 				io.out_int(~x);
 				io.out_string("\n");
