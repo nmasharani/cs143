@@ -1651,7 +1651,24 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
     if ((offset != i + DEFAULT_OBJFIELDS) && cgen_debug) cout << "Bad offset for attribute " << curr_attr->get_name()->get_string() << " in init method for class " << curr_class->name->get_string() << endl;
     if (strcmp(curr_attr->get_expr()->get_type_name(), "no_expr") != 0) {
       curr_attr->get_expr()->code(str, OFFSET_OF_TEMP_START_FROM_FP, curr_class->envr, this, curr_class); //value of init expression for curr attr is now in ACC
-      emit_store(ACC, offset, SELF, str);
+      
+      // TODO: Error somewhere here I think? see a11_basic_ops.cl
+      if (cgen_optimize) {
+        if (is_basic_class(curr_class->name)) {
+          if (strcmp(curr_attr->get_type()->get_string(), Int->get_string()) == 0) {
+            emit_restore_int(ACC, this, str);
+            emit_load(T1, offset, SELF, str);
+            emit_store(ACC, DEFAULT_OBJFIELDS, T1, str);
+          } else {
+            emit_store(ACC, offset, SELF, str);
+          }
+        } else {
+          emit_store(ACC, offset, SELF, str);
+        }
+      } else {
+        emit_store(ACC, offset, SELF, str);
+      }
+
       if (cgen_Memmgr != GC_NOGC) {
         emit_addiu(A1, SELF, offset*WORD_SIZE, str); //for the garbage collector interface
         emit_jal(GEN_GC_ASSIGN, str); //notify the garbage collector about assignment. 
@@ -2176,7 +2193,7 @@ void dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_lo
           emit_jal(OBJECT_DOT_COPY, s); //call object.copy
           
           // call the init method. 
-          s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+          s << JAL << Int->get_string() << CLASSINIT_SUFFIX << endl; 
           
           emit_load(T2, temp_start, FP, s);
           emit_store(ZERO, temp_start, FP, s);
@@ -2746,8 +2763,11 @@ void divide_class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>
     emit_fetch_int(T3, ACC, s); // move the numerical value of e2 into T3
     
     emit_div(T2, T2, T3, s); // T2 now contains T2 / T3
-    emit_store(T2, DEFAULT_OBJFIELDS, ACC, s);
+    
+    emit_move(S1, T2, s);
     emit_jal(OBJECT_DOT_COPY, s); 
+    emit_store(S1, DEFAULT_OBJFIELDS, ACC, s);
+
     // ACC contains an int object, which is e2. Simply copy it, and then update 
     // the value to T3's value. move the value of T2 into the int val slot of ACC. 
     // ACC is now a pointer to a new int object containing the correct return value. 
@@ -3070,6 +3090,8 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
       emit_beq(T1, T2, int_label, s);
     }
 
+    int return_label = table->label_id; table->label_id++;
+
     emit_load_imm(T2, 8, s); // load 8 into T2
     emit_mul(T1, T1, T2, s); // multiply T1 and T2 and store in T1. Now T1 contains the offset in bytes from the start of the class_ObjTab to the prototype object
     emit_load_address(T2, CLASSOBJTAB, s); // move the address of the object table into T2
@@ -3086,13 +3108,14 @@ void new__class::code(ostream &s, int temp_start, SymbolTable<Symbol, var_loc>* 
   
     emit_load(T2, 1, T2, s); // add 4 to the address stored in T2. T2 now contains the address of the init method for the obejct in ACC
     emit_jalr(T2, s); // call the init method. ACC already contains the object to init. 
-    
+    emit_jump(return_label, s);
     if (cgen_optimize) {
       emit_label_def(int_label, s);
       emit_load_int(ACC,inttable.lookup_string("1"), s);
       emit_load(ACC, 0, ACC, s);
       emit_convert_int(ACC, table, s);
     }
+    emit_label_def(return_label, s);
 
   } else {
     if (cgen_optimize) {
