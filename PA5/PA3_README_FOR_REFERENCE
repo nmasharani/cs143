@@ -1,0 +1,271 @@
+
+user: lpappas9
+user: nisham
+
+CODE STRUCTURE
+
+The majority of the work we do happens in semant.cc, in the classtable.
+We use the classtable as a container for lots of the information that we collect
+and use in later steps, such as a list of valid classes, types, and an 
+inheritance graph. Specifically, the ClassTable contains the following data structures:
+- SymbolTable<Symbol, Entry> * inheritance_graph; //used to impliment lub and conforms to. 
+- SymbolTable<char*, int>* defined_types; //contains the valid types declared in the program. 
+- Classes program_classes_AST; //The AST we are checking. Need to have a centrailized single copy as we 
+	want the modifications we make to the copy to persist and translate to the next module of the
+	compiler. 
+- Note, we did not build a graph for the inhertiance per say. We could have given each class node
+	a pointer to a parent class, thus creating a graph, or given each parent an array of pointers
+	to children, or both. Instead, weopted to keep the classes in list form, and traverse the list. 
+	This might not be the most effecient with respect to speed, but it reduce the amount
+	of data stored in each node, so there is a tradeoff either way. 
+
+Our code is structured in the following way:
+
+1. First, we check classes. This is performed in the constructor 
+   for the ClassTable. This involves making multiple passes over the AST to
+   collect all valid types and to check the inheritance graph. We also check
+   for a main class, but this does not happen until after verifying the validity
+   of the inheritance graph, as we do not want to halt compilation in this case. One
+   of the unique things about COOL is that types do not have to be declared before use. 
+   Therefore, in the Classtable we store a symbol table with defined types of the program, 
+   and set this field by iterating over the classes of the program, adding tpyes
+   to the symbol table as we go. After completing this traversal, we then have a collection
+   of all valid types for a program being compiled, and can check types in declarations against 
+   this list. Note, there are several cases for which we halt compilation in the constructor. 
+   If the program class hierarchy has a cycle, or if the class names violate the re-defintion
+   or inheritance of basic types, we report the errors and halt compilation. If this
+   passes, then we set up an inheritance graph used for LUB and isparent conformance operations, 
+   and continue with compilation, moving on to scope and typechecking. 
+
+
+2. Secondly, we check method declarations. This involves making sure that method inheritance
+   is consistent, ensuring that method parameters are valid, and making sure 
+   method names are valid. We also do a pass to check for a valid Main class
+   which contains a main method. This is all outlined in the COOL manual.  
+
+3. Thirdly, we ensure that every node has its class environment by calling settup-
+	typecheck-enviornment. This pass was initially going to set both the root_class
+	of the node, and a symbol table detailing the identifier scope of the node. However, 
+	as we outline later in the README, this was problematic, so this pass simply serves to 
+	set the root_class of the node, the C in the typecheck rules, and also checks for 
+	uniqueness of case statement types. 
+
+4. Lastly, we check scope and do typechecking. We do scope and typechecking
+   together in one pass, which helps ensure that the necessary scope information
+   (ie, the object and method environments) are there for typechecking. Note, one of 
+   our design decisions was to not use a new data structure to store the methods. Instead, 
+   in order to access a method, we have a function that looks up a function by name in 
+   a given class. Thus, when we dispatch on a function, we know the class of the object 
+   dipatched on, and can then find the method by passing the class to search in and the
+   name of the method. The method search function returns a pointer to the feature for 
+   the given method in the AST. Furthermore, the search method starts in the class passed
+   in for the search, and then walks up the ineheritance path, returning the first feature
+   encountered with a matching name (Note, because features can be methods or attributes, 
+   our design will only work if we only compare the name to the method names. Therefore, 
+   we first check the tpe of the node using get_type_name, and then check feature name
+   if the node type is a method). Because we have previously verfied method defintions 
+   we do not report on eronous defintions here. Furthermore, because COOL does not allow
+   two methods to be defined by the same name in the same class defintion, we know that 
+   once we find the first match, it is the method we want. We then check the conditions 
+   of a valid dispatch as outlined in the manual. Note, the nice thing about this 
+   design is that the feature has all the type information for a method, so we can simply
+   check the types of the expressions in the dispatch against the declared types of the 
+   formal in the feature defintion, and the declared return type of the feature. 
+
+These steps are all invoked from program_class::semant, and are all methods of the
+classtable. Some information, like the class environment and the node type, 
+is stored in the AST. 
+
+DESIGN DECISIONS
+
+During our design process, our first step was to be able to read and understand
+the AST, so we added accessor methods and some information fields to cool-tree.
+For every node, we maintained a "root_class" variable, which was the class
+environment of that node, and which is set in the third step articulated above.
+For expressions, since different subclasses of Expression_class have different 
+fields, we made multi-purpose accessor methods that encompassed all of those 
+fields. If an accessor method does not apply to a given expresion type, it returns
+NULL. Furthermore, in order to distinguish between the different types of Features
+and the different types of Expressions, we added a get_type_name() funtion to ech of 
+the respective nodes, which returns a string identifying the type of the node. 
+
+Due to the complexity of semantic analysis, we chose to do semantic analysis 
+over several traversals of the AST. While we think that the analysis could have
+been done in fewer traversals, we felt that the structure and order of the code
+was very clear when broken down into smaller parts. We also felt that this
+isolation between parts made it easier to track down errors, and that turned
+out to be true in practice. Because speed and memory usage are not issues
+of this assignment, mutlitple passes are actually a better design because they 
+allow each pass to serve a very specific function, as opposed to maintaining
+several logic levels in the same pass. 
+
+Another big design decision that we made was to put the typechecking code into
+ClassTable instead of into the AST. Our original instinct was to have a 
+typecheck method for each node, and to call that method appropriately. However, 
+in practice, we found that a lot of the information that we needed for 
+typechecking about class hierarchies and scope was not easily maintained within
+the AST. In other words, the circular refernce between cool-tree.h and semant.cc
+made it difficult to share information. Therefore, we defined type check methods 
+for each node in the semant.cc file, and dispatch to these methods in a conditional
+expression based on the return value of get_type_name(). 
+
+The third design decision that we considered and made was the concurrency of 
+scope checking and typechecking. Our original design had scope checking come 
+well before typechecking, but we found in our testing that this lead to 
+some errors in scope because of the way we were storing the scopes for each 
+node. In our initial study of the symtab.h support code, we read the documentation 
+as saying that the = operator made a deep copy of the associated symbol table. 
+Instead, the = operator simply copies a pointer. Our hope had been to store the scope of 
+each node in the AST, essentially giving each node a unique deep copy of the symbols
+defined up to that point in the tree. The purpose of this was to avoid having to call
+exitscope(), which simplified the logic. However, because the = operator
+returns only a copied pointer, the symbol tables stored in each node did not
+end up being unique. For example, an identifier declared in the formal list
+of a method but not declared in a subsequent method was reported as declared
+because of the single symbole table. Therefore, we had to redesign. Our first
+redisign attempt was to simply define a deep copy constructor for the Symbol Table. 
+However, this proved to be very difficult, given that the symtab.h is included
+via a symboic link, and the majority of data memembers are private. One solution 
+would be to make a copy of the file, and then edit the local copy, but this was advised
+against by the course staff. Our second approach was the one we used, which was to 
+incorperte scope checking with type checking. Thus, at all times, we have a single 
+active Symbol Table, and we use enterscope and exitscope to maintain the appropriate
+symbol shadowings. With this design, we check for scope in the folowing cases as
+defined in the handout and the manual:
+(class defintion, entering a new method, let statement, case statement branch). 
+With this design, we also encountered some problems--one in particular was that
+inherited attributes were hard to track in this way. We ended up developing a 
+helper method that is called upon entering the scope of a class, that looks for 
+parent classes and adds those attributes as well. This method simply starts 
+from the current class, adds its attributes, and then walks up the inheritance 
+tree, adding all the attributes of the parents. 
+
+TESTING: 
+
+- In our project, we tested very extensively. See below for a description of our test case
+directories, and a description of 5 test files. Furthermore, each test file contains comments
+within the file detailing the case each file tests. The files are appropriately named to allow
+the reader to infer the purpose of the test file as well. Furthemore, we included
+test files from PA1 and PA2 for further testing with our script (note the erronous files
+from those directories are not of much use, but the valid ones are. We include all just
+to be safe). 
+
+- Our implementation is robust and correct. We have combed the entire manual several times, and 
+have included test for each of the error cases outline in the manual. We have also combed piazza
+and adressed any issues presented there. 
+
+- Note, our test script allows us to compare our output with the output of the reference compiler. 
+In all cases, we match the reference, except for slight differences in order of error statememts and
+structure of error statemtns. For example:
+Error_Testfiles/self_usage.cl
+1,2d0
+< Class Main is not defined.
+< Error_Testfiles/self_usage.cl:48: Method a4 is multiply defined.
+5a4,5
+> Error_Testfiles/self_usage.cl:48: Method a4 is multiply defined.
+> Class Main is not defined.
+8c8
+< Error_Testfiles/self_usage.cl:12: Inferred return type Object of method a does not conform to declared return type A2.
+---
+> Error_Testfiles/self_usage.cl:12: Inferred return type Int of method a does not conform to declared return type A2.
+
+As seen here, we convet the type of an erronous error to Object while the reference leaves it as Int. Furthemore, the order
+of the statements is different. We confirmed with Professor Aiken that this behavior is ok. 
+
+Another point worth making is that whenever we encounter an error in a typecheck rule, we assign the 
+type of the node we are checking to be object. In other words, whenever we see an error in a hypothesis,
+the type of the conclusion is set to Object. This is what is specified in the assignment spec. However, the reference
+compiler employs a smart tactic where it returns the type of what the node should be in certain cases for certain errors.
+For example, in arithmetic, if the type of one of the epxressions is not Int, we set and retun Object as the type
+of the node. However, the reference compiler sets and returns type Int. We also confirmed this with Professor Aiken, and he
+indicated that our behaviour is fine. Note, it would be easy to set the types conditionaly to the legit node type
+even on error, as discussed in OH, but per the assignment spec, we are supposed to set to Object if the type rule
+is false. The reference compiler does not do this, but we do, to match the spec. Confirmed in OH that it is advised
+to do this on every node that has a typecheck rule evaluate to false (error case in the hypothesis). 
+
+Another point has to do with inheriting attributes. The manual indicates that it is an error to redefine an attribute
+in a class. However, the manual does not specify whether the decleration in the parent is to be the one used in typechecking
+the rest of the program, or if the one in the child is to be used. Intuitively, given the notion of infromation
+hiding, we use the varibale in the child class as the id:type pair to add to the symbol table. The reference
+compiler does the opposite, adding the one from the parent. Note, we report the same error as the reference compiler,
+ie the attrivute is an attrbiute of an inherited class, but then use the attribute decleration in the child 
+because it is far more likely that the programmer intended to use the varibale as declared, but forgot to change
+the name, whereas they probably do not know of inherited attributes from inherited classes. 
+
+Finally we found and reported a bug in the reference. In the case of dispatching on a method, if mulitple
+types do not match, the reference reports only one and quits. Our solution reports them all. Professor Aiken
+confirmed that this is indeed a bug in the reference. 
+
+See below for a detail of our test settup and an overview of 5 test files:
+
+For testing, we have three different directories of test files: Error_Testfiles,
+Testfiles, and Valid_Testfiles. Error_Testfiles is for files that we knew
+would cause semantic errors, Valid_Testfiles is for files that we knew were
+correct, and Testfiles is for files that we wanted to check against the 
+reference compiler to determine the behavior of our program. We tried to write
+test cases to catch every valid as well as every invalid behavior referenced
+in the cool manual, as well as several we found when testing against the 
+reference compiler.
+
+For each file in the directory, we ran hand-checked tests as well as automated 
+tests that diff'd the outputs of the reference compiler with our own compiler. 
+We looked at the AST, the semanter outputs, as well as the output of the execution
+of the compiled program on SPIM. 
+
+
+Here, we detail the purposes of five different test files:
+
+
+Error_Testfiles/nested_scope_test.cl
+
+In this file, we test the scope of nested let and case statements, to ensure
+that we are always using the variable declared in the scope closest to where we 
+are. This file contains a mix of valid and invalid expressions. We specifically 
+wanted to test let and case statements because let statements and case statements
+are the two places in expressions that variables can be declared, meaning that 
+they are the only places where we enter a new scope, which is tricky and leaves
+room for mistakes.
+
+
+Error_Testfiles/self_usage.cl
+
+In this file, we perform a variety of tests to catch errors with the usage
+of the self identifier. self cannot be declared as an attribute, in let statements, 
+or in case statements, so we used this test file to ensure that our behavior
+upon seeing self and afterwards matched the reference and the manual. We also 
+similarly test the usage of SELF_TYPE in this file, although that also gets
+tested more robustly elsewhere.
+
+
+Error_Testfiles/inherits_errors.cl
+
+In this file, we test for errors with class declarations and inheritances. 
+We test cycles, inheritance from basic classes, undefined classes, and 
+redeclaration of classes. We used this file to test our inheritance graph
+construction and checking. 
+
+
+Error_Testfiles/typecheck_case_errors.cl
+
+We use this file to check for errors in case statements. For example, using 
+SELF_TYPE, self, and undefined types in case statements. We also used this to
+verify that valid case statements are also recocnized and that scope is 
+consistent and correct.
+
+
+Error_Testfiles/method_errors.cl
+
+This file checks for errors with method definitions and redefinitions. We test 
+for inherited methods with different parameters, redefinitions, invalid
+formal types, and invalid return types. We found that this test file was good
+for testing both method validation prior to typechecking and for testing formal
+parameter typechecking.
+
+
+INTERESTING OBSERVATIONS:
+
+- the specification is not clear what to do in the case of an invalid decleration. 
+ie if we declare a variable of an undefined type, or declare a variable of SEF_TYPE
+or declare a varibale with id = 'self'. Do we add the varibale to the symbol
+table or do we not? The reference seems to add it, so we follow that behavior. 
+

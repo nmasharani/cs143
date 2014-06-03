@@ -1,0 +1,418 @@
+README file for Programming Assignment 4  (C++ edition)
+=======================================================
+
+Your directory should now contain the following files:
+
+ Makefile	      -> [course dir]/assignments/PA4/Makefile
+ README
+ ast-lex.cc	      -> [course dir]/src/PA4/ast-lex.cc
+ ast-parse.cc	      -> [course dir]/src/PA4/ast-parse.cc
+ cgen-phase.cc	      -> [course dir]/src/PA4/cgen-phase.cc
+ cgen.cc
+ cgen.h
+ cgen_supp.cc
+ cool-tree.cc	      -> [course dir]/src/PA4/cool-tree.cc
+ cool-tree.handcode.h
+ dumptype.cc	      -> [course dir]/src/PA4/dumptype.cc
+ emit.h
+ example.cl
+ handle_flags.cc      -> [course dir]/src/PA4/handle_flags.cc
+ mycoolc	      -> [course dir]/src/PA4/mycoolc*
+ stringtab.cc	      -> [course dir]/src/PA4/stringtab.cc
+ tree.cc	      -> [course dir]/src/PA4/tree.cc
+ utilities.cc	      -> [course dir]/src/PA4/utilities.cc
+ *.d
+
+The include (.h) files for this assignment can be found in 
+[course dir]/include/PA4
+
+	The Makefile contains targets for compiling and running your
+	program, as well as handing it in. DO NOT MODIFY.
+
+	The README contains this info. Part of the assignment is to
+	fill the README with the write-up for your project. You should
+	explain design decisions, explain why your code is correct,
+	and why your test cases are adequate. It is part of the
+	assignment to clearly and concisely explain things in text as
+	well as to comment your code. Just edit this file.
+
+	In example.cl you should write a correct Cool program which
+	tests as many aspects of the code generator as possible. It
+	should pass your code generator, and running spim on the
+	generated output should run the program correctly.
+
+	cgen.cc is the skeleton file for the code generator. This
+	skeleton is much larger than the ones for previous
+	assignments.  The skeleton provides three components of the
+	code generator:
+
+		- functions to build the inheritance graph; (we supply
+		  this in case you didn't get this working for PA4)
+
+		- functions to emit global data and constants;
+		 
+		- functions to emit spim instructions; (we supply
+		  these last two to save you some tedious coding)
+
+	You should work to understand this code, and it will help you
+        write the rest of the code generator.
+
+	cgen.h is the header file for the code generator. Feel free to
+	add anything you need.
+
+	cgen_supp.cc is general support code for the code generator.
+	You can add functions as you see fit, but do not modify the 3
+	functions:
+
+		o byte_mode
+		o ascii_mode
+		o emit_string_constant
+
+	emit.h defines a bunch of macros which should come in handy
+	when you actually want to emit code. Feel free to change
+	anything here to suit your needs.
+
+        cgen-phase.cc supplies the driver for the compiler. You should
+        not modify this code.  The script mycoolc can pass any of the
+        standard flags to the code generator; for this assignment, -c
+        (code generator debug) may be useful as it sets a global
+        variable cgen_debug to true (1).  If you want your code
+        generator to print debug information when the option is set,
+        write your debug code in the following format:
+
+	      if (cgen_debug)
+	      {
+		...
+	      }
+
+	symtab.h contains a symbol table implementation. You may
+        modify this file if you'd like.  To do so, remove the link and
+        copy `[course dir]/include/PA4/symtab.h' to your local
+        directory.
+
+	cool.h contains definitions that are used by almost all parts
+	of the compiler. DO NOT MODIFY.
+
+        tree.h contains the base class `tree_node' of the AST nodes.
+
+        cool-tree.cc, cool-tree.h, and cool-tree.handcode.h contain
+        the declarations and definitions of code generation AST nodes.
+        You may add fields as you wish, but you shouldn't modify any
+        of the methods already there except `code', which you may
+        modify or remove as you wish.  Note that cool-tree.handcode.h
+        is different from the same file in PA4---this file contains
+        function definitions needed for the cgen.cc skeleton.  You may
+        modify cool-tree.h or cool-tree.handcode.h, but don't modify
+        cool-tree.cc.  Place all method definitions in cgen.cc
+
+	stringtab.h contains functions to manipulate the string table.
+	DO NOT MODIFY.
+
+	dumptype.cc contains functions for printing out an abstract
+	syntax tree.  DO NOT MODIFY.
+
+        *.d dependency files, generated automatically by the makefile.
+
+Instructions
+------------
+
+	To compile your compiler and code generator type:
+
+	% make cgen
+
+	To test your compiler, type:
+
+	% ./mycoolc <file1.cl>
+
+	This command parses all the cool files given on the command
+	line, passes them through the semantic checker, and then hands
+	the program AST to your code generator.
+
+	To run your compiler on the file example.cl, type:
+
+	% make dotest
+
+	To run the produced code:
+
+	% spim -file file1.s  /* or the output filename you chose */
+	
+	To submit your work type:
+
+	% make submit
+
+ 	You may turn in the assignment as many times as you like.
+ 	However, only the last version will be retained for grading.
+
+	If you change architectures you must issue
+
+	% make clean
+
+	when you switch from one type of machine to the other.  If at
+	some point you get weird errors from the linker, you probably
+	forgot this step.
+
+	GOOD LUCK!
+
+---8<------8<------8<------8<---cut here---8<------8<------8<------8<---
+
+Write-up for PA4
+----------------
+
+user: lpappas9
+user: nisham
+
+CODE STRUCTURE:
+
+All of the work that our code perfoms happens in cgen.cc. The file contains 
+detailed comments, but we will recap the high level points here. The entry point 
+to our code generator is the constructor for the CgenClassTable. Indeed, all of 
+the functions that we wrote get called from this constructor. 
+
+In the constructor, we first set up the enviornment and static data sections. We 
+make a pass over the classes of the program, and build the inheritance graph. In 
+our initial pass, we traverse the inheritance graph, and assign unique tags to 
+each class. This serves as a means of identifying the class at runtime, as the 
+class tag will be stored in the dynamic object data structure. We assign 
+tags in order of inheritance. Object gets the lowest tage 0. Then, objects 
+leftmost child gets the next tag, and that child's leftmost child gets the next 
+tag, so on and so forth. This tagging scheme was designed in a specific way so 
+as to simplify the design of the case statement. The tags also serve as indices 
+into the global name and object tables of the generated code. 
+
+Using the inheritance graph, we traverse the graph and collect all attributes 
+and methods for each class. By starting at the root (Object) and working our way 
+down, we ensure correct order on inherited attributes and on inherited methods, 
+as explained in lecture and in the assignment handouts. We store the list of 
+attributes and list of methods for each class in two symbol tables. This allows 
+for easy lookup by class name, and greatly simplifies our code design later in 
+the process. 
+
+Once we have collected the attributes and methods for each class and built our 
+data structures mentioned above, we then begin to emit the actual code. First, 
+we emit the static data section. We emit each protoype object with attributes 
+assigned according to the default initializations as specified in the manual. 
+The attributes are emitted in the correct order, because we collect all of the 
+attributes in the correct order during our initial pass over the inheritance 
+graph in the constructor. We then emit the dispatch tables for each class. 
+Having already built a list of methods for each class that observes inheritance 
+order, we simply print the methods contained in this list for each class. The 
+starter code provided us functionality to emit the static string and int 
+constants. We then emit the name and object tables according to tag order. To do 
+this, we use two data structures built during code generator construction 
+that map a class name to its tag and vice versa. With that finished, the static 
+code generation phase of the code generator is finished. 
+
+We then move to emit the code for the fucntions of the program. There are two 
+types of functions: 
+1. the default init methods for each class
+2. The methods defined by the user's program. 
+We emit both of these according to the stack convention described in the code 
+comments and later in this README. We initialize each attribute exactly once in 
+the init method, which is achieved by first calling the parent's object init 
+method, and then initializing the atttributes defined in the current class. 
+
+The code generation of methods and attributes links to the expression generation 
+code by calling expr->code(...) on the assciated expression (method body for 
+methods, attribute program specified initializers for init methods). 
+
+The expression code generation is the final piece of the code generator and is 
+very straightforward. We designed the code to follow the semantic rules listd in 
+section 13 of the manual. Furthermore, the code is documented with a translation 
+of the MIPS assembly to the right of the call in the source code. We also output 
+comments in the emitted MIPS, to further clarify the code. 
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+DESIGN DECISIONS: 
+
+Our key design decision was our managing of the stack. We intially designed the 
+stack differently than our curent implementation, but encountered problems in 
+the calling the basic methods (as these pop the passed arguments off the stack). 
+Thus, we redesigned and decided to follow the method we learned about in this 
+class and in CS107. 
+
+Specifically, the callee always saves three registers. These are the FP, SELF, 
+and RA registers. These registers are saved in the callee's frame and in this 
+order: saved FP at highest address and saved RA at the lowest address of the 
+saved registers. We then move the new FP to just after the saved SELF. This 
+means that there are 2 words of space between the FP and the parameters to the 
+method. We then recursively compute the number of local variables needed to 
+evaluate the method body and move the stack pointer down by this amount. However, 
+before doing so, we null out the stack memory so as to prevent the Garbage 
+collector from tampering with an old pointer. This preallocation of space on the 
+stack for temporary variables allows us to reduce the number of instructions the 
+machine needs to execute. 
+
+As mentioned above, parameters are passed to methods in the convention of C. 
+Specifcally, they are passed in reverse order, where the last argument is at an 
+8 byte offset from the FP of the method. 
+
+The final element of our stack management discipline has to do with tracking the 
+locations of local variables in the active stack. To do this, we designed a data 
+struct called var_loc. This struct contains a string idetnifying the type of 
+variable (CLASS = attribute, FEATURE = formal parameter to method, LOCAL = 
+variable declared in let or case statement). The second field is an integer that 
+represents an offset in words from some reference point. The reference point is 
+always the address contained in a register. In the case of local variables, the 
+offset is negative, and is the number of words below the FP that the designated 
+variable lives. The offset for a formal is positive and is the offset above the 
+FP (including space for the saved registers SELF and FP). Finally, for the case 
+of CLASS, the offset is positive and is the offset from the SELF register (which 
+contains the address of the object) to the repsective attribute. 
+
+As in PA3, we use a symbol table to keep track of the current identifier in 
+scope. We rely on the type and scope checking performed in PA3, and assume that 
+no type/scope issues exist. Thus, for each class, we intialize the environment 
+to contain attributes (inherited and local) of the class, and then proceed to 
+add/remove scopes for method definitions, let statements, and case statements. 
+In COOL, these are the only four places that an identifier can be introduced. 
+
+As mentioned, our decision to allocate tags as we did was to allow for efficient 
+implementation of the case statement. Our tag assignment allowed us to order the 
+case statements by greatest tag number, and then use the bgti and blti  operators 
+to select the proper case branch.
+
+Finally, it should be noted that we adhered to the Garbage collector interface 
+by outputting a -1 eye catcher in our protobjs, and calling the GC notify method 
+in assignment to attributes as instructed.  
+
+The rest of the code is straightforward and easily followed by the extensive 
+comments in the source code. Please refer to specific sections in the code for 
+further details if desired. 
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+TESTING: 
+
+Testing this assignment was probably the most challenging. In the first three 
+assignments, the error cases were contained in the manual and it was just a 
+matter of processing the manual and devising the appropriate cases. In this PA4, 
+the majority of error checking is completed previously, leaving only three error
+cases to catch (dispatch on void, case on void, no match case statement). We 
+found it much more difficult to verify program correctness than to verify that we 
+correctly reported all errors. That being said, we persevered and tested 
+extensively over the course of four days, and feel confident in our output. 
+
+To test, we employed five methods. First, we visually inspected the code to 
+catch silly mistakes, for example, storing the true Bool in ACC instead of the 
+false Bool in the neg statement. Second, we annotated our emitted MIPS with 
+informational commments to see the structrue of the outputted code. Third, We 
+compared with the reference and reversed engineered the reference code as a 
+sanity check to ensure that our generated code was close. Then, we stepped 
+through programs in spim, verifying the contents of the registers and the stack 
+as we went. We made sure to do this for the tricky edge cases as well, like 
+case statements and new with SELF_TYPE. Finally, we wrote a shell script that 
+diff'd our output with the reference. We ran this script with both the GC and 
+verified the output in both cases. 
+
+In doing so, we noticed that we matched output in all cases except for strange 
+cases of "increasing heap...." being reported. We spoke to Professor Aiken about 
+this and he indicated that we should not worry about it. Indeed, running the 
+program from the command line and not the shell script matched the reference 
+with both visual and manual diff'ing in these cases. 
+
+What follows is a detailed description of our testing, and explanation of several
+key files. Note, we have a signifcant number of additional files in the associated
+testfile directories, but only commented on a few as here as specified by the 
+assignment handout.  
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+TESTING OUR CODE GENERATOR
+
+For this assignment, we had two testfile directories: Testfiles, which contains
+tests we wrote specifically to test our code generator, and valid_testfiles_pa3, 
+which contains the valid cool programs we wrote to test assignments 1-3, as a 
+sanity check. 
+
+We used a script, testscript, to automate our testing process to 
+increase the volume we were able to test. The test script used diff to compare 
+the outputs of cool programs compiled with our compiler and the reference. In 
+all but a few cases, we found that our compiler matched the reference in output
+using this script. In the few cases mentioned above, the program required user 
+input, so we couldn't test them with an automated script, so we verified the 
+outputs manually. We also saw that our compiler didn't match the reference 
+completely--the number of instructions, reads, rights, etc. were always different,
+which is probably due to the fact that our code generation implementation is
+different to the reference's.
+
+When writing our test files, we used IO to output the values of variables at 
+certain critical points in the program, so that we could verify that the 
+behavior was as expected. Since it is possible to have a cool program that runs
+successfully and emits a success message, but that might have incorrect behavior,
+we found that this printing was very important in identifying incorrect behavior. 
+
+For more information about testing, see the descriptions of several select test 
+files below.
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+DESCRIPTIONS OF TEST FILES
+
+Due to the volume of test files we wrote, we cannot write on every single one 
+of them. For more information about a file, look at the comments in a file
+itself.
+
+Note that, for ease of testing, we copied the test files from 
+/usr/class/cs143/examples to our Testfiles directory.
+
+
+FILE 1: Testfiles/a111_let_self_type.cl
+
+This file tests the usage of SELF_TYPE in let statements, attributes, assignment, 
+and new statements. Since SELF_TYPE is a "special case" in all of these expression 
+types, we found it to be especially important to test it carefully--we had a 
+few very tricky bugs that came from these special cases, and that we found 
+through testing. This file also takes advantage of the built in Object method
+type_name, which is pre-generated in the trap handler. Using this method requires
+our stack convention to conform to the trap handler's stack convention, so this
+file also tests that.
+
+FILE 2: Testfiles/let_test.cl
+
+This file tests the dynamic scope and stack convention in let statements. Since
+let statements are part of a new scope, but we don't enter a new stack frame upon
+entering a let statement, getting these statements to work correctly with the 
+correct dynamic scope is tricky and important. It is also very easy for the
+stack to become corrupted in the complicated implementation of let statements,
+so this file also allowed us to test that. 
+
+FILE 3: Testfiles/dispatch.cl
+
+This file tests that dispatch of all types works correctly, with the correct stack
+convention. The file tests dispatch with and without parameters, with and without
+static types, and with and without expressions upon which the method is being 
+called. This file also tests the order in which parameters are evaluated. 
+
+FILE 4: Testfiles/a2_nest_case.cl
+
+This file tests nested case statements. Like let statements, case statements are
+tricky because, although they define a new scope, they don't get executed on a new
+stack frame. Therefore, ensuring that the stack is preserved and that temporary 
+variables aren't overwritten is extremely important. Testing these nested case
+statements ensures that the stack convention is as we designed it.
+
+FILE 5: Testfiles/case_test.cl
+
+This file stress tests case statements to ensure that the variables go to the 
+correct branch of the statement. Since we want each variable to go to the branch
+that is closest to it in the inheritance tree, we can't just go with the first 
+branch we see to which the variable conforms.
+
+
+||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+WHY OUR CODE IS CORRECT:
+
+We believe that our code is most definitly correct. We have poured over all of 
+the COOL documentation, the manual, the support code, and the assignment handouts, 
+and have meticulously written tests cases to test these features. Furthermore, 
+we have written test casees for every issue posted about on piazza, and our 
+solution exhbiits the desired behavior as specified by both the course staff and 
+the COOL documentation. In all cases, we match the reference, except in the 
+reporting of increasing heap... and PC number when reporting the division by 0 
+error. Both of these cases were deemed acceptable by the course staff. 
+
+
+

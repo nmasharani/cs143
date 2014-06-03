@@ -1,0 +1,19 @@
+for file in Testfiles/*.cl
+	do
+		echo $file
+
+		./mycoolc $file -gt -o our_output.s > our_console
+		/usr/class/cs143/bin/spim -file our_output.s > our_runtime
+		/usr/class/cs143/bin/coolc -gt $file -o their_output.s > their_console
+		/usr/class/cs143/bin/spim -file their_output.s > their_runtime
+
+		diff our_runtime their_runtime
+
+		echo ""
+		echo "***********************************************************************"
+		echo ""
+
+	done
+
+
+
