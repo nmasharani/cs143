@@ -1656,9 +1656,16 @@ void CgenClassTable::code_init_method(CgenNodeP curr_class) {
       if (cgen_optimize) {
         if (is_basic_class(curr_class->name)) {
           if (strcmp(curr_attr->get_type()->get_string(), Int->get_string()) == 0) {
-            emit_restore_int(ACC, this, str);
-            emit_load(T1, offset, SELF, str);
-            emit_store(ACC, DEFAULT_OBJFIELDS, T1, str);
+            emit_move(S1, ACC, str);
+            str << LA << ACC << " " << Int->get_string() << PROTOBJ_SUFFIX << endl; //load the address of the protoype object into ACC
+            emit_jal(OBJECT_DOT_COPY, str); //call object.copy
+            
+            // call the init method. 
+            str << JAL << Int->get_string() << CLASSINIT_SUFFIX << endl; 
+            emit_move(T1, S1, str);
+            emit_restore_int(T1, this, str);
+            emit_store(T1, DEFAULT_OBJFIELDS, ACC, str);
+            emit_store(ACC, offset, SELF, str);
           } else {
             emit_store(ACC, offset, SELF, str);
           }
@@ -2071,7 +2078,7 @@ void static_dispatch_class::code(ostream &s, int temp_start, SymbolTable<Symbol,
           emit_jal(OBJECT_DOT_COPY, s); //call object.copy
           
           // call the init method. 
-          s << JAL << type_name->get_string() << CLASSINIT_SUFFIX << endl; 
+          s << JAL << Int->get_string() << CLASSINIT_SUFFIX << endl; 
           
           emit_load(T2, temp_start, FP, s);
           emit_store(ZERO, temp_start, FP, s);
