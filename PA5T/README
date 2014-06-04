@@ -1,0 +1,43 @@
+README file for Programming Assignment 5T (Extra Credit)  (Test Cases)
+=======================================================
+
+Test Case Extra Credit Steps:
+1) Create one or more test cases in this directory.
+
+2) Make sure the test cases print something so that we have a way of
+knowing if a test case was compiled properly.  (We'll diff the output
+of running your case as compiled by the reference compiler vs. the output
+of other students' compilers.)
+
+3) Briefly describe your test case(s) in this README, explaining why you
+think each case is likely to be problematic for an optimizing compiler.
+
+4) Run 'make submit' and check that all your .cl files are listed.
+
+---8<------8<------8<------8<---cut here---8<------8<------8<------8<---
+
+Write-up for PA5
+----------------
+
+user: lpappas9
+user: nisham
+
+Optimizer:
+
+We attempted the optimizer, but we ran short of time. The cgen.cc file is included. It has the logic in place for the unboing and operations on integers, but is not finished. 
+
+Test Case break_optimizer.cl:
+
+-This test case stresses the usage of integers and bools to make sure that they conform to the COOL, even when unboxed. For example, in the basic objects, methods like susbtr for the string class expects an int object to be 
+passed, therefore, invoking this method must be with a boxed int. Also, ints must be able to dispatch on the inherited methods of abort, copy, typename, as well as bools. 
+
+Assignment to Object is also a tricky case. The assignment y: Object <- 42 is valid, because an int object
+inherits from object. Therefore, when doing this, the int must be re-boxed. Same applies for bools.
+
+Assignment happens in let expression, attributes, case, method params. We excersise these in the file. 
+
+Finally, we stress test integer ops to make sure that they still work with optimization. 
+
+We also stress test nested let statments to test register allocation, in the case that there are more local
+variables than registers avaialable. 
+
